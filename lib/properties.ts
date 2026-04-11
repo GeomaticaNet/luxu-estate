@@ -12,12 +12,17 @@ interface GetPropertiesResult {
 
 /** Maps a raw Supabase row to the Property interface */
 function rowToProperty(row: Record<string, unknown>): Property {
+<<<<<<< HEAD
   const images = (row.property_images as Record<string, unknown>[]) ?? [];
   const mainImage = images.find((img) => img.is_main) ?? images[0];
 
   return {
     id: row.id as string,
     slug: row.slug as string,
+=======
+  return {
+    id: row.id as string,
+>>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     title: row.title as string,
     price: Number(row.price),
     priceLabel: (row.price_label as string | null) ?? undefined,
@@ -26,6 +31,7 @@ function rowToProperty(row: Record<string, unknown>): Property {
     type: row.type as "SALE" | "RENT",
     bedrooms: Number(row.bedrooms),
     bathrooms: Number(row.bathrooms),
+<<<<<<< HEAD
     garages: Number(row.garages),
     area: Number(row.area),
     description: (row.description as string | null) ?? undefined,
@@ -34,6 +40,11 @@ function rowToProperty(row: Record<string, unknown>): Property {
     lng: Number(row.lng ?? -122.1430),
     imageUrl: (mainImage?.url as string) || "/placeholder.jpg",
     imageAlt: row.title as string,
+=======
+    area: Number(row.area),
+    imageUrl: row.image_url as string,
+    imageAlt: row.image_alt as string,
+>>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
   };
 }
 
@@ -58,7 +69,11 @@ export async function getProperties(
 
   const { data, count, error } = await supabase
     .from("properties")
+<<<<<<< HEAD
     .select("*, property_images(*)", { count: "exact" })
+=======
+    .select("*", { count: "exact" })
+>>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     .eq("is_featured", false)
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -87,7 +102,11 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 
   const { data, error } = await supabase
     .from("properties")
+<<<<<<< HEAD
     .select("*, property_images(*)")
+=======
+    .select("*")
+>>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     .eq("is_featured", true)
     .order("created_at", { ascending: true });
 
@@ -98,6 +117,7 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 
   return (data ?? []).map(rowToFeaturedProperty);
 }
+<<<<<<< HEAD
 
 /**
  * Fetches a single property by slug and its associated images.
@@ -125,3 +145,5 @@ export async function getPropertyBySlug(slug: string) {
     images: imagesData
   };
 }
+=======
+>>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
