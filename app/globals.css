@@ -40,3 +40,19 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Custom Scrollbar - Mosque Color */
+.scrollbar-mosque {
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-mosque) transparent;
+}
+.scrollbar-mosque::-webkit-scrollbar {
+  height: 16px;
+}
+.scrollbar-mosque::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-mosque::-webkit-scrollbar-thumb {
+  background-color: var(--color-mosque);
+  border-radius: 20px;
+}

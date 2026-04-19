@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { FeaturedProperty } from "@/interfaces/property";
 
 interface Props {
@@ -7,7 +10,7 @@ interface Props {
 
 export const FeaturedPropertyCard = ({ property }: Props) => {
   return (
-    <div className="group relative rounded-xl overflow-hidden shadow-soft bg-white cursor-pointer">
+    <Link href={`/propiedades/${property.slug}`} className="block group relative rounded-xl overflow-hidden shadow-soft bg-white cursor-pointer transition-all duration-300 hover:shadow-lg">
       <div className="aspect-[4/3] w-full overflow-hidden relative">
         <Image 
           fill
@@ -18,7 +21,10 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark">
           {property.featuredLabel}
         </div>
-        <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-nordic-dark hover:bg-mosque hover:text-white transition-all">
+        <button 
+          onClick={(e) => e.preventDefault()}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-nordic-dark hover:bg-mosque hover:text-white transition-all z-10"
+        >
           <span className="material-icons text-xl">favorite_border</span>
         </button>
         {/* Gradient shadow for specific visual effect on some cards if needed, optionally mapping logic, but keeping standard as per design */}
@@ -48,6 +54,6 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };

@@ -14,6 +14,7 @@ interface GetPropertiesResult {
 function rowToProperty(row: Record<string, unknown>): Property {
   return {
     id: row.id as string,
+    slug: row.slug as string,
     title: row.title as string,
     price: Number(row.price),
     priceLabel: (row.price_label as string | null) ?? undefined,
@@ -22,7 +23,12 @@ function rowToProperty(row: Record<string, unknown>): Property {
     type: row.type as "SALE" | "RENT",
     bedrooms: Number(row.bedrooms),
     bathrooms: Number(row.bathrooms),
+    garages: Number(row.garages),
     area: Number(row.area),
+    description: (row.description as string | null) ?? undefined,
+    amenities: (row.amenities as string[] | null) ?? undefined,
+    lat: Number(row.lat ?? 37.4419),
+    lng: Number(row.lng ?? -122.1430),
     imageUrl: row.image_url as string,
     imageAlt: row.image_alt as string,
   };
@@ -88,4 +94,39 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
   }
 
   return (data ?? []).map(rowToFeaturedProperty);
+}
+
+/**
+ * Fetches a single property by slug and its associated images.
+ */
+export async function getPropertyBySlug(slug: string) {
+  const supabase = createServerClient();
+
+  // Fetch property
+  const { data: propertyData, error: propertyError } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (propertyError || !propertyData) {
+    console.error(`[getPropertyBySlug] Error fetching property with slug ${slug}:`, propertyError?.message);
+    return null;
+  }
+
+  // Fetch associated images
+  const { data: imagesData, error: imagesError } = await supabase
+    .from("property_images")
+    .select("*")
+    .eq("property_id", propertyData.id)
+    .order("sort_order", { ascending: true });
+
+  if (imagesError) {
+    console.error(`[getPropertyBySlug] Error fetching images for property ${propertyData.id}:`, imagesError.message);
+  }
+
+  return {
+    property: rowToProperty(propertyData),
+    images: (imagesData ?? []) as import("@/interfaces/property").PropertyImage[]
+  };
 }
