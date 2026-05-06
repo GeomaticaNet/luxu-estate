@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+// No need for React hooks in this component
 
 // Fix for default Leaflet icons in Next.js
 const customIcon = new L.Icon({
@@ -24,19 +24,7 @@ interface Props {
 }
 
 const PropertyMapComponent = ({ address, lat, lng }: Props) => {
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
-        <span className="material-icons animate-spin text-mosque">refresh</span>
-      </div>
-    );
-  }
 
   const position: [number, number] = [lat, lng];
 

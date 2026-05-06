@@ -15,11 +15,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <head>
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display selection:bg-mosque selection:text-white">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display selection:bg-mosque selection:text-white">
         <Navbar />
         {children}
       </body>

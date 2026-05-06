@@ -1,4 +1,4 @@
-import { Property, FeaturedProperty } from "@/interfaces/property";
+import { Property, FeaturedProperty, PropertyImage } from "@/interfaces/property";
 import { createServerClient } from "@/lib/supabase/server";
 
 const PAGE_SIZE = 8;
@@ -11,18 +11,15 @@ interface GetPropertiesResult {
 }
 
 /** Maps a raw Supabase row to the Property interface */
-function rowToProperty(row: Record<string, unknown>): Property {
-<<<<<<< HEAD
-  const images = (row.property_images as Record<string, unknown>[]) ?? [];
+function rowToProperty(row: { [key: string]: unknown; property_images?: PropertyImage[] }): Property {
+  // Images handling (new schema)
+  const images = row.property_images ?? [];
   const mainImage = images.find((img) => img.is_main) ?? images[0];
+
 
   return {
     id: row.id as string,
     slug: row.slug as string,
-=======
-  return {
-    id: row.id as string,
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     title: row.title as string,
     price: Number(row.price),
     priceLabel: (row.price_label as string | null) ?? undefined,
@@ -31,20 +28,14 @@ function rowToProperty(row: Record<string, unknown>): Property {
     type: row.type as "SALE" | "RENT",
     bedrooms: Number(row.bedrooms),
     bathrooms: Number(row.bathrooms),
-<<<<<<< HEAD
     garages: Number(row.garages),
     area: Number(row.area),
     description: (row.description as string | null) ?? undefined,
     amenities: (row.amenities as string[] | null) ?? undefined,
     lat: Number(row.lat ?? 37.4419),
     lng: Number(row.lng ?? -122.1430),
-    imageUrl: (mainImage?.url as string) || "/placeholder.jpg",
+    imageUrl: mainImage?.url || "/placeholder.jpg",
     imageAlt: row.title as string,
-=======
-    area: Number(row.area),
-    imageUrl: row.image_url as string,
-    imageAlt: row.image_alt as string,
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
   };
 }
 
@@ -60,21 +51,34 @@ function rowToFeaturedProperty(row: Record<string, unknown>): FeaturedProperty {
  * Fetches paginated "new in market" properties from Supabase.
  */
 export async function getProperties(
-  page: number = 1
+  page: number = 1,
+  query?: string,
+  beds?: number,
+  baths?: number
 ): Promise<GetPropertiesResult> {
   const supabase = createServerClient();
   const currentPage = Math.max(1, page);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const { data, count, error } = await supabase
+  let queryBuilder = supabase
     .from("properties")
-<<<<<<< HEAD
     .select("*, property_images(*)", { count: "exact" })
-=======
-    .select("*", { count: "exact" })
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
-    .eq("is_featured", false)
+    .eq("is_featured", false);
+
+  if (query) {
+    queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);
+  }
+
+  if (beds !== undefined && beds > 0) {
+    queryBuilder = queryBuilder.gte("bedrooms", beds);
+  }
+
+  if (baths !== undefined && baths > 0) {
+    queryBuilder = queryBuilder.gte("bathrooms", baths);
+  }
+
+  const { data, count, error } = await queryBuilder
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -102,11 +106,7 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 
   const { data, error } = await supabase
     .from("properties")
-<<<<<<< HEAD
     .select("*, property_images(*)")
-=======
-    .select("*")
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     .eq("is_featured", true)
     .order("created_at", { ascending: true });
 
@@ -117,7 +117,6 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 
   return (data ?? []).map(rowToFeaturedProperty);
 }
-<<<<<<< HEAD
 
 /**
  * Fetches a single property by slug and its associated images.
@@ -142,8 +141,6 @@ export async function getPropertyBySlug(slug: string) {
 
   return {
     property: rowToProperty(propertyData),
-    images: imagesData
+    images: imagesData,
   };
 }
-=======
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)

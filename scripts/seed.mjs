@@ -4,11 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://swbhsewxzhxgxmdxahcz.supabase.co";
 const SUPABASE_ANON_KEY =
-<<<<<<< HEAD
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3YmhzZXd4emh4Z3htZHhhaGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzU2NTYsImV4cCI6MjA5MTM1MTY1Nn0.CuAIC-WzCuS_pRUZyIloD3yd3NSOfm0hic3v5PCzxag";
-=======
-  "***SUPABASE_ANON_KEY_REDACTED***";
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

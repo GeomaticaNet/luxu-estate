@@ -78,6 +78,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
               {/* Agent Section (Hardcoded for now) */}
               <div className="flex items-center gap-4 mb-6">
                 {/* Use normal img here as it's an external unconfigured URL for demo */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w"
                   alt="Sarah Jenkins"

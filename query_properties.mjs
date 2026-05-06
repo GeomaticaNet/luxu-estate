@@ -11,7 +11,7 @@ const envVars = envFile.split('\n').reduce((acc, line) => {
 const supabase = createClient(envVars.NEXT_PUBLIC_SUPABASE_URL, envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 async function check() {
-  const { data, error } = await supabase.from('properties').select('title, is_featured, featured_label');
+  const { data } = await supabase.from('properties').select('title, is_featured, featured_label');
   console.log(data);
 }
 check();

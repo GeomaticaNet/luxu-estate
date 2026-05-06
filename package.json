@@ -12,10 +12,7 @@
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.78.0",
     "@tailwindcss/oxide-linux-x64-gnu": "^4.2.2",
-<<<<<<< HEAD
     "leaflet": "^1.9.4",
-=======
->>>>>>> 1870eca (feat: Implement Supabase data fetching for properties with pagination.)
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",

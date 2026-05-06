@@ -6,11 +6,25 @@ interface Props {
   properties: Property[];
   currentPage: number;
   totalPages: number;
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
+export const NewInMarket = ({ properties, currentPage, totalPages, searchParams }: Props) => {
   const hasPrev = currentPage > 1;
   const hasNext = currentPage < totalPages;
+
+  const createPageURL = (pageNumber: number | string) => {
+    const params = new URLSearchParams();
+    if (searchParams) {
+      Object.entries(searchParams).forEach(([key, value]) => {
+        if (value !== undefined) {
+          params.set(key, String(value));
+        }
+      });
+    }
+    params.set('page', pageNumber.toString());
+    return `/?${params.toString()}`;
+  };
 
   // Build page numbers array (show up to 5 pages around current)
   const pageNumbers: number[] = [];
@@ -34,9 +48,9 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
           </p>
         </div>
         <div className="hidden md:flex bg-white p-1 rounded-lg">
-          <button className="px-4 py-1.5 rounded-md text-sm font-medium bg-nordic-dark text-white shadow-sm">
+          <Link href="/" className="px-4 py-1.5 rounded-md text-sm font-medium bg-nordic-dark text-white shadow-sm">
             All
-          </button>
+          </Link>
           <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nordic-muted hover:text-nordic-dark">
             Buy
           </button>
@@ -65,7 +79,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
           {/* Previous button */}
           {hasPrev ? (
             <Link
-              href={`/?page=${currentPage - 1}`}
+              href={createPageURL(currentPage - 1)}
               className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all hover:shadow-md"
             >
               <span className="material-icons text-base">chevron_left</span>
@@ -82,7 +96,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
           {pageNumbers[0] > 1 && (
             <>
               <Link
-                href="/?page=1"
+                href={createPageURL(1)}
                 className="w-9 h-9 flex items-center justify-center bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all"
               >
                 1
@@ -99,7 +113,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
           {pageNumbers.map((page) => (
             <Link
               key={page}
-              href={`/?page=${page}`}
+              href={createPageURL(page)}
               className={`w-9 h-9 flex items-center justify-center border text-sm font-medium rounded-lg transition-all ${
                 page === currentPage
                   ? "bg-nordic-dark text-white border-nordic-dark shadow-sm"
@@ -119,7 +133,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
                 </span>
               )}
               <Link
-                href={`/?page=${totalPages}`}
+                href={createPageURL(totalPages)}
                 className="w-9 h-9 flex items-center justify-center bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all"
               >
                 {totalPages}
@@ -130,7 +144,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages }: Props) => {
           {/* Next button */}
           {hasNext ? (
             <Link
-              href={`/?page=${currentPage + 1}`}
+              href={createPageURL(currentPage + 1)}
               className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all hover:shadow-md"
             >
               Next

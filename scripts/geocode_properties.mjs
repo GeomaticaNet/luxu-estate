@@ -10,7 +10,7 @@ const loadEnv = () => {
         process.env[match[1]] = match[2].trim();
       }
     });
-  } catch (e) {}
+  } catch {}
 };
 loadEnv();
 
