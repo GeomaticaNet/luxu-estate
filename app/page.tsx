@@ -4,7 +4,7 @@ import { NewInMarket } from "@/components/home/NewInMarket";
 import { getProperties, getFeaturedProperties } from "@/lib/properties";
 
 interface HomePageProps {
-  searchParams: Promise<{ page?: string; q?: string; beds?: string; baths?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; beds?: string; baths?: string; propertyType?: string; price_min?: string; price_max?: string }>;
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
@@ -13,11 +13,15 @@ export default async function Home({ searchParams }: HomePageProps) {
   const query = params?.q ?? "";
   const beds = params?.beds ? parseInt(params.beds, 10) : undefined;
   const baths = params?.baths ? parseInt(params.baths, 10) : undefined;
+  const propertyType = params?.propertyType;
+
+  const priceMin = params?.price_min ? parseInt(params.price_min, 10) : undefined;
+  const priceMax = params?.price_max ? parseInt(params.price_max, 10) : undefined;
 
   const [{ properties, currentPage, totalPages }, featuredProperties] =
-    await Promise.all([getProperties(page, query, beds, baths), getFeaturedProperties()]);
+    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax), getFeaturedProperties()]);
 
-  const isFiltering = query !== "" || beds !== undefined || baths !== undefined;
+  const isFiltering = query !== "" || beds !== undefined || baths !== undefined || propertyType !== undefined || priceMin !== undefined || priceMax !== undefined;
 
   return (
     <>

@@ -54,7 +54,10 @@ export async function getProperties(
   page: number = 1,
   query?: string,
   beds?: number,
-  baths?: number
+  baths?: number,
+  propertyType?: string,
+  priceMin?: number,
+  priceMax?: number
 ): Promise<GetPropertiesResult> {
   const supabase = createServerClient();
   const currentPage = Math.max(1, page);
@@ -76,6 +79,21 @@ export async function getProperties(
 
   if (baths !== undefined && baths > 0) {
     queryBuilder = queryBuilder.gte("bathrooms", baths);
+  }
+
+  if (propertyType) {
+    queryBuilder = queryBuilder.textSearch("title", `'${propertyType}'`, {
+      type: "plain",
+      config: "english",
+    });
+  }
+
+  if (priceMin !== undefined && priceMin > 0) {
+    queryBuilder = queryBuilder.gte("price", priceMin);
+  }
+
+  if (priceMax !== undefined && priceMax > 0) {
+    queryBuilder = queryBuilder.lte("price", priceMax);
   }
 
   const { data, count, error } = await queryBuilder

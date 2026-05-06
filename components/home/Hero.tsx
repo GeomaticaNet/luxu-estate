@@ -1,20 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SearchFiltersModal } from "./SearchFiltersModal";
 
-export const Hero = () => {
+const HeroContent = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Read initial query from URL so input stays populated
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
+
+  const hasFilters = Array.from(searchParams?.keys() || []).length > 0;
+  const currentPropertyType = searchParams?.get("propertyType");
 
   const handleSearch = () => {
+    const params = new URLSearchParams(searchParams?.toString());
     if (searchQuery.trim()) {
-      router.push(`/?q=${encodeURIComponent(searchQuery)}`);
+      params.set("q", searchQuery.trim());
     } else {
-      router.push("/");
+      params.delete("q");
     }
+    
+    // Always go back to page 1 on new search
+    params.delete("page");
+    
+    router.push(`/?${params.toString()}`);
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    router.push("/");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -22,6 +39,19 @@ export const Hero = () => {
       handleSearch();
     }
   };
+
+  const togglePropertyType = (type: string) => {
+    const params = new URLSearchParams(searchParams?.toString());
+    if (currentPropertyType === type) {
+      params.delete("propertyType");
+    } else {
+      params.set("propertyType", type);
+    }
+    params.delete("page");
+    router.push(`/?${params.toString()}`);
+  };
+
+  const propertyTypes = ["House", "Apartment", "Villa", "Penthouse"];
 
   return (
     <section className="py-12 md:py-16">
@@ -32,55 +62,97 @@ export const Hero = () => {
             <span className="absolute bottom-2 left-0 w-full h-3 bg-mosque/20 -rotate-1 z-0"></span>
           </span>.
         </h1>
-        <div className="relative group max-w-2xl mx-auto">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <div className="relative group max-w-2xl mx-auto flex items-center">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
             <span className="material-icons text-nordic-muted text-2xl group-focus-within:text-mosque transition-colors">search</span>
           </div>
           <input 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="block w-full pl-12 pr-4 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white:bg-white/10 transition-all text-lg" 
+            className="block w-full pl-12 pr-44 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white:bg-white/10 transition-all text-lg" 
             placeholder="Search by city, neighborhood, or address..." 
             type="text" 
           />
-          <button 
-            onClick={handleSearch}
-            className="absolute inset-y-2 right-2 px-6 bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20"
-          >
-            Search
-          </button>
+          <div className="absolute inset-y-2 right-2 flex items-center gap-2">
+            {hasFilters && (
+              <div className="flex items-center bg-mosque/10 text-mosque pl-3 pr-1 py-1 rounded-md text-sm font-medium">
+                Filtered
+                <button 
+                  onClick={handleClearFilters}
+                  className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:bg-mosque/20 transition-colors"
+                >
+                  <span className="material-icons text-[14px]">close</span>
+                </button>
+              </div>
+            )}
+            <button 
+              onClick={handleSearch}
+              className="px-6 h-full bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20"
+            >
+              Search
+            </button>
+          </div>
         </div>
         <div className="flex items-center justify-center gap-3 overflow-x-auto hide-scroll py-2 px-4 -mx-4">
-          <button className="whitespace-nowrap px-5 py-2 rounded-full bg-nordic-dark text-white text-sm font-medium shadow-lg shadow-nordic-dark/10 transition-transform hover:-translate-y-0.5">
+          <button 
+            onClick={() => {
+              const params = new URLSearchParams(searchParams?.toString());
+              params.delete("propertyType");
+              params.delete("page");
+              router.push(`/?${params.toString()}`);
+            }}
+            className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-transform hover:-translate-y-0.5 ${
+              !currentPropertyType 
+                ? "bg-nordic-dark text-white shadow-lg shadow-nordic-dark/10" 
+                : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
+            }`}
+          >
             All
           </button>
-          <button className="whitespace-nowrap px-5 py-2 rounded-full bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 text-sm font-medium transition-all hover:bg-mosque/5">
-            House
-          </button>
-          <button className="whitespace-nowrap px-5 py-2 rounded-full bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 text-sm font-medium transition-all hover:bg-mosque/5">
-            Apartment
-          </button>
-          <button className="whitespace-nowrap px-5 py-2 rounded-full bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 text-sm font-medium transition-all hover:bg-mosque/5">
-            Villa
-          </button>
-          <button className="whitespace-nowrap px-5 py-2 rounded-full bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 text-sm font-medium transition-all hover:bg-mosque/5">
-            Penthouse
-          </button>
+          {propertyTypes.map((type) => (
+            <button 
+              key={type}
+              onClick={() => togglePropertyType(type)}
+              className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                currentPropertyType === type
+                  ? "bg-mosque text-white shadow-lg shadow-mosque/20"
+                  : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
           <div className="w-px h-6 bg-nordic-dark/10 mx-2"></div>
           <button 
             onClick={() => setIsFiltersOpen(true)}
-            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-nordic-dark font-medium text-sm hover:bg-black/5:bg-white/5 transition-colors"
+            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-nordic-dark font-medium text-sm bg-white border border-nordic-dark/5 hover:border-mosque/50 hover:text-mosque hover:bg-mosque/5 hover:ring-2 hover:ring-mosque/20 hover:shadow-md transition-all"
           >
             <span className="material-icons text-base">tune</span> Filters
           </button>
         </div>
       </div>
       
-      <SearchFiltersModal 
-        isOpen={isFiltersOpen} 
-        onClose={() => setIsFiltersOpen(false)} 
+      <SearchFiltersModal
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        initialFilters={{
+          q: searchParams?.get('q') ?? undefined,
+          beds: searchParams?.get('beds') ?? undefined,
+          baths: searchParams?.get('baths') ?? undefined,
+          price_min: searchParams?.get('price_min') ?? undefined,
+          price_max: searchParams?.get('price_max') ?? undefined,
+          propertyType: searchParams?.get('propertyType') ?? undefined,
+        }}
       />
     </section>
+  );
+};
+
+export const Hero = () => {
+  return (
+    <Suspense fallback={<div className="py-12 md:py-16 text-center">Loading search...</div>}>
+      <HeroContent />
+    </Suspense>
   );
 };
