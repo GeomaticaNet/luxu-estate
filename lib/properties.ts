@@ -12,6 +12,9 @@ interface GetPropertiesResult {
 
 /** Maps a raw Supabase row to the Property interface */
 function rowToProperty(row: Record<string, unknown>): Property {
+  const images = (row.property_images as Record<string, unknown>[]) ?? [];
+  const mainImage = images.find((img) => img.is_main) ?? images[0];
+
   return {
     id: row.id as string,
     slug: row.slug as string,
@@ -29,8 +32,8 @@ function rowToProperty(row: Record<string, unknown>): Property {
     amenities: (row.amenities as string[] | null) ?? undefined,
     lat: Number(row.lat ?? 37.4419),
     lng: Number(row.lng ?? -122.1430),
-    imageUrl: row.image_url as string,
-    imageAlt: row.image_alt as string,
+    imageUrl: (mainImage?.url as string) || "/placeholder.jpg",
+    imageAlt: row.title as string,
   };
 }
 
@@ -55,7 +58,7 @@ export async function getProperties(
 
   const { data, count, error } = await supabase
     .from("properties")
-    .select("*", { count: "exact" })
+    .select("*, property_images(*)", { count: "exact" })
     .eq("is_featured", false)
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -84,7 +87,7 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 
   const { data, error } = await supabase
     .from("properties")
-    .select("*")
+    .select("*, property_images(*)")
     .eq("is_featured", true)
     .order("created_at", { ascending: true });
 
@@ -102,10 +105,10 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
 export async function getPropertyBySlug(slug: string) {
   const supabase = createServerClient();
 
-  // Fetch property
+  // Fetch property with its images
   const { data: propertyData, error: propertyError } = await supabase
     .from("properties")
-    .select("*")
+    .select("*, property_images(*)")
     .eq("slug", slug)
     .single();
 
@@ -114,19 +117,11 @@ export async function getPropertyBySlug(slug: string) {
     return null;
   }
 
-  // Fetch associated images
-  const { data: imagesData, error: imagesError } = await supabase
-    .from("property_images")
-    .select("*")
-    .eq("property_id", propertyData.id)
-    .order("sort_order", { ascending: true });
-
-  if (imagesError) {
-    console.error(`[getPropertyBySlug] Error fetching images for property ${propertyData.id}:`, imagesError.message);
-  }
+  const imagesData = (propertyData.property_images as import("@/interfaces/property").PropertyImage[]) ?? [];
+  imagesData.sort((a, b) => a.sort_order - b.sort_order);
 
   return {
     property: rowToProperty(propertyData),
-    images: (imagesData ?? []) as import("@/interfaces/property").PropertyImage[]
+    images: imagesData
   };
 }
