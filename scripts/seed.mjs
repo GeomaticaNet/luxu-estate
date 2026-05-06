@@ -1,10 +1,16 @@
 // scripts/seed.mjs
-// Run with: node scripts/seed.mjs
+// Run with: node --env-file=.env.local scripts/seed.mjs
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://swbhsewxzhxgxmdxahcz.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3YmhzZXd4emh4Z3htZHhhaGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzU2NTYsImV4cCI6MjA5MTM1MTY1Nn0.CuAIC-WzCuS_pRUZyIloD3yd3NSOfm0hic3v5PCzxag";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error(
+    "❌ Missing environment variables. Make sure .env.local exists with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  );
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
