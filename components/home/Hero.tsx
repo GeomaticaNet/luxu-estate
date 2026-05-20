@@ -12,7 +12,7 @@ const HeroContent = () => {
   // Read initial query from URL so input stays populated
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
 
-  const hasFilters = Array.from(searchParams?.keys() || []).length > 0;
+  const hasFilters = Array.from(searchParams?.keys() || []).some(key => key !== "q" && key !== "page");
   const currentPropertyType = searchParams?.get("propertyType");
 
   const handleSearch = () => {
