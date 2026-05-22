@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/GeomaticaNet/luxu-estate/main/public/og-image.png" alt="Luxe Estate" width="100%" style="max-width: 800px; border-radius: 12px;">
+  <img src="https://raw.githubusercontent.com/GeomaticaNet/luxu-estate/main/public/screenshot-main.png" alt="Luxe Estate" width="100%" style="max-width: 800px; border-radius: 12px;">
 </p>
 
 <h1 align="center">🏡 Luxe Estate</h1>
