@@ -5,8 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { SearchFiltersModal } from "./SearchFiltersModal";
+import { HeroVideoBackground } from "./HeroVideoBackground";
 
 const DEBOUNCE_MS = 350;
+
+const HERO_VIDEOS = ["/videos/1.mp4", "/videos/2.mp4", "/videos/4.mp4"];
 
 const HeroContent = () => {
   const t = useTranslations("Hero");
@@ -15,7 +18,6 @@ const HeroContent = () => {
   const searchParams = useSearchParams();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
-  // Read initial query from URL so input stays populated
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
 
   const hasFilters = Array.from(searchParams?.keys() || []).some(key => key !== "q" && key !== "page");
@@ -50,7 +52,6 @@ const HeroContent = () => {
     }, DEBOUNCE_MS);
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -88,33 +89,35 @@ const HeroContent = () => {
   const propertyTypes = ["House", "Apartment", "Villa", "Penthouse"];
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="max-w-3xl mx-auto text-center space-y-8">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-nordic-dark leading-tight">
+    <section className="relative py-12 md:py-16 overflow-hidden">
+      <HeroVideoBackground videos={HERO_VIDEOS} />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-nordic-dark/70 z-10" />
+      <div className="relative z-20 max-w-3xl mx-auto text-center space-y-8">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
           {t("title_prefix")} <span className="relative inline-block">
             <span className="relative z-10 font-medium">{t("title_highlight")}</span>
-            <span className="absolute bottom-2 left-0 w-full h-3 bg-mosque/20 -rotate-1 z-0"></span>
+            <span className="absolute bottom-2 left-0 w-full h-3 bg-mosque/40 -rotate-1 z-0"></span>
           </span>{t("title_suffix")}
         </h1>
         <div className="relative group max-w-2xl mx-auto flex items-center">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-            <span className="material-icons text-nordic-muted text-2xl group-focus-within:text-mosque transition-colors">search</span>
+            <span className="material-icons text-white/60 text-2xl group-focus-within:text-mosque transition-colors">search</span>
           </div>
           <input 
             value={searchQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="block w-full pl-12 pr-44 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white:bg-white/10 transition-all text-lg" 
+            className="block w-full pl-12 pr-44 py-4 rounded-xl border border-white/20 bg-white/15 text-white shadow-soft placeholder-white/50 focus:ring-2 focus:ring-mosque focus:bg-white/25 backdrop-blur-md transition-all text-lg" 
             placeholder={t("search_placeholder")} 
             type="text" 
           />
           <div className="absolute inset-y-2 right-2 flex items-center gap-2">
             {hasFilters && (
-              <div className="flex items-center bg-mosque/10 text-mosque pl-3 pr-1 py-1 rounded-md text-sm font-medium">
+              <div className="flex items-center bg-white/15 backdrop-blur-sm text-white pl-3 pr-1 py-1 rounded-md text-sm font-medium">
                 {t("filtered")}
                 <button 
                   onClick={handleClearFilters}
-                  className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:bg-mosque/20 transition-colors"
+                  className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
                   <span className="material-icons text-[14px]">close</span>
                 </button>
@@ -138,8 +141,8 @@ const HeroContent = () => {
             }}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-transform hover:-translate-y-0.5 ${
               !currentPropertyType 
-                ? "bg-nordic-dark text-white shadow-lg shadow-nordic-dark/10" 
-                : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
+                ? "bg-white text-nordic-dark shadow-lg" 
+                : "bg-white/15 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25"
             }`}
           >
             {t("all")}
@@ -151,16 +154,16 @@ const HeroContent = () => {
               className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${
                 currentPropertyType === type
                   ? "bg-mosque text-white shadow-lg shadow-mosque/20"
-                  : "bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5"
+                  : "bg-white/15 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25"
               }`}
             >
               {t(`types.${type}`)}
             </button>
           ))}
-          <div className="w-px h-6 bg-nordic-dark/10 mx-2"></div>
+          <div className="w-px h-6 bg-white/20 mx-2"></div>
           <button 
             onClick={() => setIsFiltersOpen(true)}
-            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-nordic-dark font-medium text-sm bg-white border border-nordic-dark/5 hover:border-mosque/50 hover:text-mosque hover:bg-mosque/5 hover:ring-2 hover:ring-mosque/20 hover:shadow-md transition-all"
+            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-white text-sm font-medium bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 hover:ring-2 hover:ring-white/30 transition-all"
           >
             <span className="material-icons text-base">tune</span> {t("filters")}
           </button>
@@ -186,7 +189,7 @@ const HeroContent = () => {
 export const Hero = () => {
   const t = useTranslations("Hero");
   return (
-    <Suspense fallback={<div className="py-12 md:py-16 text-center">{t("loading")}</div>}>
+    <Suspense fallback={<div className="py-12 md:py-16 text-center text-white">{t("loading")}</div>}>
       <HeroContent />
     </Suspense>
   );

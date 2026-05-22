@@ -7,7 +7,7 @@ export const Navbar = () => {
   const t = useTranslations("Navigation");
 
   return (
-    <nav className="sticky top-0 z-50 bg-background-light/95 backdrop-blur-md border-b border-nordic-dark/10">
+    <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-black/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
