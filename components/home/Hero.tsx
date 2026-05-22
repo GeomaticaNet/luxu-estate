@@ -89,9 +89,12 @@ const HeroContent = () => {
   const propertyTypes = ["House", "Apartment", "Villa", "Penthouse"];
 
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden min-h-[80vh] flex items-center">
-      <HeroVideoBackground videos={HERO_VIDEOS} />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent z-10" />
+    <section className="relative py-20 md:py-28 min-h-[80vh] flex items-center">
+      {/* Video + dark overlay: arrancan desde el top de la página (-80px = altura navbar) */}
+      <div className="absolute left-0 right-0 bottom-0 z-0" style={{ top: '-80px' }}>
+        <HeroVideoBackground videos={HERO_VIDEOS} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent z-10" />
+      </div>
       <div className="absolute bottom-0 left-0 right-0 h-32 md:h-48 bg-gradient-to-t from-background-light to-transparent z-10" />
       <div className="relative z-20 max-w-3xl mx-auto text-center space-y-8">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
