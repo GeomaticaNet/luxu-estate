@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { PropertyCard } from "../property/PropertyCard";
 import { Property } from "@/interfaces/property";
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const NewInMarket = ({ properties, currentPage, totalPages, searchParams }: Props) => {
+  const t = useTranslations("NewInMarket");
   const hasPrev = currentPage > 1;
   const hasNext = currentPage < totalPages;
 
@@ -42,20 +44,20 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
       {/* Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-light text-nordic-dark">New in Market</h2>
+          <h2 className="text-2xl font-light text-nordic-dark">{t("title")}</h2>
           <p className="text-nordic-muted mt-1 text-sm">
-            Fresh opportunities added this week.
+            {t("subtitle")}
           </p>
         </div>
         <div className="hidden md:flex bg-white p-1 rounded-lg">
           <Link href="/" className="px-4 py-1.5 rounded-md text-sm font-medium bg-nordic-dark text-white shadow-sm">
-            All
+            {t("all")}
           </Link>
           <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nordic-muted hover:text-nordic-dark">
-            Buy
+            {t("buy")}
           </button>
           <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nordic-muted hover:text-nordic-dark">
-            Rent
+            {t("rent")}
           </button>
         </div>
       </div>
@@ -63,7 +65,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
       {/* Property grid */}
       {properties.length === 0 ? (
         <p className="text-nordic-muted text-center py-16">
-          No properties found.
+          {t("no_properties")}
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -83,12 +85,12 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
               className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all hover:shadow-md"
             >
               <span className="material-icons text-base">chevron_left</span>
-              Prev
+              {t("prev")}
             </Link>
           ) : (
             <span className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 text-nordic-muted text-sm font-medium rounded-lg cursor-not-allowed opacity-50">
               <span className="material-icons text-base">chevron_left</span>
-              Prev
+              {t("prev")}
             </span>
           )}
 
@@ -147,12 +149,12 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
               href={createPageURL(currentPage + 1)}
               className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 hover:border-mosque hover:text-mosque text-nordic-dark text-sm font-medium rounded-lg transition-all hover:shadow-md"
             >
-              Next
+              {t("next")}
               <span className="material-icons text-base">chevron_right</span>
             </Link>
           ) : (
             <span className="flex items-center gap-1 px-4 py-2 bg-white border border-nordic-dark/10 text-nordic-muted text-sm font-medium rounded-lg cursor-not-allowed opacity-50">
-              Next
+              {t("next")}
               <span className="material-icons text-base">chevron_right</span>
             </span>
           )}
@@ -162,7 +164,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
       {/* Page info */}
       {totalPages > 1 && (
         <p className="mt-4 text-center text-xs text-nordic-muted">
-          Page {currentPage} of {totalPages}
+          {t("page_info", { current: currentPage, total: totalPages })}
         </p>
       )}
     </section>

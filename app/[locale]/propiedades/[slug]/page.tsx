@@ -5,6 +5,7 @@ import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { MortgageCalculator } from "@/components/property/MortgageCalculator";
 import PropertyMap from "@/components/property/PropertyMap";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PropertyDetailsPage({ params }: PageProps) {
   const resolvedParams = await params;
   const data = await getPropertyBySlug(resolvedParams.slug);
+  const t = await getTranslations("PropertyDetails");
 
   if (!data || !data.property) {
     notFound();
@@ -88,7 +90,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
                   <h3 className="font-semibold text-nordic">Sarah Jenkins</h3>
                   <div className="flex items-center gap-1 text-xs text-mosque font-medium">
                     <span className="material-icons text-[14px]">star</span>
-                    <span>Top Rated Agent</span>
+                    <span>{t("top_rated_agent")}</span>
                   </div>
                 </div>
                 <div className="ml-auto flex gap-2">
@@ -106,11 +108,11 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
                   <span className="material-icons text-xl group-hover:scale-110 transition-transform">
                     calendar_today
                   </span>
-                  Schedule Visit
+                  {t("schedule_visit")}
                 </button>
                 <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
                   <span className="material-icons text-xl">mail_outline</span>
-                  Contact Agent
+                  {t("contact_agent")}
                 </button>
               </div>
             </div>

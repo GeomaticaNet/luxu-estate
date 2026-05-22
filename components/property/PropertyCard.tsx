@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { Property } from "@/interfaces/property";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const PropertyCard = ({ property, className = "" }: Props) => {
+  const t = useTranslations("PropertyCard");
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
       <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col">
@@ -27,7 +29,7 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
             <span className="material-icons text-lg">favorite_border</span>
           </button>
           <div className={`absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${property.type === 'SALE' ? 'bg-nordic-dark/90' : 'bg-mosque/90'}`}>
-            {property.type === 'SALE' ? 'FOR SALE' : 'FOR RENT'}
+            {property.type === 'SALE' ? t("for_sale") : t("for_rent")}
           </div>
         </div>
         <div className="p-4 flex flex-col flex-grow">

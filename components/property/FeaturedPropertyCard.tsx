@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { FeaturedProperty } from "@/interfaces/property";
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const FeaturedPropertyCard = ({ property }: Props) => {
+  const t = useTranslations("PropertyCard");
   return (
     <Link href={`/propiedades/${property.slug}`} className="block group relative rounded-xl overflow-hidden shadow-soft bg-white cursor-pointer transition-all duration-300 hover:shadow-lg">
       <div className="aspect-[4/3] w-full overflow-hidden relative">
@@ -19,7 +21,7 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
           src={property.imageUrl}
         />
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark">
-          {property.featuredLabel}
+          {property.featuredLabel === 'Exclusive' ? t('exclusive') : t('featured')}
         </div>
         <button 
           onClick={(e) => e.preventDefault()}
@@ -44,10 +46,10 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
         </div>
         <div className="flex items-center gap-6 mt-6 pt-6 border-t border-nordic-dark/5">
           <div className="flex items-center gap-2 text-nordic-muted text-sm">
-            <span className="material-icons text-lg">king_bed</span> {property.bedrooms} Beds
+            <span className="material-icons text-lg">king_bed</span> {property.bedrooms} {t("beds")}
           </div>
           <div className="flex items-center gap-2 text-nordic-muted text-sm">
-            <span className="material-icons text-lg">bathtub</span> {property.bathrooms} Baths
+            <span className="material-icons text-lg">bathtub</span> {property.bathrooms} {t("baths")}
           </div>
           <div className="flex items-center gap-2 text-nordic-muted text-sm">
             <span className="material-icons text-lg">square_foot</span> {property.area.toLocaleString()} m²

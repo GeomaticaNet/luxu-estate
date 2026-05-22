@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 
 const PRICE_MIN = 0;
@@ -29,6 +30,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
   initialFilters = {},
 }) => {
   const router = useRouter();
+  const t = useTranslations("SearchFiltersModal");
 
   const [location, setLocation] = useState('');
   const [bedrooms, setBedrooms] = useState(0);
@@ -89,7 +91,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
         >
           {/* Header */}
           <header className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-30">
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Filters</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-gray-900">{t("filters")}</h2>
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500"
@@ -103,7 +105,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
             {/* Location */}
             <section>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Location
+                {t("location")}
               </label>
               <div className="relative group">
                 <span className="material-icons absolute left-4 top-3.5 text-gray-400 group-focus-within:text-mosque transition-colors">
@@ -113,7 +115,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-background-light border-0 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-mosque focus:bg-white transition-all shadow-sm"
-                  placeholder="City, neighborhood, or address"
+                  placeholder={t("location_placeholder")}
                   type="text"
                 />
               </div>
@@ -122,7 +124,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
             {/* Price Range */}
             <section>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                Price Range
+                {t("price_range")}
               </label>
 
               {/* Dual range slider */}
@@ -192,7 +194,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-background-light p-3 rounded-lg border border-transparent focus-within:border-mosque/30 transition-colors">
-                  <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">Min Price</label>
+                  <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">{t("min_price")}</label>
                   <div className="flex items-center">
                     <span className="text-gray-400 mr-1">$</span>
                     <input
@@ -200,12 +202,12 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                       type="text"
                       value={minPrice ? Number(minPrice).toLocaleString() : ''}
                       onChange={(e) => setMinPrice(e.target.value.replace(/\D/g, ''))}
-                      placeholder="No minimum"
+                      placeholder={t("no_minimum")}
                     />
                   </div>
                 </div>
                 <div className="bg-background-light p-3 rounded-lg border border-transparent focus-within:border-mosque/30 transition-colors">
-                  <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">Max Price</label>
+                  <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">{t("max_price")}</label>
                   <div className="flex items-center">
                     <span className="text-gray-400 mr-1">$</span>
                     <input
@@ -213,7 +215,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                       type="text"
                       value={maxPrice ? Number(maxPrice).toLocaleString() : ''}
                       onChange={(e) => setMaxPrice(e.target.value.replace(/\D/g, ''))}
-                      placeholder="No maximum"
+                      placeholder={t("no_maximum")}
                     />
                   </div>
                 </div>
@@ -225,7 +227,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
               {/* Property Type */}
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Property Type
+                  {t("property_type")}
                 </label>
                 <div className="relative">
                   <select
@@ -233,13 +235,13 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
                   >
-                    <option value="">Any Type</option>
-                    <option value="House">House</option>
-                    <option value="Apartment">Apartment</option>
-                    <option value="Villa">Villa</option>
-                    <option value="Penthouse">Penthouse</option>
-                    <option value="Condo">Condo</option>
-                    <option value="Townhouse">Townhouse</option>
+                    <option value="">{t("any_type")}</option>
+                    <option value="House">{t("house")}</option>
+                    <option value="Apartment">{t("apartment")}</option>
+                    <option value="Villa">{t("villa")}</option>
+                    <option value="Penthouse">{t("penthouse")}</option>
+                    <option value="Condo">{t("condo")}</option>
+                    <option value="Townhouse">{t("townhouse")}</option>
                   </select>
                   <span className="material-icons absolute right-3 top-3 text-gray-400 pointer-events-none">
                     expand_more
@@ -250,7 +252,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
               {/* Beds & Baths */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">Bedrooms</span>
+                  <span className="text-sm font-medium text-gray-900">{t("bedrooms")}</span>
                   <div className="flex items-center space-x-3 bg-background-light rounded-full p-1">
                     <button
                       onClick={() => setBedrooms(Math.max(0, bedrooms - 1))}
@@ -260,7 +262,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                       <span className="material-icons text-base">remove</span>
                     </button>
                     <span className="text-sm font-semibold w-8 text-center">
-                      {bedrooms === 0 ? 'Any' : `${bedrooms}+`}
+                      {bedrooms === 0 ? t("any") : `${bedrooms}+`}
                     </span>
                     <button
                       onClick={() => setBedrooms(bedrooms + 1)}
@@ -272,7 +274,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">Bathrooms</span>
+                  <span className="text-sm font-medium text-gray-900">{t("bathrooms")}</span>
                   <div className="flex items-center space-x-3 bg-background-light rounded-full p-1">
                     <button
                       onClick={() => setBathrooms(Math.max(0, bathrooms - 1))}
@@ -282,7 +284,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                       <span className="material-icons text-base">remove</span>
                     </button>
                     <span className="text-sm font-semibold w-8 text-center">
-                      {bathrooms === 0 ? 'Any' : `${bathrooms}+`}
+                      {bathrooms === 0 ? t("any") : `${bathrooms}+`}
                     </span>
                     <button
                       onClick={() => setBathrooms(bathrooms + 1)}
@@ -298,24 +300,24 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
             {/* Amenities */}
             <section>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                Amenities &amp; Features
+                {t("amenities_features")}
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
-                  { icon: 'pool', label: 'Swimming Pool' },
-                  { icon: 'fitness_center', label: 'Gym' },
-                  { icon: 'local_parking', label: 'Parking' },
-                  { icon: 'ac_unit', label: 'Air Conditioning' },
-                  { icon: 'wifi', label: 'High-speed Wifi' },
-                  { icon: 'deck', label: 'Patio / Terrace' },
-                ].map(({ icon, label }) => (
-                  <label key={label} className="cursor-pointer group">
+                  { id: 'pool', icon: 'pool', labelKey: 'pool' },
+                  { id: 'gym', icon: 'fitness_center', labelKey: 'gym' },
+                  { id: 'parking', icon: 'local_parking', labelKey: 'parking' },
+                  { id: 'ac', icon: 'ac_unit', labelKey: 'ac' },
+                  { id: 'wifi', icon: 'wifi', labelKey: 'wifi' },
+                  { id: 'patio', icon: 'deck', labelKey: 'patio' },
+                ].map(({ id, icon, labelKey }) => (
+                  <label key={id} className="cursor-pointer group">
                     <input className="peer sr-only" type="checkbox" />
                     <div className="h-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm flex items-center justify-center gap-2 transition-all hover:border-mosque/40 peer-checked:border-mosque peer-checked:bg-mosque/5 peer-checked:text-mosque">
                       <span className="material-icons text-lg text-gray-400 group-hover:text-gray-500 peer-checked:text-mosque">
                         {icon}
                       </span>
-                      {label}
+                      {t(labelKey as any)}
                     </div>
                   </label>
                 ))}
@@ -329,13 +331,13 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
               onClick={clearFilters}
               className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors underline decoration-gray-300 underline-offset-4"
             >
-              Clear all filters
+              {t("clear_all_filters")}
             </button>
             <button
               onClick={handleSearch}
               className="bg-mosque hover:bg-mosque/90 text-white px-8 py-3 rounded-lg font-medium shadow-lg shadow-mosque/30 transition-all hover:shadow-mosque/40 flex items-center gap-2 active:scale-95"
             >
-              Show Homes
+              {t("show_homes")}
               <span className="material-icons text-sm">arrow_forward</span>
             </button>
           </footer>

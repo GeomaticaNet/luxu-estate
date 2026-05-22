@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { FeaturedPropertyCard } from "../property/FeaturedPropertyCard";
 import { FeaturedProperty } from "@/interfaces/property";
 
@@ -7,22 +8,23 @@ interface Props {
 }
 
 export const FeaturedCollections = ({ properties }: Props) => {
+  const t = useTranslations("FeaturedCollections");
   return (
     <section className="mb-16">
       <div className="flex items-end justify-between mb-8">
         <div>
           <h2 className="text-2xl font-light text-nordic-dark">
-            Featured Collections
+            {t("title")}
           </h2>
           <p className="text-nordic-muted mt-1 text-sm">
-            Curated properties for the discerning eye.
+            {t("subtitle")}
           </p>
         </div>
         <Link
           className="hidden sm:flex items-center gap-1 text-sm font-medium text-mosque hover:opacity-70 transition-opacity"
           href="/"
         >
-          View all{" "}
+          {t("view_all")}{" "}
           <span className="material-icons text-sm">arrow_forward</span>
         </Link>
       </div>
