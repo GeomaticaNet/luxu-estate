@@ -27,8 +27,8 @@ export default async function Home(props: HomePageProps) {
 
   return (
     <>
+      <Hero />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <Hero />
         {!isFiltering && (
           <FeaturedCollections properties={featuredProperties} />
         )}
