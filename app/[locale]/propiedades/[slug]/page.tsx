@@ -4,6 +4,7 @@ import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { MortgageCalculator } from "@/components/property/MortgageCalculator";
 import PropertyMap from "@/components/property/PropertyMap";
+import Image from "next/image";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -52,8 +53,39 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
     maximumFractionDigits: 0,
   }).format(property.price);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: property.title,
+    description: property.description,
+    url: `https://luxu-estate.vercel.app/propiedades/${property.slug}`,
+    image: property.imageUrl,
+    offers: {
+      "@type": "Offer",
+      price: property.price,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: property.address,
+      addressLocality: property.location,
+    },
+    numberOfBedrooms: property.bedrooms,
+    numberOfBathrooms: property.bathrooms,
+    floorSize: {
+      "@type": "QuantitativeValue",
+      value: property.area,
+      unitCode: "MTK",
+    },
+  };
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
         
         {/* Left Column: Gallery */}
@@ -79,13 +111,15 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
 
               {/* Agent Section (Hardcoded for now) */}
               <div className="flex items-center gap-4 mb-6">
-                {/* Use normal img here as it's an external unconfigured URL for demo */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w"
-                  alt="Sarah Jenkins"
-                  className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
-                />
+                <div className="relative w-14 h-14 flex-shrink-0">
+                  <Image
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w"
+                    alt="Sarah Jenkins"
+                    fill
+                    sizes="56px"
+                    className="rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                </div>
                 <div>
                   <h3 className="font-semibold text-nordic">Sarah Jenkins</h3>
                   <div className="flex items-center gap-1 text-xs text-mosque font-medium">

@@ -10,17 +10,23 @@ interface Props {
   className?: string; // e.g. "hidden lg:flex" for responsive layouts
 }
 
+const BLUR_PLACEHOLDER = "data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v+AEAA=";
+
 export const PropertyCard = ({ property, className = "" }: Props) => {
   const t = useTranslations("PropertyCard");
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
-      <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer h-full flex flex-col">
+      <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">
         <div className="relative aspect-[4/3] overflow-hidden">
           <Image 
             fill
+            priority
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             alt={property.imageAlt} 
-            className="object-cover transition-transform duration-500 group-hover:scale-110" 
+            className="object-cover transition-transform duration-700 group-hover:scale-110" 
             src={property.imageUrl}
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
           />
           <button 
             onClick={(e) => e.preventDefault()}

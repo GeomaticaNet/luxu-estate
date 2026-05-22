@@ -9,6 +9,8 @@ interface Props {
   images: PropertyImage[];
 }
 
+const BLUR_PLACEHOLDER = "data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v+AEAA=";
+
 export const PropertyGallery = ({ mainImage, images }: Props) => {
   const [activeImage, setActiveImage] = useState<PropertyImage>(mainImage);
 
@@ -20,6 +22,8 @@ export const PropertyGallery = ({ mainImage, images }: Props) => {
           alt="Main Property Image"
           fill
           priority
+          placeholder="blur"
+          blurDataURL={BLUR_PLACEHOLDER}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
@@ -51,6 +55,8 @@ export const PropertyGallery = ({ mainImage, images }: Props) => {
                 alt="Property gallery thumbnail"
                 fill
                 sizes="192px"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
                 className="object-cover"
               />
             </div>
