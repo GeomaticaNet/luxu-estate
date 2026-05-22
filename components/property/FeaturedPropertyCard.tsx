@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { FeaturedProperty } from "@/interfaces/property";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
 interface Props {
   property: FeaturedProperty;
@@ -29,12 +30,11 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark">
           {property.featuredLabel === 'Exclusive' ? t('exclusive') : t('featured')}
         </div>
-        <button 
-          onClick={(e) => e.preventDefault()}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-nordic-dark hover:bg-mosque hover:text-white transition-all z-10"
-        >
-          <span className="material-icons text-xl">favorite_border</span>
-        </button>
+        <FavoriteButton
+          slug={property.slug}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-sm"
+          iconSize="text-xl"
+        />
         {/* Gradient shadow for specific visual effect on some cards if needed, optionally mapping logic, but keeping standard as per design */}
         {property.featuredLabel === 'Exclusive' && <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>}
       </div>

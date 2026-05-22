@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Property } from "@/interfaces/property";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 
 interface Props {
   property: Property;
@@ -28,12 +29,10 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
           />
-          <button 
-            onClick={(e) => e.preventDefault()}
-            className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-mosque hover:text-white transition-colors text-nordic-dark z-10"
-          >
-            <span className="material-icons text-lg">favorite_border</span>
-          </button>
+          <FavoriteButton
+            slug={property.slug}
+            className="absolute top-3 right-3 p-2 rounded-full"
+          />
           <div className={`absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${property.type === 'SALE' ? 'bg-nordic-dark/90' : 'bg-mosque/90'}`}>
             {property.type === 'SALE' ? t("for_sale") : t("for_rent")}
           </div>

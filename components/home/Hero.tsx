@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { SearchFiltersModal } from "./SearchFiltersModal";
+
+const DEBOUNCE_MS = 350;
 
 const HeroContent = () => {
   const t = useTranslations("Hero");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Read initial query from URL so input stays populated
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
@@ -18,22 +21,50 @@ const HeroContent = () => {
   const hasFilters = Array.from(searchParams?.keys() || []).some(key => key !== "q" && key !== "page");
   const currentPropertyType = searchParams?.get("propertyType");
 
-  const handleSearch = () => {
+  const navigateWithQuery = useCallback((query: string) => {
     const params = new URLSearchParams(searchParams?.toString());
-    if (searchQuery.trim()) {
-      params.set("q", searchQuery.trim());
+    if (query.trim()) {
+      params.set("q", query.trim());
     } else {
       params.delete("q");
     }
-    
-    // Always go back to page 1 on new search
     params.delete("page");
-    
     router.push(`/?${params.toString()}`);
+  }, [router, searchParams]);
+
+  const handleSearch = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    navigateWithQuery(searchQuery);
   };
+
+  const handleQueryChange = (value: string) => {
+    setSearchQuery(value);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      navigateWithQuery(value);
+    }, DEBOUNCE_MS);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const handleClearFilters = () => {
     setSearchQuery("");
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
     router.push("/");
   };
 
@@ -71,7 +102,7 @@ const HeroContent = () => {
           </div>
           <input 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
             className="block w-full pl-12 pr-44 py-4 rounded-xl border-none bg-white text-nordic-dark shadow-soft placeholder-nordic-muted/60 focus:ring-2 focus:ring-mosque focus:bg-white:bg-white/10 transition-all text-lg" 
             placeholder={t("search_placeholder")} 
