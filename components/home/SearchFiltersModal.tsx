@@ -261,7 +261,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                     >
                       <span className="material-icons text-base">remove</span>
                     </button>
-                    <span className="text-sm font-semibold w-8 text-center">
+                    <span className="text-sm font-semibold w-20 text-center">
                       {bedrooms === 0 ? t("any") : `${bedrooms}+`}
                     </span>
                     <button
@@ -283,7 +283,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
                     >
                       <span className="material-icons text-base">remove</span>
                     </button>
-                    <span className="text-sm font-semibold w-8 text-center">
+                    <span className="text-sm font-semibold w-20 text-center">
                       {bathrooms === 0 ? t("any") : `${bathrooms}+`}
                     </span>
                     <button
