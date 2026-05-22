@@ -113,7 +113,7 @@ El sitio detecta automáticamente el idioma del navegador. Idiomas disponibles:
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="public/og-image.png" alt="Luxe Estate Home" width="80%" style="border-radius: 8px; margin-bottom: 20px;">
+  <img src="public/screenshot-main.png" alt="Luxe Estate Home" width="80%" style="border-radius: 8px; margin-bottom: 20px;">
   <br>
   <img src="public/screenshot-2.png" alt="Luxe Estate Property Detail" width="80%" style="border-radius: 8px; margin-bottom: 20px;">
   <br>
