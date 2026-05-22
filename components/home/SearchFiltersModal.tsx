@@ -86,11 +86,11 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
       {/* Modal panel */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <main
-          className="relative w-full max-w-2xl bg-white/85 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] pointer-events-auto"
+          className="relative w-full max-w-4xl bg-white/60 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <header className="px-8 py-6 border-b border-white/20 flex justify-between items-center bg-white/80 backdrop-blur-xl sticky top-0 z-30">
+          <header className="px-8 py-6 border-b border-white/10 flex justify-between items-center bg-white/40 backdrop-blur-xl sticky top-0 z-30">
             <h2 className="text-2xl font-semibold tracking-tight text-nordic-dark">{t("filters")}</h2>
             <button
               onClick={onClose}
@@ -326,7 +326,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
           </div>
 
           {/* Footer */}
-          <footer className="bg-white/80 backdrop-blur-xl border-t border-white/20 px-8 py-6 sticky bottom-0 z-30 flex items-center justify-between">
+          <footer className="bg-white/40 backdrop-blur-xl border-t border-white/10 px-8 py-6 sticky bottom-0 z-30 flex items-center justify-between">
             <button
               onClick={clearFilters}
               className="text-sm font-medium text-nordic-muted hover:text-nordic-dark transition-colors underline decoration-nordic-muted/30 underline-offset-4"
