@@ -102,8 +102,8 @@ export default async function AdminPropertiesPage({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-nordic-dark tracking-tight">My Properties</h1>
-          <p className="text-gray-500 mt-1">Manage your portfolio and track performance.</p>
+          <h1 className="text-3xl font-extrabold text-nordic-dark tracking-wide">My Properties</h1>
+          <p className="text-gray-500 mt-1 tracking-wide">Manage your portfolio and track performance.</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="bg-white border border-gray-200 text-nordic-dark hover:bg-gray-50 px-4 py-2.5 rounded-[7px] text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2">
@@ -118,7 +118,7 @@ export default async function AdminPropertiesPage({
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white p-5 rounded-xl border border-gray-200 flex items-center justify-between">
+          <div key={stat.label} className="bg-white p-5 rounded-lg border border-gray-200 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">{stat.label}</p>
               <p className="text-2xl font-bold text-nordic-dark mt-1">{stat.value}</p>
@@ -131,9 +131,9 @@ export default async function AdminPropertiesPage({
       </div>
 
       {/* Property List Container */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         {/* Table Header */}
-        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-sm font-semibold text-gray-500 uppercase tracking-wider">
           <div className="col-span-6">Property Details</div>
           <div className="col-span-2">Price</div>
           <div className="col-span-2">Status</div>
