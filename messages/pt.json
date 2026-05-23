@@ -185,5 +185,29 @@
     "patio": "Pátio / Terraço",
     "clear_all_filters": "Limpar todos os filtros",
     "show_homes": "Mostrar Imóveis"
+  },
+  "Admin": {
+    "dashboard": "Painel",
+    "properties": "Propriedades",
+    "users": "Usuários",
+    "back_to_site": "Voltar ao site",
+    "dashboard_title": "Painel de Administração",
+    "total_properties": "Propriedades totais",
+    "total_users": "Usuários totais",
+    "featured_properties": "Propriedades em destaque",
+    "quick_actions": "Ações rápidas",
+    "manage_properties": "Gerenciar propriedades",
+    "manage_users": "Gerenciar usuários",
+    "properties_title": "Propriedades",
+    "add_property": "Adicionar propriedade",
+    "property": "Propriedade",
+    "type": "Tipo",
+    "price": "Preço",
+    "location": "Localização",
+    "featured": "Destaque",
+    "actions": "Ações",
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Excluir"
   }
 }

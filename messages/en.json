@@ -185,5 +185,29 @@
     "patio": "Patio / Terrace",
     "clear_all_filters": "Clear all filters",
     "show_homes": "Show Homes"
+  },
+  "Admin": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "users": "Users",
+    "back_to_site": "Back to site",
+    "dashboard_title": "Admin Dashboard",
+    "total_properties": "Total properties",
+    "total_users": "Total users",
+    "featured_properties": "Featured properties",
+    "quick_actions": "Quick actions",
+    "manage_properties": "Manage properties",
+    "manage_users": "Manage users",
+    "properties_title": "Properties",
+    "add_property": "Add property",
+    "property": "Property",
+    "type": "Type",
+    "price": "Price",
+    "location": "Location",
+    "featured": "Featured",
+    "actions": "Actions",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }
