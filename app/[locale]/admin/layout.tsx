@@ -40,7 +40,7 @@ export default async function AdminLayout({
   console.log('[AdminLayout] Admin confirmed, rendering');
 
   const navItems = [
-    { href: "/admin", label: t("dashboard"), icon: "dashboard" },
+    { href: "/admin/dashboard", label: t("dashboard"), icon: "dashboard" },
     { href: "/admin/properties", label: t("properties"), icon: "apartment" },
     { href: "/admin/users", label: t("users"), icon: "people" },
   ];
