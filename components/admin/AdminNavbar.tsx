@@ -2,6 +2,8 @@
 
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 interface AdminNavbarProps {
   userEmail?: string;
@@ -10,17 +12,24 @@ interface AdminNavbarProps {
 
 export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
   const pathname = usePathname();
+  const supabase = createClient();
+  const router = useRouter();
   
   const navItems = [
     { href: "/admin/dashboard", label: "Dashboard" },
-    { href: "/admin/properties", label: "Listings" },
+    { href: "/admin/properties", label: "Properties" },
     { href: "/admin/users", label: "Users" },
-    { href: "#", label: "Inquiries" },
   ];
 
   const isActive = (href: string) => {
     if (href === "#") return false;
     return pathname.includes(href);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -49,7 +58,7 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
           </div>
         </div>
 
-        {/* Right: Search, Notifications, Profile */}
+        {/* Right: Search, Notifications, Avatar, Logout */}
         <div className="flex items-center gap-5">
           <button className="text-nordic-dark/60 hover:text-mosque transition-colors">
             <span className="material-symbols-outlined text-xl">search</span>
@@ -58,7 +67,9 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
             <span className="material-symbols-outlined text-xl">notifications</span>
             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
           </button>
-          <button className="flex items-center gap-2 ml-2">
+          
+          {/* Avatar */}
+          <div className="flex items-center gap-1">
             <div className="h-8 w-8 rounded-full bg-nordic-dark/10 flex items-center justify-center overflow-hidden border border-nordic-dark/10">
               {userAvatar ? (
                 <img src={userAvatar} alt="Profile" className="h-full w-full object-cover" />
@@ -66,7 +77,16 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
                 <span className="material-symbols-outlined text-nordic-dark/60 text-lg">person</span>
               )}
             </div>
-          </button>
+            
+            {/* Logout button - same style as UserMenu */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center bg-white/10 p-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors ml-1"
+              title="Logout"
+            >
+              <span className="material-icons text-sm text-nordic-dark/70">logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </nav>

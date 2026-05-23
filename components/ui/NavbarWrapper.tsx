@@ -9,8 +9,8 @@ interface NavbarWrapperProps {
 export function NavbarWrapper({ children }: NavbarWrapperProps) {
   const pathname = usePathname();
   
-  // Don't show public navbar on admin routes
-  if (pathname?.includes("/admin")) {
+  // Don't show public navbar on admin or login routes
+  if (pathname?.includes("/admin") || pathname?.includes("/login")) {
     return null;
   }
   

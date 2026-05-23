@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+            className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between mb-4">
               <span className="material-icons text-mosque text-3xl">{stat.icon}</span>
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <h2 className="text-xl font-semibold text-nordic-dark mb-4">{t("quick_actions")}</h2>
         <div className="flex gap-4">
           <Link

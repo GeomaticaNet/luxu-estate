@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
           return (
             <div 
               key={user.id}
-              className={`group relative rounded-xl p-5 shadow-sm border transition-all flex flex-col md:grid md:grid-cols-12 gap-4 items-center ${
+                className={`group relative rounded-lg p-5 shadow-sm border transition-all flex flex-col md:grid md:grid-cols-12 gap-4 items-center ${
                 isFirst 
                   ? "bg-hint-of-green border-transparent" 
                   : "bg-white border-gray-100 hover:bg-hint-of-green"
@@ -224,7 +224,7 @@ export default function AdminUsersPage() {
 
               {/* Role & Status */}
               <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
                   {getRoleLabel(user.role)}
                 </span>
                 <div className="flex items-center text-xs text-nordic-dark/60">
@@ -314,23 +314,23 @@ export default function AdminUsersPage() {
               </p>
             </div>
             <div>
-              <nav aria-label="Pagination" className="relative z-0 inline-flex rounded-md shadow-none -space-x-px">
+              <nav aria-label="Pagination" className="relative z-0 inline-flex rounded-lg shadow-none -space-x-px">
                 <button className="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium text-nordic-dark/50 hover:text-mosque transition-colors">
                   <span className="material-icons text-xl">chevron_left</span>
                 </button>
-                <button className="z-10 bg-mosque text-white relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 shadow-sm">
+                <button className="z-10 bg-mosque text-white relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg mx-1 shadow-sm">
                   1
                 </button>
-                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 transition-colors">
+                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg mx-1 transition-colors">
                   2
                 </button>
-                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 transition-colors">
+                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg mx-1 transition-colors">
                   3
                 </button>
                 <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-nordic-dark/40">
                   ...
                 </span>
-                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md mx-1 transition-colors">
+                <button className="bg-transparent text-nordic-dark/70 hover:bg-white hover:text-mosque relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg mx-1 transition-colors">
                   8
                 </button>
                 <button className="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium text-nordic-dark/50 hover:text-mosque transition-colors">

@@ -61,10 +61,10 @@ export default async function AdminPropertiesPage() {
           <p className="text-gray-500 mt-1">Manage your portfolio and track performance.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="bg-white border border-gray-200 text-nordic-dark hover:bg-gray-50 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2">
+          <button className="bg-white border border-gray-200 text-nordic-dark hover:bg-gray-50 px-4 py-2.5 rounded-[7px] text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2">
             <span className="material-icons text-base">filter_list</span> Filter
           </button>
-          <button className="bg-mosque hover:bg-mosque/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-mosque/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2">
+          <button className="bg-mosque hover:bg-mosque/90 text-white px-5 py-2.5 rounded-[7px] text-sm font-medium shadow-md shadow-mosque/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2">
             <span className="material-icons text-base">add</span> Add New Property
           </button>
         </div>
@@ -73,7 +73,7 @@ export default async function AdminPropertiesPage() {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white p-5 rounded-xl border border-mosque/10 shadow-sm flex items-center justify-between">
+          <div key={stat.label} className="bg-white p-5 rounded-lg border border-mosque/10 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">{stat.label}</p>
               <p className="text-2xl font-bold text-nordic-dark mt-1">{stat.value}</p>
@@ -86,7 +86,7 @@ export default async function AdminPropertiesPage() {
       </div>
 
       {/* Property List Container */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         {/* Table Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           <div className="col-span-6">Property Details</div>
@@ -166,8 +166,8 @@ export default async function AdminPropertiesPage() {
             Showing <span className="font-medium text-nordic-dark">1</span> to <span className="font-medium text-nordic-dark">{properties?.length || 0}</span> of <span className="font-medium text-nordic-dark">{properties?.length || 0}</span> results
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-white disabled:opacity-50">Previous</button>
-            <button className="px-3 py-1 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-white">Next</button>
+            <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white disabled:opacity-50">Previous</button>
+            <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white">Next</button>
           </div>
         </div>
       </div>
