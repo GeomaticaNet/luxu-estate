@@ -5,9 +5,9 @@ import { usePathname, useRouter } from "@/i18n/routing";
 import { useState, useTransition, useRef, useEffect } from "react";
 
 const locales = [
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "pt", label: "Português", flag: "🇧🇷" },
+  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "en", label: "EN", flag: "🇺🇸" },
+  { code: "pt", label: "PT", flag: "🇧🇷" },
 ];
 
 export function LanguageSelector() {
@@ -42,7 +42,7 @@ export function LanguageSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
-        className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors"
+        className="flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors"
       >
         <span className="text-sm font-medium">{currentLocale.flag} {currentLocale.label}</span>
         <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
@@ -51,12 +51,12 @@ export function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-xl border border-gray-200/30 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-24 rounded-xl bg-white/85 backdrop-blur-lg shadow-xl border border-gray-200/30 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {locales.map((l) => (
             <button
               key={l.code}
               onClick={() => handleSelect(l.code)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+              className={`w-full flex items-center gap-1 px-4 py-2.5 text-sm transition-colors ${
                 l.code === locale
                   ? "bg-mosque/10 text-mosque font-semibold"
                   : "text-nordic-dark hover:bg-gray-50"
@@ -65,7 +65,7 @@ export function LanguageSelector() {
               <span className="text-base">{l.flag}</span>
               <span>{l.label}</span>
               {l.code === locale && (
-                <span className="ml-auto material-symbols-outlined text-sm text-mosque">check</span>
+                <span className="material-symbols-outlined text-sm text-mosque">check</span>
               )}
             </button>
           ))}
