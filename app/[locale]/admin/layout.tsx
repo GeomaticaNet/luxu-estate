@@ -16,20 +16,28 @@ export default async function AdminLayout({
   
   const { data: { user } } = await supabase.auth.getUser();
   
+  console.log('[AdminLayout] User:', user?.id, user?.email);
+
   if (!user) {
+    console.log('[AdminLayout] No user, redirecting to login');
     redirect(`/${locale}/login`);
   }
 
   // Verify admin role
-  const { data: userRole } = await supabase
+  const { data: userRole, error } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
     .single();
 
+  console.log('[AdminLayout] Role query:', userRole, 'Error:', error);
+
   if (!userRole || userRole.role !== 'admin') {
+    console.log('[AdminLayout] Not admin, redirecting to home');
     redirect(`/${locale}`);
   }
+
+  console.log('[AdminLayout] Admin confirmed, rendering');
 
   const navItems = [
     { href: "/admin", label: t("dashboard"), icon: "dashboard" },
@@ -40,7 +48,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-background-light flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-nordic-dark text-white flex-shrink-0">
+      <aside className="w-64 bg-nordic-dark text-white flex-shrink-0 sticky top-0 h-screen">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-lg bg-mosque flex items-center justify-center">
