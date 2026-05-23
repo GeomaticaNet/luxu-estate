@@ -7,26 +7,40 @@ export default async function AdminPropertiesPage() {
   const supabase = await createServerClient();
   const publicClient = createPublicClient();
 
-  const { data: properties, error } = await supabase
+  const { data: properties, error } = await publicClient
     .from('properties')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div className="text-red-600">Error loading properties</div>;
+    console.error('Error loading properties:', error);
+    return <div className="text-red-600">Error loading properties: {error.message}</div>;
   }
 
+  console.log('Properties loaded:', properties?.length);
+
+  // Fetch main images separately
+  const { data: mainImages } = await publicClient
+    .from('property_images')
+    .select('property_id, url')
+    .eq('is_main', true);
+
+  const imagesMap = new Map();
+  mainImages?.forEach(img => {
+    imagesMap.set(img.property_id, img.url);
+  });
+
   // Stats from database
-  const { data: allProperties, error: err1 } = await publicClient
+  const { data: allProperties } = await publicClient
     .from('properties')
     .select('id');
   
-  const { data: activeProps, error: err2 } = await publicClient
+  const { data: activeProps } = await publicClient
     .from('properties')
     .select('id')
     .eq('active', true);
 
-  const { data: rentProps, error: err3 } = await publicClient
+  const { data: rentProps } = await publicClient
     .from('properties')
     .select('id')
     .eq('type', 'RENT');
@@ -35,31 +49,31 @@ export default async function AdminPropertiesPage() {
   const activeProperties = activeProps?.length || 0;
   const pendingSale = rentProps?.length || 0;
 
-  console.log('DEBUG - allProperties:', allProperties?.length, 'error:', err1);
-  console.log('DEBUG - activeProps:', activeProps?.length, 'error:', err2);
-  console.log('DEBUG - rentProps:', rentProps?.length, 'error:', err3);
-
   const stats = [
     { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
     { label: "Active Properties", value: activeProperties, icon: "check_circle", color: "bg-hint-of-green text-mosque" },
     { label: "Pending Sale", value: pendingSale, icon: "pending", color: "bg-orange-100 text-orange-600" },
   ];
 
-  const getStatusBadge = (type: string, active: boolean) => {
+  const getStatusBadge = (active: boolean) => {
     if (active) {
       return (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque border border-mosque/10">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque">
           <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
           Active
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-        <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5"></span>
-        Inactive
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+        Sold
       </span>
     );
+  };
+
+  const getMainImage = (propertyId: string) => {
+    return imagesMap.get(propertyId) || null;
   };
 
   return (
@@ -83,7 +97,7 @@ export default async function AdminPropertiesPage() {
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white p-5 rounded-lg border border-mosque/10 shadow-sm flex items-center justify-between">
+          <div key={stat.label} className="bg-white p-5 rounded-xl border border-gray-200 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">{stat.label}</p>
               <p className="text-2xl font-bold text-nordic-dark mt-1">{stat.value}</p>
@@ -96,7 +110,7 @@ export default async function AdminPropertiesPage() {
       </div>
 
       {/* Property List Container */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* Table Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           <div className="col-span-6">Property Details</div>
@@ -106,69 +120,72 @@ export default async function AdminPropertiesPage() {
         </div>
 
         {/* Properties */}
-        {properties?.map((property, index) => (
-          <div 
-            key={property.id}
-            className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 hover:bg-background-light transition-colors items-center ${
-              index === properties.length - 1 ? 'border-b-0' : ''
-            }`}
-          >
-            {/* Property Details */}
-            <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
-              <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                {property.image_url && (
-                  <img 
-                    src={property.image_url} 
-                    alt={property.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                )}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer">
-                  {property.title}
-                </h3>
-                <p className="text-sm text-gray-500">{property.address}, {property.location}</p>
-                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <span className="material-icons text-[14px]">bed</span> {property.bedrooms} Beds
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                  <span className="flex items-center gap-1">
-                    <span className="material-icons text-[14px]">bathtub</span> {property.bathrooms} Baths
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                  <span>{property.area}m²</span>
+        {properties?.map((property, index) => {
+          const mainImage = getMainImage(property.id);
+          return (
+            <div 
+              key={property.id}
+              className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 hover:bg-background-light transition-colors items-center ${
+                index === properties.length - 1 ? 'border-b-0' : ''
+              }`}
+            >
+              {/* Property Details */}
+              <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
+                <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                  {mainImage && (
+                    <img 
+                      src={mainImage} 
+                      alt={property.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer">
+                    {property.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">{property.address}, {property.location}</p>
+                  <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <span className="material-icons text-[14px]">bed</span> {property.bedrooms} Beds
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-icons text-[14px]">bathtub</span> {property.bathrooms} Baths
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                    <span>{property.area} sqft</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Price */}
-            <div className="col-span-6 md:col-span-2">
-              <div className="text-base font-semibold text-nordic-dark">
-                ${property.price.toLocaleString()}
+              {/* Price */}
+              <div className="col-span-6 md:col-span-2">
+                <div className="text-base font-semibold text-nordic-dark">
+                  ${Number(property.price).toLocaleString()}
+                </div>
+                {property.price_label && (
+                  <div className="text-xs text-gray-400">Monthly: ${property.price_label}</div>
+                )}
               </div>
-              {property.price_label && (
-                <div className="text-xs text-gray-400">Monthly: {property.price_label}</div>
-              )}
-            </div>
 
-            {/* Status */}
-            <div className="col-span-6 md:col-span-2">
-              {getStatusBadge(property.type, property.active)}
-            </div>
+              {/* Status */}
+              <div className="col-span-6 md:col-span-2">
+                {getStatusBadge(property.active)}
+              </div>
 
-            {/* Actions */}
-            <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
-              <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all" title="Edit Property">
-                <span className="material-icons text-xl">edit</span>
-              </button>
-              <button className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Delete Property">
-                <span className="material-icons text-xl">delete_outline</span>
-              </button>
+              {/* Actions */}
+              <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
+                <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all" title="Edit Property">
+                  <span className="material-icons text-xl">edit</span>
+                </button>
+                <button className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Delete Property">
+                  <span className="material-icons text-xl">delete_outline</span>
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
