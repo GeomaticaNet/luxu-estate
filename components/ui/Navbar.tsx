@@ -17,7 +17,7 @@ export const Navbar = async () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Left: Logo */}
-          <div>
+          <div className="flex-shrink-0">
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
               <div className="w-8 h-8 rounded-lg bg-nordic-dark flex items-center justify-center">
                 <span className="material-icons text-white text-lg">apartment</span>
@@ -27,7 +27,7 @@ export const Navbar = async () => {
           </div>
 
           {/* Center: Navigation items */}
-          <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             <Link className="text-mosque font-medium text-sm border-b-2 border-mosque px-1 py-1" href="#">{t("buy")}</Link>
             <Link className="text-nordic-dark/70 hover:text-nordic-dark font-medium text-sm hover:border-b-2 hover:border-nordic-dark/20 px-1 py-1 transition-all" href="#">{t("rent")}</Link>
             <Link className="text-nordic-dark/70 hover:text-nordic-dark font-medium text-sm hover:border-b-2 hover:border-nordic-dark/20 px-1 py-1 transition-all" href="#">{t("sell")}</Link>
