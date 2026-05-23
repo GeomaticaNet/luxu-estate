@@ -82,18 +82,13 @@ export default function UserList({
         <div className="col-span-2 text-right">Actions</div>
       </div>
 
-      {users.map((user, index) => {
-        const isFirst = index === 0;
+      {users.map((user) => {
         const isOnline = onlineUserIds.has(user.id);
         
         return (
           <div 
             key={user.id}
-            className={`group relative rounded-md p-5 shadow-sm border transition-all flex flex-col md:grid md:grid-cols-12 gap-4 items-center ${
-              isFirst 
-                ? "bg-hint-of-green border-transparent" 
-                : "bg-white border-gray-100 hover:bg-hint-of-green"
-            }`}
+            className={`group relative rounded-lg p-5 bg-white shadow-sm border border-gray-100 transition-all flex flex-col md:grid md:grid-cols-12 gap-4 items-center hover:bg-background-light`}
           >
             <div className="col-span-12 md:col-span-4 flex items-center w-full">
               <div className="relative flex-shrink-0">
@@ -115,22 +110,22 @@ export default function UserList({
               <div className="ml-4 overflow-hidden">
                 <div className="text-sm font-bold text-nordic-dark truncate">{user.full_name || 'Unknown User'}</div>
                 <div className="text-xs text-nordic-dark/70 truncate">{user.email}</div>
-                <div className={`mt-1 text-[10px] px-2 py-0.5 inline-block rounded-sm ${
-                  isFirst ? 'bg-white/50 text-nordic-dark/60' : 'bg-gray-50 text-nordic-dark/50'
-                }`}>
-                  ID: #{user.id.slice(0, 8).toUpperCase()}
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className="text-[10px] px-2 py-0.5 inline-block rounded bg-orange-100 text-orange-700 font-medium">
+                    ID: #{user.id.slice(0, 8).toUpperCase()}
+                  </span>
+                  {isOnline && userPages.has(user.id) && (
+                    <span className="text-[10px] px-2 py-0.5 inline-flex items-center gap-1 rounded bg-hint-of-green/50 text-mosque">
+                      <span className="material-icons" style={{ fontSize: '15px' }}>location_on</span>
+                      {getPageLabel(userPages.get(user.id) || '/', locale)}
+                    </span>
+                  )}
                 </div>
-                {isOnline && userPages.has(user.id) && (
-                  <div className="mt-1 text-[10px] px-2 py-0.5 inline-block rounded-sm bg-hint-of-green/50 text-mosque">
-                    <span className="material-icons text-[10px] align-middle mr-0.5">location_on</span>
-                    {getPageLabel(userPages.get(user.id) || '/', locale)}
-                  </div>
-                )}
               </div>
             </div>
 
             <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
                 user.role === 'admin' ? 'bg-nordic-dark text-white' : 'bg-mosque/10 text-mosque'
               }`}>
                 {user.role === 'admin' ? 'Administrator' : 'User'}
@@ -157,7 +152,7 @@ export default function UserList({
             <RoleDropdown 
               userId={user.id} 
               currentRole={user.role} 
-              isFirst={isFirst} 
+              isFirst={false} 
             />
           </div>
         );

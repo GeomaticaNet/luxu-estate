@@ -25,7 +25,7 @@ export default function RoleDropdown({ userId, currentRole, isFirst }: RoleDropd
       <button 
         onClick={() => setIsOpen(!isOpen)}
         disabled={updating}
-        className={`inline-flex items-center px-4 py-2 border text-xs font-medium rounded-md transition-colors w-full md:w-auto justify-center ${
+        className={`inline-flex items-center px-4 py-2 border text-xs font-medium rounded-lg transition-colors w-full md:w-auto justify-center ${
           isOpen
             ? "bg-mosque text-white shadow-md"
             : isFirst 
@@ -40,7 +40,7 @@ export default function RoleDropdown({ userId, currentRole, isFirst }: RoleDropd
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-48 rounded-md shadow-xl bg-mosque ring-1 ring-black ring-opacity-5 overflow-hidden z-50 origin-top-right">
+        <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-xl bg-mosque ring-1 ring-black ring-opacity-5 overflow-hidden z-50 origin-top-right">
           <div className="py-1" role="menu">
             <button
               onClick={() => handleRoleChange('admin')}

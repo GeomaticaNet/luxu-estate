@@ -59,12 +59,12 @@ export default async function AdminUsersPage({
                 <span className="material-icons text-nordic-dark/40 group-focus-within:text-mosque text-xl">search</span>
               </div>
               <input 
-                className="block w-full pl-10 pr-3 py-2.5 border-none rounded-md bg-white text-nordic-dark shadow-soft placeholder-nordic-dark/30 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-white text-nordic-dark shadow-soft placeholder-nordic-dark/30 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-sm"
                 placeholder="Search by name, email..."
                 type="text"
               />
             </div>
-            <button className="inline-flex items-center justify-center px-4 py-2.5 border border-mosque text-sm font-medium rounded-md text-mosque bg-transparent hover:bg-mosque/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mosque transition-colors whitespace-nowrap">
+            <button className="inline-flex items-center justify-center px-4 py-2.5 border border-mosque text-sm font-medium rounded-lg text-mosque bg-transparent hover:bg-mosque/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mosque transition-colors whitespace-nowrap">
               <span className="material-icons text-lg mr-2">add</span>
               Add User
             </button>
