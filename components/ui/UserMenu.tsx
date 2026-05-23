@@ -20,7 +20,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText }: UserMenuProps) {
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-6">
       <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative flex items-center justify-center">
         {avatarUrl ? (
           <Image 
