@@ -3,7 +3,8 @@
     "buy": "Buy",
     "rent": "Rent",
     "sell": "Sell",
-    "saved": "Saved Homes"
+    "saved": "Saved Homes",
+    "login": "Login"
   },
   "LanguageSelector": {
     "es": "Spanish",

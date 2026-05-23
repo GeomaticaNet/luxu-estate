@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { LanguageSelector } from "./LanguageSelector";
 import { createServerClient } from "@/lib/supabase/server";
+import { LogoutButton } from "./LogoutButton";
 
 export const Navbar = async () => {
   const t = await getTranslations("Navigation");
@@ -37,25 +38,28 @@ export const Navbar = async () => {
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light"></span>
             </button>
             {user ? (
-              <button className="flex items-center gap-2 pl-2 border-l border-nordic-dark/10 ml-2">
-                <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative flex items-center justify-center">
-                  {avatarUrl ? (
-                    <Image 
-                      fill
-                      sizes="36px"
-                      alt={user.user_metadata?.full_name || "Profile"} 
-                      className="object-cover" 
-                      src={avatarUrl}
-                    />
-                  ) : (
-                    <span className="material-icons text-nordic-dark/50">person</span>
-                  )}
-                </div>
-              </button>
+              <>
+                <button className="flex items-center gap-2 pl-2 border-l border-nordic-dark/10 ml-2">
+                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative flex items-center justify-center">
+                    {avatarUrl ? (
+                      <Image 
+                        fill
+                        sizes="36px"
+                        alt={user.user_metadata?.full_name || "Profile"} 
+                        className="object-cover" 
+                        src={avatarUrl}
+                      />
+                    ) : (
+                      <span className="material-icons text-nordic-dark/50">person</span>
+                    )}
+                  </div>
+                </button>
+                <LogoutButton />
+              </>
             ) : (
               <Link href="/login" className="flex items-center gap-2 pl-4 border-l border-nordic-dark/10 ml-2">
                 <div className="px-4 py-1.5 rounded-lg bg-mosque text-white text-sm font-medium hover:bg-mosque/90 transition-colors shadow-sm">
-                  Login
+                  {t("login") || "Login"}
                 </div>
               </Link>
             )}

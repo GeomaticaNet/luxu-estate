@@ -3,7 +3,8 @@
     "buy": "Comprar",
     "rent": "Alugar",
     "sell": "Vender",
-    "saved": "Salvos"
+    "saved": "Salvos",
+    "login": "Entrar"
   },
   "LanguageSelector": {
     "es": "Espanhol",
