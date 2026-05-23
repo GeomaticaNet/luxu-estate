@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const supabase = await createServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      await supabase.rpc('update_user_presence');
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
