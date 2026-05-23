@@ -1,3 +1,4 @@
+import { NavbarWrapper } from "@/components/ui/NavbarWrapper";
 import { Navbar } from "@/components/ui/Navbar";
 import { LocaleDebug } from "@/components/ui/LocaleDebug";
 import { NextIntlClientProvider } from 'next-intl';
@@ -45,7 +46,9 @@ export default async function RootLayout({
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display selection:bg-mosque selection:text-white">
         <NextIntlClientProvider messages={messages}>
           <LocaleDebug />
-          <Navbar />
+          <NavbarWrapper>
+            <Navbar />
+          </NavbarWrapper>
           {children}
         </NextIntlClientProvider>
       </body>

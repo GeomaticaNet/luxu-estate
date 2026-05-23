@@ -7,10 +7,10 @@ import Image from "next/image";
 interface UserMenuProps {
   avatarUrl?: string | null;
   fullName?: string | null;
-  logoutText: string;
+  logoutText?: string;
 }
 
-export function UserMenu({ avatarUrl, fullName, logoutText }: UserMenuProps) {
+export function UserMenu({ avatarUrl, fullName, logoutText = "Logout" }: UserMenuProps) {
   const supabase = createClient();
   const router = useRouter();
 
