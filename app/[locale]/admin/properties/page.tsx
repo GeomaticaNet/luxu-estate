@@ -1,10 +1,11 @@
 import { getTranslations } from "next-intl/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient, createPublicClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
 
 export default async function AdminPropertiesPage() {
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
+  const publicClient = createPublicClient();
 
   const { data: properties, error } = await supabase
     .from('properties')
@@ -15,10 +16,28 @@ export default async function AdminPropertiesPage() {
     return <div className="text-red-600">Error loading properties</div>;
   }
 
-  // Stats
-  const totalListings = properties?.length || 0;
-  const activeProperties = properties?.filter(p => p.type === 'SALE').length || 0;
-  const pendingSale = properties?.filter(p => p.type === 'RENT').length || 0;
+  // Stats from database
+  const { data: allProperties, error: err1 } = await publicClient
+    .from('properties')
+    .select('id');
+  
+  const { data: activeProps, error: err2 } = await publicClient
+    .from('properties')
+    .select('id')
+    .eq('active', true);
+
+  const { data: rentProps, error: err3 } = await publicClient
+    .from('properties')
+    .select('id')
+    .eq('type', 'RENT');
+
+  const totalListings = allProperties?.length || 0;
+  const activeProperties = activeProps?.length || 0;
+  const pendingSale = rentProps?.length || 0;
+
+  console.log('DEBUG - allProperties:', allProperties?.length, 'error:', err1);
+  console.log('DEBUG - activeProps:', activeProps?.length, 'error:', err2);
+  console.log('DEBUG - rentProps:', rentProps?.length, 'error:', err3);
 
   const stats = [
     { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
@@ -26,30 +45,21 @@ export default async function AdminPropertiesPage() {
     { label: "Pending Sale", value: pendingSale, icon: "pending", color: "bg-orange-100 text-orange-600" },
   ];
 
-  const getStatusBadge = (type: string) => {
-    switch (type) {
-      case 'SALE':
-        return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque border border-mosque/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
-            Active
-          </span>
-        );
-      case 'RENT':
-        return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
-            Pending
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5"></span>
-            Sold
-          </span>
-        );
+  const getStatusBadge = (type: string, active: boolean) => {
+    if (active) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque border border-mosque/10">
+          <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
+          Active
+        </span>
+      );
     }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5"></span>
+        Inactive
+      </span>
+    );
   };
 
   return (
@@ -145,7 +155,7 @@ export default async function AdminPropertiesPage() {
 
             {/* Status */}
             <div className="col-span-6 md:col-span-2">
-              {getStatusBadge(property.type)}
+              {getStatusBadge(property.type, property.active)}
             </div>
 
             {/* Actions */}
