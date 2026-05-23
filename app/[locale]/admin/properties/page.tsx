@@ -1,29 +1,47 @@
 import { getTranslations } from "next-intl/server";
-import { createServerClient, createPublicClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
 
-export default async function AdminPropertiesPage() {
+const PAGE_SIZE = 10;
+
+export default async function AdminPropertiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const t = await getTranslations("Admin");
-  const supabase = await createServerClient();
   const publicClient = createPublicClient();
+
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam || "1", 10));
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  // Total count for pagination
+  const { count: totalCount } = await publicClient
+    .from('properties')
+    .select('*', { count: 'exact', head: true });
+
+  const totalPages = Math.ceil((totalCount || 0) / PAGE_SIZE);
 
   const { data: properties, error } = await publicClient
     .from('properties')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (error) {
     console.error('Error loading properties:', error);
     return <div className="text-red-600">Error loading properties: {error.message}</div>;
   }
 
-  console.log('Properties loaded:', properties?.length);
-
-  // Fetch main images separately
+  // Fetch main images for displayed properties
+  const propertyIds = properties?.map(p => p.id) || [];
   const { data: mainImages } = await publicClient
     .from('property_images')
     .select('property_id, url')
-    .eq('is_main', true);
+    .eq('is_main', true)
+    .in('property_id', propertyIds);
 
   const imagesMap = new Map();
   mainImages?.forEach(img => {
@@ -75,6 +93,9 @@ export default async function AdminPropertiesPage() {
   const getMainImage = (propertyId: string) => {
     return imagesMap.get(propertyId) || null;
   };
+
+  const showingFrom = from + 1;
+  const showingTo = Math.min(to + 1, totalCount || 0);
 
   return (
     <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -190,11 +211,21 @@ export default async function AdminPropertiesPage() {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-medium text-nordic-dark">1</span> to <span className="font-medium text-nordic-dark">{properties?.length || 0}</span> of <span className="font-medium text-nordic-dark">{properties?.length || 0}</span> results
+            Showing <span className="font-medium text-nordic-dark">{showingFrom}</span> to <span className="font-medium text-nordic-dark">{showingTo}</span> of <span className="font-medium text-nordic-dark">{totalCount || 0}</span> results
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white disabled:opacity-50">Previous</button>
-            <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white">Next</button>
+            <Link
+              href={currentPage > 1 ? `/admin/properties?page=${currentPage - 1}` : '#'}
+              className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage <= 1 ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+              Previous
+            </Link>
+            <Link
+              href={currentPage < totalPages ? `/admin/properties?page=${currentPage + 1}` : '#'}
+              className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage >= totalPages ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+              Next
+            </Link>
           </div>
         </div>
       </div>
