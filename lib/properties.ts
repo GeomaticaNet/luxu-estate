@@ -1,5 +1,5 @@
 import { Property, FeaturedProperty, PropertyImage } from "@/interfaces/property";
-import { createServerClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 
 const PAGE_SIZE = 8;
 
@@ -113,7 +113,7 @@ export async function getProperties(
   priceMin?: number,
   priceMax?: number
 ): Promise<GetPropertiesResult> {
-  const supabase = createServerClient();
+  const supabase = createPublicClient();
   const currentPage = Math.max(1, page);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -174,7 +174,7 @@ export async function getProperties(
  * Fetches all featured properties from Supabase.
  */
 export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
-  const supabase = createServerClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("properties")
@@ -194,7 +194,7 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
  * Fetches a single property by slug and its associated images.
  */
 export async function getPropertyBySlug(slug: string) {
-  const supabase = createServerClient();
+  const supabase = createPublicClient();
 
   // Fetch property with its images
   const { data: propertyData, error: propertyError } = await supabase
