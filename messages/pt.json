@@ -4,7 +4,8 @@
     "rent": "Alugar",
     "sell": "Vender",
     "saved": "Salvos",
-    "login": "Entrar"
+    "login": "Entrar",
+    "logout": "Sair"
   },
   "LanguageSelector": {
     "es": "Espanhol",

@@ -4,7 +4,8 @@
     "rent": "Alquilar",
     "sell": "Vender",
     "saved": "Guardados",
-    "login": "Iniciar Sesión"
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión"
   },
   "LanguageSelector": {
     "es": "Español",

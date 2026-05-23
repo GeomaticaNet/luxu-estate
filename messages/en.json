@@ -4,7 +4,8 @@
     "rent": "Rent",
     "sell": "Sell",
     "saved": "Saved Homes",
-    "login": "Login"
+    "login": "Login",
+    "logout": "Logout"
   },
   "LanguageSelector": {
     "es": "Spanish",

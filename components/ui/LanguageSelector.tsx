@@ -44,7 +44,6 @@ export function LanguageSelector() {
         disabled={isPending}
         className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors"
       >
-        <span className="material-symbols-outlined text-sm">language</span>
         <span className="text-sm font-medium">{currentLocale.flag} {currentLocale.label}</span>
         <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
           expand_more
