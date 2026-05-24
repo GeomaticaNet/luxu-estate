@@ -18,10 +18,10 @@ export default async function AdminUsersPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; search?: string }>;
 }) {
   const { locale } = await params;
-  const { tab } = await searchParams;
+  const { tab, search: searchQuery } = await searchParams;
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
 
@@ -50,13 +50,21 @@ export default async function AdminUsersPage({
     created_at: u.created_at,
   })) || [];
 
-  // Filter by tab
+  // Filter by tab and search
   const activeTab = tab || 'all';
+  const search = (searchQuery || '').toLowerCase();
   const filteredUsers = formattedUsers.filter(user => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'users') return user.role === 'user';
-    if (activeTab === 'admins') return user.role === 'admin';
-    return true;
+    // Tab filter
+    const matchesTab = activeTab === 'all' || 
+      (activeTab === 'users' && user.role === 'user') ||
+      (activeTab === 'admins' && user.role === 'admin');
+    
+    // Search filter
+    const matchesSearch = !search || 
+      user.full_name?.toLowerCase().includes(search) ||
+      user.email.toLowerCase().includes(search);
+    
+    return matchesTab && matchesSearch;
   });
 
   const tabs = [
@@ -74,16 +82,19 @@ export default async function AdminUsersPage({
             <p className="text-nordic-dark/60 mt-1 text-sm tracking-wide">Manage user access and roles for your properties.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div className="relative group w-full md:w-80">
+            <form action="/admin/users" method="GET" className="relative group w-full md:w-80">
+              <input type="hidden" name="tab" value={activeTab} />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span className="material-icons text-nordic-dark/40 group-focus-within:text-mosque text-xl">search</span>
               </div>
               <input 
+                name="search"
+                defaultValue={searchQuery || ''}
                 className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-white text-nordic-dark shadow-soft placeholder-nordic-dark/30 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-sm"
                 placeholder="Search by name, email..."
                 type="text"
               />
-            </div>
+            </form>
             <button className="inline-flex items-center justify-center px-4 py-2.5 border border-mosque text-sm font-medium rounded-lg text-mosque bg-transparent hover:bg-mosque/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mosque transition-colors whitespace-nowrap">
               <span className="material-icons text-lg mr-2">add</span>
               Add User
@@ -115,6 +126,7 @@ export default async function AdminUsersPage({
             <div>
               <p className="text-sm text-nordic-dark/60">
                 Showing <span className="font-medium text-nordic-dark">{filteredUsers.length}</span> of <span className="font-medium text-nordic-dark">{formattedUsers.length}</span> users
+                {search && <span className="ml-1">for "<span className="font-medium text-mosque">{searchQuery}</span>"</span>}
               </p>
             </div>
           </div>
