@@ -14,14 +14,34 @@ interface RoleDropdownProps {
 export default function RoleDropdown({ userId, currentRole, currentUserId, active, isFirst }: RoleDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showConfirmDemote, setShowConfirmDemote] = useState(false);
+  const [pendingRole, setPendingRole] = useState<string | null>(null);
 
   const isCurrentUser = userId === currentUserId;
 
   async function handleRoleChange(newRole: string) {
+    // If demoting admin to user, show confirmation first (even for self)
+    if (currentRole === 'admin' && newRole === 'user') {
+      setPendingRole(newRole);
+      setShowConfirmDemote(true);
+      setIsOpen(false);
+      return;
+    }
+    
     setUpdating(true);
     setIsOpen(false);
     await updateUserRole(userId, newRole);
     setUpdating(false);
+  }
+
+  async function confirmDemote() {
+    if (pendingRole) {
+      setUpdating(true);
+      setShowConfirmDemote(false);
+      await updateUserRole(userId, pendingRole);
+      setPendingRole(null);
+      setUpdating(false);
+    }
   }
 
   async function handleToggleActive() {
@@ -56,21 +76,27 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
           <div className="py-1" role="menu">
             <button
               onClick={() => handleRoleChange('admin')}
+              disabled={currentRole === 'admin'}
               className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
-                currentRole === 'admin' ? 'text-white font-medium bg-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                currentRole === 'admin' 
+                  ? 'text-white/30 cursor-not-allowed' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <span className="material-icons text-sm mr-3 text-white/50">shield</span>
-              Administrator
+              <span className={`material-icons text-sm mr-3 ${currentRole === 'admin' ? 'text-white/20' : 'text-white/50'}`}>shield</span>
+              {currentRole === 'admin' ? 'Already Admin' : 'Promote to Admin'}
             </button>
             <button
               onClick={() => handleRoleChange('user')}
+              disabled={currentRole === 'user'}
               className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
-                currentRole === 'user' ? 'text-white font-medium bg-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                currentRole === 'user'
+                  ? 'text-white/30 cursor-not-allowed' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <span className="material-icons text-sm mr-3 text-white/50">person</span>
-              User
+              <span className={`material-icons text-sm mr-3 ${currentRole === 'user' ? 'text-white/20' : 'text-white/50'}`}>person</span>
+              {currentRole === 'user' ? 'Already User' : 'Demote to User'}
             </button>
             <div className="border-t border-white/10 my-1"></div>
             <button
@@ -89,6 +115,37 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               </span>
               {isCurrentUser ? 'Cannot suspend yourself' : active ? 'Suspend User' : 'Re-activate User'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Demote Modal */}
+      {showConfirmDemote && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
+                <span className="material-icons text-orange-600">warning</span>
+              </div>
+              <h3 className="text-lg font-bold text-nordic-dark">Confirm Action</h3>
+            </div>
+            <p className="text-gray-600 text-sm mb-6">
+              You are about to <strong>demote this admin to a regular user</strong>. They will lose all admin privileges immediately. Are you sure?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowConfirmDemote(false); setPendingRole(null); }}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-nordic-dark hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDemote}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors"
+              >
+                Yes, Demote
+              </button>
+            </div>
           </div>
         </div>
       )}
