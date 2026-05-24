@@ -110,21 +110,18 @@ export default function UserList({
                   <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 ring-2 ring-white"></span>
                 )}
               </div>
-              <div className="ml-4 overflow-hidden">
-                <div className="text-sm font-bold text-nordic-dark truncate">{user.full_name || 'Unknown User'}</div>
-                <div className="text-xs text-nordic-dark/70 truncate">{user.email}</div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <span className="text-[10px] px-2 py-0.5 inline-block rounded bg-orange-100 text-orange-700 font-medium">
-                    ID: #{user.id.slice(0, 8).toUpperCase()}
-                  </span>
-                  {isOnline && userPages.has(user.id) && (
-                    <span className="text-[10px] px-2 py-0.5 inline-flex items-center gap-1 rounded bg-hint-of-green/50 text-mosque">
-                      <span className="material-icons" style={{ fontSize: '15px' }}>location_on</span>
-                      {getPageLabel(userPages.get(user.id) || '/', locale)}
-                    </span>
-                  )}
+                <div className="ml-4 overflow-hidden">
+                  <div className="text-sm font-bold text-nordic-dark truncate">{user.full_name || 'Unknown User'}</div>
+                  <div className="text-xs text-nordic-dark/70 truncate">{user.email}</div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    {isOnline && userPages.has(user.id) && (
+                      <span className="text-[10px] px-2 py-0.5 inline-flex items-center gap-1 rounded bg-hint-of-green/50 text-mosque">
+                        <span className="material-icons" style={{ fontSize: '15px' }}>location_on</span>
+                        {getPageLabel(userPages.get(user.id) || '/', locale)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
             </div>
 
             <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
