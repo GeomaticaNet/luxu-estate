@@ -9,6 +9,7 @@ interface UserWithRole {
   full_name: string | null;
   avatar_url: string | null;
   role: string;
+  active: boolean;
   created_at: string;
 }
 
@@ -45,6 +46,7 @@ export default async function AdminUsersPage({
     full_name: u.full_name || null,
     avatar_url: u.avatar_url || null,
     role: u.role,
+    active: u.active ?? true,
     created_at: u.created_at,
   })) || [];
 

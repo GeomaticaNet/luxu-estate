@@ -2,10 +2,13 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const supabase = createClient();
   const [loading, setLoading] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
   const handleLogin = async (provider: "google" | "github") => {
     setLoading(provider);
@@ -34,6 +37,15 @@ export default function LoginPage() {
         </div>
         
         <div className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-black/5">
+          {error === 'suspended' && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4 flex items-start gap-3">
+              <span className="material-icons text-red-500 text-xl">block</span>
+              <div>
+                <p className="font-semibold text-red-700 text-sm">Usuario suspendido</p>
+                <p className="text-red-600/80 text-xs mt-0.5">Tu cuenta ha sido suspendida. Contacta con el administrador.</p>
+              </div>
+            </div>
+          )}
           <div className="space-y-4">
             <button 
               onClick={() => handleLogin("google")}

@@ -1,22 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { updateUserRole } from "./actions";
+import { updateUserRole, toggleUserActive } from "./actions";
 
 interface RoleDropdownProps {
   userId: string;
   currentRole: string;
+  currentUserId: string | null;
+  active: boolean;
   isFirst: boolean;
 }
 
-export default function RoleDropdown({ userId, currentRole, isFirst }: RoleDropdownProps) {
+export default function RoleDropdown({ userId, currentRole, currentUserId, active, isFirst }: RoleDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+
+  const isCurrentUser = userId === currentUserId;
 
   async function handleRoleChange(newRole: string) {
     setUpdating(true);
     setIsOpen(false);
     await updateUserRole(userId, newRole);
+    setUpdating(false);
+  }
+
+  async function handleToggleActive() {
+    if (isCurrentUser) return;
+    setUpdating(true);
+    setIsOpen(false);
+    await toggleUserActive(userId, !active);
     setUpdating(false);
   }
 
@@ -62,10 +74,20 @@ export default function RoleDropdown({ userId, currentRole, isFirst }: RoleDropd
             </button>
             <div className="border-t border-white/10 my-1"></div>
             <button
-              className="group flex items-center w-full px-4 py-3 text-xs text-red-200 hover:bg-red-500/20 hover:text-red-100 transition-colors"
+              onClick={handleToggleActive}
+              disabled={isCurrentUser || updating}
+              className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
+                isCurrentUser 
+                  ? 'text-red-200/40 cursor-not-allowed' 
+                  : active
+                    ? 'text-red-200 hover:bg-red-500/20 hover:text-red-100'
+                    : 'text-green-200 hover:bg-green-500/20 hover:text-green-100'
+              }`}
             >
-              <span className="material-icons text-sm mr-3 text-red-300">block</span>
-              Suspend User
+              <span className={`material-icons text-sm mr-3 ${isCurrentUser ? 'text-red-300/40' : active ? 'text-red-300' : 'text-green-300'}`}>
+                {active ? 'block' : 'check_circle'}
+              </span>
+              {isCurrentUser ? 'Cannot suspend yourself' : active ? 'Suspend User' : 'Re-activate User'}
             </button>
           </div>
         </div>

@@ -11,6 +11,7 @@ interface UserWithRole {
   full_name: string | null;
   avatar_url: string | null;
   role: string;
+  active: boolean;
   created_at: string;
 }
 
@@ -132,9 +133,11 @@ export default function UserList({
               }`}>
                 {user.role === 'admin' ? 'Administrator' : 'User'}
               </span>
-              <div className="flex items-center text-xs text-nordic-dark/60">
-                <span className="material-icons text-[14px] mr-1 text-mosque">check_circle</span>
-                Active
+              <div className={`flex items-center text-xs ${user.active ? 'text-nordic-dark/60' : 'text-red-500'}`}>
+                <span className={`material-icons text-[14px] mr-1 ${user.active ? 'text-mosque' : 'text-red-500'}`}>
+                  {user.active ? 'check_circle' : 'cancel'}
+                </span>
+                {user.active ? 'Active' : 'Inactive'}
               </div>
             </div>
 
@@ -151,11 +154,13 @@ export default function UserList({
               </div>
             </div>
 
-            <RoleDropdown 
-              userId={user.id} 
-              currentRole={user.role} 
-              isFirst={false} 
-            />
+              <RoleDropdown 
+                userId={user.id} 
+                currentRole={user.role} 
+                currentUserId={currentUserId}
+                active={user.active}
+                isFirst={false} 
+              />
           </div>
         );
       })}
