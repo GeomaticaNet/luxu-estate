@@ -31,12 +31,14 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background-light flex flex-col">
+    <div className="h-screen bg-background-light flex flex-col overflow-hidden">
       <AdminNavbar 
         userEmail={user.email || undefined}
         userAvatar={user.user_metadata?.avatar_url}
       />
-      {children}
+      <div className="flex-grow overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
