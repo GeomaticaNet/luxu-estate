@@ -77,8 +77,9 @@ export default function UserList({
   }, [fetchPresence]);
 
   return (
-    <main className="flex-grow px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-12 space-y-4">
-      <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-sm font-semibold uppercase tracking-wider text-nordic-dark/50 mb-2">
+    <>
+      <div className="flex-grow w-full pb-12 space-y-4">
+        <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-sm font-semibold uppercase tracking-wider text-nordic-dark/50 mb-2">
         <div className="col-span-4">User Details</div>
         <div className="col-span-3">Role & Status</div>
         <div className="col-span-3">Performance</div>
@@ -164,6 +165,6 @@ export default function UserList({
           </div>
         );
       })}
-    </main>
+    </div>
   );
 }
