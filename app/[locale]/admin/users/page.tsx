@@ -1,7 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import UserList from "./UserList";
-import { routing } from '@/i18n/routing';
+import { Link } from "@/i18n/routing";
 
 interface UserWithRole {
   id: string;
@@ -14,10 +14,13 @@ interface UserWithRole {
 
 export default async function AdminUsersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { locale } = await params;
+  const { tab } = await searchParams;
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
 
@@ -36,7 +39,7 @@ export default async function AdminUsersPage({
     );
   }
 
-  const formattedUsers: UserWithRole[] = users?.map((u: any) => ({
+  let formattedUsers: UserWithRole[] = users?.map((u: any) => ({
     id: u.id,
     email: u.email || 'N/A',
     full_name: u.full_name || null,
@@ -44,6 +47,21 @@ export default async function AdminUsersPage({
     role: u.role,
     created_at: u.created_at,
   })) || [];
+
+  // Filter by tab
+  const activeTab = tab || 'all';
+  const filteredUsers = formattedUsers.filter(user => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'users') return user.role === 'user';
+    if (activeTab === 'admins') return user.role === 'admin';
+    return true;
+  });
+
+  const tabs = [
+    { id: 'all', label: 'All Users' },
+    { id: 'users', label: 'Users' },
+    { id: 'admins', label: 'Admins' },
+  ];
 
   return (
     <div className="min-h-screen bg-background-light flex flex-col">
@@ -71,20 +89,30 @@ export default async function AdminUsersPage({
           </div>
         </div>
         <div className="mt-8 flex gap-6 border-b border-nordic-dark/10 overflow-x-auto">
-          <button className="pb-3 text-sm font-medium text-mosque border-b-2 border-mosque font-semibold whitespace-nowrap">All Users</button>
-          <button className="pb-3 text-sm font-medium text-nordic-dark/60 hover:text-nordic-dark whitespace-nowrap">Users</button>
-          <button className="pb-3 text-sm font-medium text-nordic-dark/60 hover:text-nordic-dark whitespace-nowrap">Admins</button>
+          {tabs.map((t) => (
+            <Link
+              key={t.id}
+              href={`/admin/users?tab=${t.id}`}
+              className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === t.id
+                  ? 'text-mosque border-b-2 border-mosque font-semibold'
+                  : 'text-nordic-dark/60 hover:text-nordic-dark'
+              }`}
+            >
+              {t.label}
+            </Link>
+          ))}
         </div>
       </header>
 
-      <UserList users={formattedUsers} currentUserId={currentUserId} locale={locale} />
+      <UserList users={filteredUsers} totalUsers={formattedUsers.length} currentUserId={currentUserId} locale={locale} />
 
       <footer className="mt-auto border-t border-nordic-dark/5 bg-background-light py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-nordic-dark/60">
-                Showing <span className="font-medium text-nordic-dark">1</span> to <span className="font-medium text-nordic-dark">{formattedUsers.length}</span> of <span className="font-medium text-nordic-dark">{formattedUsers.length}</span> users
+                Showing <span className="font-medium text-nordic-dark">{filteredUsers.length}</span> of <span className="font-medium text-nordic-dark">{formattedUsers.length}</span> users
               </p>
             </div>
           </div>

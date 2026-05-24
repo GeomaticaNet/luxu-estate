@@ -16,10 +16,12 @@ interface UserWithRole {
 
 export default function UserList({
   users,
+  totalUsers,
   currentUserId,
   locale,
 }: {
   users: UserWithRole[];
+  totalUsers: number;
   currentUserId: string | null;
   locale: string;
 }) {
