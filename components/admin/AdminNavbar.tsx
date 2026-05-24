@@ -33,8 +33,8 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
   };
 
   return (
-    <nav className="bg-white border-b border-nordic-dark/5 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
+    <nav className="bg-white border-b border-nordic-dark/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Left: Logo + Nav */}
         <div className="flex items-center gap-12">
           <Link href="/" className="flex-shrink-0 flex items-center gap-2">
