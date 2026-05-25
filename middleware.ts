@@ -9,6 +9,15 @@ export default async function middleware(request: NextRequest) {
   const response = intlMiddleware(request);
   const pathname = request.nextUrl.pathname;
 
+  // Redirect admin root and dashboard to properties
+  const localeMatch = pathname.match(/^\/(es|en|pt)/);
+  const locale = localeMatch?.[1];
+  const pathWithoutLocale = locale ? pathname.replace(`/${locale}`, '') : pathname;
+  
+  if (pathWithoutLocale === '/admin' || pathWithoutLocale === '/admin/dashboard') {
+    return NextResponse.redirect(new URL(`/${locale || 'es'}/admin/properties`, request.url));
+  }
+
   // Check if route is admin
   const isAdminRoute = pathname.includes('/admin');
 

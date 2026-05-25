@@ -16,7 +16,6 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
   const router = useRouter();
   
   const navItems = [
-    { href: "/admin/dashboard", label: "Dashboard" },
     { href: "/admin/properties", label: "Properties" },
     { href: "/admin/users", label: "Users" },
   ];
