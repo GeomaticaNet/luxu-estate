@@ -73,20 +73,27 @@ export default async function AdminPropertiesPage({
     { label: "Pending Sale", value: pendingSale, icon: "pending", color: "bg-orange-100 text-orange-600" },
   ];
 
-  const getStatusBadge = (active: boolean) => {
-    if (active) {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque">
-          <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
-          Active
-        </span>
-      );
-    }
+  const getStatusBadge = (active: boolean, isFeatured: boolean) => {
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
-        Sold
-      </span>
+      <div className="flex flex-col gap-1">
+        {active ? (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque">
+            <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
+            Active
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+            Sold
+          </span>
+        )}
+        {isFeatured && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
+            Featured
+          </span>
+        )}
+      </div>
     );
   };
 
@@ -192,7 +199,7 @@ export default async function AdminPropertiesPage({
 
               {/* Status */}
               <div className="col-span-6 md:col-span-2">
-                {getStatusBadge(property.active)}
+                {getStatusBadge(property.active, property.is_featured)}
               </div>
 
               {/* Actions */}
