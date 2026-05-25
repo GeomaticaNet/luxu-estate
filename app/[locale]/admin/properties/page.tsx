@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { createPublicClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
+import { ToggleActiveButton } from "./ToggleActiveButton";
 
 const PAGE_SIZE = 10;
 
@@ -84,7 +85,7 @@ export default async function AdminPropertiesPage({
         ) : (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
             <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
-            Sold
+            Inactive
           </span>
         )}
         {isFeatured && (
@@ -161,11 +162,18 @@ export default async function AdminPropertiesPage({
               <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
                 <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
                   {mainImage && (
-                    <img 
-                      src={mainImage} 
-                      alt={property.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                    <>
+                      <img 
+                        src={mainImage} 
+                        alt={property.title}
+                        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!property.active ? 'grayscale opacity-60' : ''}`}
+                      />
+                      {!property.active && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <span className="material-icons text-white/80 text-2xl">visibility_off</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div>
@@ -207,9 +215,7 @@ export default async function AdminPropertiesPage({
                 <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all" title="Edit Property">
                   <span className="material-icons text-xl">edit</span>
                 </button>
-                <button className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Delete Property">
-                  <span className="material-icons text-xl">delete_outline</span>
-                </button>
+                <ToggleActiveButton propertyId={property.id} active={property.active} />
               </div>
             </div>
           );
