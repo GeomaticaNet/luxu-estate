@@ -48,6 +48,8 @@
   "PropertyCard": {
     "for_sale": "FOR SALE",
     "for_rent": "FOR RENT",
+    "sold": "SOLD",
+    "rented": "RENTED",
     "beds": "Beds",
     "baths": "Baths",
     "featured": "FEATURED",

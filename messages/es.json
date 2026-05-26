@@ -48,6 +48,8 @@
   "PropertyCard": {
     "for_sale": "EN VENTA",
     "for_rent": "EN ALQUILER",
+    "sold": "VENDIDA",
+    "rented": "ALQUILADA",
     "beds": "Camas",
     "baths": "Baños",
     "featured": "DESTACADO",

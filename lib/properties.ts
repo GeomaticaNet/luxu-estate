@@ -119,11 +119,18 @@ export async function getProperties(
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
+  // Check if user is using search filters
+  const hasSearchFilters = query || (beds && beds > 0) || (baths && baths > 0) || propertyType || (priceMin && priceMin > 0) || (priceMax && priceMax > 0);
+
   let queryBuilder = supabase
     .from("properties")
     .select("*, property_images(*)", { count: "exact" })
-    .eq("active", true)
     .eq("is_featured", false);
+
+  // Only show active properties when using search/filters
+  if (hasSearchFilters) {
+    queryBuilder = queryBuilder.eq("active", true);
+  }
 
   if (query) {
     queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);

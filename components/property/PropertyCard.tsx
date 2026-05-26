@@ -25,8 +25,8 @@ function getBadgeStyle(type: string) {
 
 function getBadgeText(t: any, type: string) {
   switch (type) {
-    case 'SOLD': return 'Sold';
-    case 'RENTED': return 'Rented';
+    case 'SOLD': return t("sold");
+    case 'RENTED': return t("rented");
     case 'SALE': return t("for_sale");
     case 'RENT': return t("for_rent");
     default: return type;
