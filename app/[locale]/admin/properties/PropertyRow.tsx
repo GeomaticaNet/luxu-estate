@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface PropertyRowProps {
@@ -50,16 +50,22 @@ export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyR
   const [isActive, setIsActive] = useState(property.active);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Sync with server data when navigating between pages
+  useEffect(() => {
+    setIsActive(property.active);
+  }, [property.active]);
+
   const handleToggle = async () => {
     setIsLoading(true);
     try {
       const supabase = createClient();
       const newActive = !isActive;
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("properties")
         .update({ active: newActive })
-        .eq("id", property.id);
+        .eq("id", property.id)
+        .select();
 
       if (error) {
         console.error("Supabase error:", error);
@@ -67,8 +73,9 @@ export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyR
         return;
       }
 
+      console.log("Update result:", data);
       setIsActive(newActive);
-      onToggle(isActive); // Pass the previous state
+      onToggle(isActive);
     } catch (error) {
       console.error("Error:", error);
       alert("Error toggling property");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertyRow } from "./PropertyRow";
 
 interface Property {
@@ -26,7 +26,14 @@ interface PropertyListProps {
 }
 
 export function PropertyList({ properties, mainImages, initialTotal, initialActive, initialRent }: PropertyListProps) {
-  const [activeCount, setActiveCount] = useState(initialActive);
+  const [pendingDelta, setPendingDelta] = useState(0);
+
+  // Reset delta when page changes (initialActive changes from server)
+  useEffect(() => {
+    setPendingDelta(0);
+  }, [initialActive]);
+
+  const activeCount = initialActive + pendingDelta;
 
   const stats = [
     { label: "Total Listings", value: initialTotal, icon: "apartment", color: "bg-mosque/10 text-mosque" },
@@ -35,7 +42,7 @@ export function PropertyList({ properties, mainImages, initialTotal, initialActi
   ];
 
   const handleToggle = (wasActive: boolean) => {
-    setActiveCount(prev => wasActive ? prev - 1 : prev + 1);
+    setPendingDelta(prev => wasActive ? prev - 1 : prev + 1);
   };
 
   return (
