@@ -143,7 +143,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
               />
               {!isActive && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                  <span className="material-icons text-white/60 text-2xl">visibility_off</span>
+                  <span className="material-icons text-white text-2xl">visibility_off</span>
                 </div>
               )}
             </>
