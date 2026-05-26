@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr';
 
 const intlMiddleware = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Let Server Actions (POST) pass through without any processing
   if (request.method === 'POST') {
     return NextResponse.next();
