@@ -139,11 +139,11 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
               <img 
                 src={mainImage} 
                 alt={property.title}
-                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive ? 'grayscale opacity-60' : ''}`}
+                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive ? 'grayscale opacity-50' : ''}`}
               />
               {!isActive && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <span className="material-icons text-white/80 text-2xl">visibility_off</span>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <span className="material-icons text-white/60 text-2xl">visibility_off</span>
                 </div>
               )}
             </>
