@@ -65,6 +65,11 @@ export default async function AdminPropertiesPage({
     .select('id')
     .eq('type', 'RENT');
 
+  const { data: saleProps } = await publicClient
+    .from('properties')
+    .select('id')
+    .eq('type', 'SALE');
+
   const { data: soldProps } = await publicClient
     .from('properties')
     .select('id')
@@ -77,6 +82,7 @@ export default async function AdminPropertiesPage({
 
   const totalListings = allProperties?.length || 0;
   const activeProperties = activeProps?.length || 0;
+  const forSaleCount = saleProps?.length || 0;
   const forRentCount = rentProps?.length || 0;
   const soldCount = soldProps?.length || 0;
   const rentedCount = rentedProps?.length || 0;
@@ -108,6 +114,7 @@ export default async function AdminPropertiesPage({
         mainImages={imagesMap}
         totalListings={totalListings}
         activeProperties={activeProperties}
+        forSaleCount={forSaleCount}
         forRentCount={forRentCount}
         soldCount={soldCount}
         rentedCount={rentedCount}

@@ -41,6 +41,12 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${active ? 'bg-mosque' : type === 'SOLD' ? 'bg-gray-500' : type === 'RENTED' ? 'bg-blue-300' : 'bg-gray-400'}`}></span>
         {status.text}
       </span>
+      {type === "SALE" && active && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+          For Sale
+        </span>
+      )}
       {type === "RENT" && active && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>

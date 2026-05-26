@@ -22,6 +22,7 @@ interface PropertyListProps {
   mainImages: Record<string, string>;
   totalListings: number;
   activeProperties: number;
+  forSaleCount: number;
   forRentCount: number;
   soldCount: number;
   rentedCount: number;
@@ -33,20 +34,21 @@ interface PropertyListProps {
 }
 
 export function PropertyList(props: PropertyListProps) {
-  const { properties, mainImages, totalListings, activeProperties, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages } = props;
+  const { properties, mainImages, totalListings, activeProperties, forSaleCount, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages } = props;
 
   const stats = [
     { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
     { label: "Active Properties", value: activeProperties, icon: "check_circle", color: "bg-hint-of-green text-mosque" },
-    { label: "For Rent", value: forRentCount, icon: "home", color: "bg-blue-100 text-blue-600" },
+    { label: "For Sale", value: forSaleCount, icon: "sell", color: "bg-green-100 text-green-700" },
     { label: "Sold", value: soldCount, icon: "domain_disabled", color: "bg-gray-200 text-gray-600" },
+    { label: "For Rent", value: forRentCount, icon: "home", color: "bg-blue-100 text-blue-600" },
     { label: "Rented", value: rentedCount, icon: "handshake", color: "bg-blue-900/20 text-blue-900" },
   ];
 
   return (
     <>
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-white p-5 rounded-lg border border-gray-200 flex items-center justify-between">
             <div>
