@@ -4,6 +4,7 @@ import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { MortgageCalculator } from "@/components/property/MortgageCalculator";
 import PropertyMap from "@/components/property/PropertyMap";
+import { BackButton } from "@/components/ui/BackButton";
 import Image from "next/image";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -86,6 +87,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <BackButton />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
