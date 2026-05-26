@@ -65,9 +65,21 @@ export default async function AdminPropertiesPage({
     .select('id')
     .eq('type', 'RENT');
 
+  const { data: soldProps } = await publicClient
+    .from('properties')
+    .select('id')
+    .eq('type', 'SOLD');
+
+  const { data: rentedProps } = await publicClient
+    .from('properties')
+    .select('id')
+    .eq('type', 'RENTED');
+
   const totalListings = allProperties?.length || 0;
   const activeProperties = activeProps?.length || 0;
-  const pendingSale = rentProps?.length || 0;
+  const forRentCount = rentProps?.length || 0;
+  const soldCount = soldProps?.length || 0;
+  const rentedCount = rentedProps?.length || 0;
 
   const showingFrom = from + 1;
   const showingTo = Math.min(to + 1, totalCount || 0);
@@ -96,7 +108,9 @@ export default async function AdminPropertiesPage({
         mainImages={imagesMap}
         totalListings={totalListings}
         activeProperties={activeProperties}
-        rentProperties={pendingSale}
+        forRentCount={forRentCount}
+        soldCount={soldCount}
+        rentedCount={rentedCount}
         currentPage={currentPage}
         totalPages={totalPages}
         showingFrom={showingFrom}
