@@ -23,36 +23,46 @@ interface PropertyRowProps {
   isLast: boolean;
 }
 
-function getStatusLabel(active: boolean, type: string) {
-  if (!active) {
-    if (type === "SOLD") return { text: "Sold", color: "bg-gray-200 text-gray-600" };
-    if (type === "RENTED") return { text: "Rented", color: "bg-blue-900 text-blue-100" };
-    return { text: "Inactive", color: "bg-gray-100 text-gray-500" };
-  }
-  return { text: "Active", color: "bg-hint-of-green text-mosque" };
-}
-
 function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured: boolean; type: string }) {
-  const status = getStatusLabel(active, type);
+  // Determine the primary badge text, color, and dot
+  let badgeText: string;
+  let badgeColor: string;
+  let dotColor: string;
+
+  if (!active) {
+    if (type === "SOLD") {
+      badgeText = "Sold";
+      badgeColor = "bg-gray-200 text-gray-600";
+      dotColor = "bg-gray-500";
+    } else if (type === "RENTED") {
+      badgeText = "Rented";
+      badgeColor = "bg-blue-900 text-blue-100";
+      dotColor = "bg-blue-300";
+    } else {
+      badgeText = "Inactive";
+      badgeColor = "bg-gray-100 text-gray-500";
+      dotColor = "bg-gray-400";
+    }
+  } else if (type === "SALE") {
+    badgeText = "For Sale";
+    badgeColor = "bg-green-100 text-green-700";
+    dotColor = "bg-green-500";
+  } else if (type === "RENT") {
+    badgeText = "For Rent";
+    badgeColor = "bg-blue-100 text-blue-700";
+    dotColor = "bg-blue-500";
+  } else {
+    badgeText = "Active";
+    badgeColor = "bg-hint-of-green text-mosque";
+    dotColor = "bg-mosque";
+  }
 
   return (
     <div className="flex flex-col gap-1">
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
-        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${active ? 'bg-mosque' : type === 'SOLD' ? 'bg-gray-500' : type === 'RENTED' ? 'bg-blue-300' : 'bg-gray-400'}`}></span>
-        {status.text}
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
+        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotColor}`}></span>
+        {badgeText}
       </span>
-      {type === "SALE" && active && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-          For Sale
-        </span>
-      )}
-      {type === "RENT" && active && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
-          For Rent
-        </span>
-      )}
       {isFeatured && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
