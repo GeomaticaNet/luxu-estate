@@ -23,24 +23,28 @@ interface PropertyRowProps {
   isLast: boolean;
 }
 
+function getStatusLabel(active: boolean, type: string) {
+  if (!active) {
+    if (type === "SOLD") return { text: "Sold", color: "bg-gray-200 text-gray-600" };
+    if (type === "RENTED") return { text: "Rented", color: "bg-blue-900 text-blue-100" };
+    return { text: "Inactive", color: "bg-gray-100 text-gray-500" };
+  }
+  return { text: "Active", color: "bg-hint-of-green text-mosque" };
+}
+
 function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured: boolean; type: string }) {
+  const status = getStatusLabel(active, type);
+
   return (
     <div className="flex flex-col gap-1">
-      {active ? (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-hint-of-green text-mosque">
-          <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
-          Active
-        </span>
-      ) : (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
-          Inactive
-        </span>
-      )}
-      {type === 'RENT' && (
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${active ? 'bg-mosque' : type === 'SOLD' ? 'bg-gray-500' : type === 'RENTED' ? 'bg-blue-300' : 'bg-gray-400'}`}></span>
+        {status.text}
+      </span>
+      {type === "RENT" && active && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
-          Rent
+          For Rent
         </span>
       )}
       {isFeatured && (
@@ -55,28 +59,30 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
 
 export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
   const [isActive, setIsActive] = useState(property.active);
+  const [propertyType, setPropertyType] = useState(property.type);
   const [isLoading, setIsLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
-  const handleToggle = async () => {
+  const handleAction = async (action: string) => {
     setIsLoading(true);
+    setMenuOpen(false);
+
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         alert("Not logged in");
         return;
       }
 
-      const newActive = !isActive;
-
-      const res = await fetch("/api/toggle", {
+      const res = await fetch("/api/property/action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: property.id,
-          active: newActive,
+          action,
         }),
       });
 
@@ -86,7 +92,23 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
         return;
       }
 
-      setIsActive(newActive);
+      // Update local state for immediate feedback
+      if (action === "toggle") {
+        setIsActive(!isActive);
+      } else if (action === "forSale") {
+        setPropertyType("SALE");
+        setIsActive(true);
+      } else if (action === "forRent") {
+        setPropertyType("RENT");
+        setIsActive(true);
+      } else if (action === "sold") {
+        setPropertyType("SOLD");
+        setIsActive(false);
+      } else if (action === "rented") {
+        setPropertyType("RENTED");
+        setIsActive(false);
+      }
+
       router.refresh();
     } catch (err) {
       alert("Error: " + String(err));
@@ -94,6 +116,14 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
       setIsLoading(false);
     }
   };
+
+  const menuItems = [
+    { action: "toggle", label: isActive ? "Deactivate" : "Activate", icon: isActive ? "visibility_off" : "visibility" },
+    { action: "forSale", label: "For Sale", icon: "home" },
+    { action: "forRent", label: "For Rent", icon: "key" },
+    { action: "sold", label: "Sold", icon: "check_circle" },
+    { action: "rented", label: "Rented", icon: "handshake" },
+  ];
 
   return (
     <div 
@@ -150,28 +180,44 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={isActive} isFeatured={property.is_featured} type={property.type} />
+        <StatusBadge active={isActive} isFeatured={property.is_featured} type={propertyType} />
       </div>
 
-      {/* Actions */}
-      <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
-        <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all cursor-pointer" title="Edit Property">
-          <span className="material-icons text-xl">edit</span>
-        </button>
-        <button 
-          onClick={handleToggle}
-          disabled={isLoading}
-          className={`p-2 rounded-lg transition-all cursor-pointer ${
-            isActive 
-              ? 'text-mosque hover:bg-hint-of-green/30' 
-              : 'text-gray-400 hover:text-nordic-dark hover:bg-gray-100'
-          } ${isLoading ? 'opacity-50' : ''}`}
-          title={isActive ? 'Deactivate Property' : 'Activate Property'}
-        >
-          <span className="material-icons text-xl">
-            {isActive ? 'visibility' : 'visibility_off'}
-          </span>
-        </button>
+      {/* Actions - Menu */}
+      <div className="col-span-12 md:col-span-2 flex items-center justify-end">
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            disabled={isLoading}
+            className={`p-2 rounded-lg transition-all cursor-pointer text-gray-400 hover:text-nordic-dark hover:bg-gray-100 ${isLoading ? 'opacity-50' : ''}`}
+            title="Actions"
+          >
+            <span className="material-icons text-xl">more_vert</span>
+          </button>
+
+          {menuOpen && (
+            <>
+              {/* Backdrop */}
+              <div 
+                className="fixed inset-0 z-40"
+                onClick={() => setMenuOpen(false)}
+              />
+              {/* Menu */}
+              <div className="absolute right-0 bottom-full mb-1 z-50 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.action}
+                    onClick={() => handleAction(item.action)}
+                    className="w-full text-left px-4 py-2 text-sm text-nordic-dark hover:bg-background-light transition-colors flex items-center gap-2"
+                  >
+                    <span className="material-icons text-base text-gray-400">{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
