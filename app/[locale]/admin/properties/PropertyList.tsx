@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { PropertyRow } from "./PropertyRow";
 
 interface Property {
@@ -20,30 +19,24 @@ interface Property {
 interface PropertyListProps {
   properties: Property[];
   mainImages: Record<string, string>;
-  initialTotal: number;
-  initialActive: number;
-  initialRent: number;
+  totalListings: number;
+  activeProperties: number;
+  rentProperties: number;
+  showingFrom: number;
+  showingTo: number;
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
 }
 
-export function PropertyList({ properties, mainImages, initialTotal, initialActive, initialRent }: PropertyListProps) {
-  const [pendingDelta, setPendingDelta] = useState(0);
-
-  // Reset delta when page changes (initialActive changes from server)
-  useEffect(() => {
-    setPendingDelta(0);
-  }, [initialActive]);
-
-  const activeCount = initialActive + pendingDelta;
+export function PropertyList(props: PropertyListProps) {
+  const { properties, mainImages, totalListings, activeProperties, rentProperties, showingFrom, showingTo, totalCount, currentPage, totalPages } = props;
 
   const stats = [
-    { label: "Total Listings", value: initialTotal, icon: "apartment", color: "bg-mosque/10 text-mosque" },
-    { label: "Active Properties", value: activeCount, icon: "check_circle", color: "bg-hint-of-green text-mosque" },
-    { label: "Pending Sale", value: initialRent, icon: "pending", color: "bg-orange-100 text-orange-600" },
+    { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
+    { label: "Active Properties", value: activeProperties, icon: "check_circle", color: "bg-hint-of-green text-mosque" },
+    { label: "Pending Sale", value: rentProperties, icon: "pending", color: "bg-orange-100 text-orange-600" },
   ];
-
-  const handleToggle = (wasActive: boolean) => {
-    setPendingDelta(prev => wasActive ? prev - 1 : prev + 1);
-  };
 
   return (
     <>
@@ -60,6 +53,27 @@ export function PropertyList({ properties, mainImages, initialTotal, initialActi
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Compact Pagination - Top */}
+      <div className="flex items-center justify-between mb-3 px-2">
+        <div className="text-xs text-gray-400">
+          Showing <span className="font-medium text-gray-600">{showingFrom}</span> to <span className="font-medium text-gray-600">{showingTo}</span> of <span className="font-medium text-gray-600">{totalCount || 0}</span>
+        </div>
+        <div className="flex gap-1">
+          <a
+            href={currentPage > 1 ? `?page=${currentPage - 1}` : undefined}
+            className={`px-2 py-1 text-xs border border-gray-200 rounded text-gray-500 hover:bg-white hover:text-nordic-dark transition-colors ${currentPage <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
+          >
+            <span className="material-icons text-sm">chevron_left</span>
+          </a>
+          <a
+            href={currentPage < totalPages ? `?page=${currentPage + 1}` : undefined}
+            className={`px-2 py-1 text-xs border border-gray-200 rounded text-gray-500 hover:bg-white hover:text-nordic-dark transition-colors ${currentPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}`}
+          >
+            <span className="material-icons text-sm">chevron_right</span>
+          </a>
+        </div>
       </div>
 
       {/* Property List Container */}
@@ -79,7 +93,7 @@ export function PropertyList({ properties, mainImages, initialTotal, initialActi
             property={property}
             mainImage={mainImages[property.id] || null}
             isLast={index === properties.length - 1}
-            onToggle={handleToggle}
+            currentPage={currentPage}
           />
         ))}
       </div>

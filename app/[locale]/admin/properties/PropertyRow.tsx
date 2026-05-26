@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { togglePropertyActive } from "./actions";
 
 interface PropertyRowProps {
   property: {
@@ -19,7 +18,7 @@ interface PropertyRowProps {
   };
   mainImage: string | null;
   isLast: boolean;
-  onToggle: (wasActive: boolean) => void;
+  currentPage: number;
 }
 
 function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: boolean }) {
@@ -46,44 +45,7 @@ function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: bool
   );
 }
 
-export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyRowProps) {
-  const [isActive, setIsActive] = useState(property.active);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Sync with server data when navigating between pages
-  useEffect(() => {
-    setIsActive(property.active);
-  }, [property.active]);
-
-  const handleToggle = async () => {
-    setIsLoading(true);
-    try {
-      const supabase = createClient();
-      const newActive = !isActive;
-
-      const { data, error } = await supabase
-        .from("properties")
-        .update({ active: newActive })
-        .eq("id", property.id)
-        .select();
-
-      if (error) {
-        console.error("Supabase error:", error);
-        alert("Error: " + error.message);
-        return;
-      }
-
-      console.log("Update result:", data);
-      setIsActive(newActive);
-      onToggle(isActive);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Error toggling property");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+export function PropertyRow({ property, mainImage, isLast, currentPage }: PropertyRowProps) {
   return (
     <div 
       className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 hover:bg-background-light transition-colors items-center ${
@@ -98,9 +60,9 @@ export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyR
               <img 
                 src={mainImage} 
                 alt={property.title}
-                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive ? 'grayscale opacity-60' : ''}`}
+                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!property.active ? 'grayscale opacity-60' : ''}`}
               />
-              {!isActive && (
+              {!property.active && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                   <span className="material-icons text-white/80 text-2xl">visibility_off</span>
                 </div>
@@ -139,7 +101,7 @@ export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyR
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={isActive} isFeatured={property.is_featured} />
+        <StatusBadge active={property.active} isFeatured={property.is_featured} />
       </div>
 
       {/* Actions */}
@@ -147,20 +109,20 @@ export function PropertyRow({ property, mainImage, isLast, onToggle }: PropertyR
         <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all" title="Edit Property">
           <span className="material-icons text-xl">edit</span>
         </button>
-        <button 
-          onClick={handleToggle}
-          disabled={isLoading}
-          className={`p-2 rounded-lg transition-all ${
-            isActive 
-              ? 'text-mosque hover:bg-hint-of-green/30' 
-              : 'text-gray-400 hover:text-nordic-dark hover:bg-gray-100'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          title={isActive ? 'Deactivate Property' : 'Activate Property'}
-        >
-          <span className="material-icons text-xl">
-            {isActive ? 'visibility' : 'visibility_off'}
-          </span>
-        </button>
+        <form action={togglePropertyActive}>
+          <input type="hidden" name="propertyId" value={property.id} />
+          <input type="hidden" name="currentActive" value={property.active ? "true" : "false"} />
+          <input type="hidden" name="currentPage" value={currentPage} />
+          <button 
+            type="submit"
+            className={`p-2 rounded-lg transition-all ${property.active ? 'text-mosque hover:bg-hint-of-green/30' : 'text-gray-400 hover:text-nordic-dark hover:bg-gray-100'}`}
+            title={property.active ? 'Deactivate Property' : 'Activate Property'}
+          >
+            <span className="material-icons text-xl">
+              {property.active ? 'visibility' : 'visibility_off'}
+            </span>
+          </button>
+        </form>
       </div>
     </div>
   );

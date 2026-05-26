@@ -29,6 +29,7 @@ export default async function AdminPropertiesPage({
     .from('properties')
     .select('*')
     .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
     .range(from, to);
 
   if (error) {
@@ -93,9 +94,14 @@ export default async function AdminPropertiesPage({
       <PropertyList 
         properties={properties || []}
         mainImages={imagesMap}
-        initialTotal={totalListings}
-        initialActive={activeProperties}
-        initialRent={pendingSale}
+        totalListings={totalListings}
+        activeProperties={activeProperties}
+        rentProperties={pendingSale}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        showingFrom={showingFrom}
+        showingTo={showingTo}
+        totalCount={totalCount || 0}
       />
 
       {/* Pagination */}

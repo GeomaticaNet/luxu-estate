@@ -6,9 +6,9 @@ import { createServerClient } from '@supabase/ssr';
 const intlMiddleware = createMiddleware(routing);
 
 export default async function middleware(request: NextRequest) {
-  // Allow POST requests (Server Actions) to pass through without auth checks
+  // Let Server Actions (POST) pass through without any processing
   if (request.method === 'POST') {
-    return intlMiddleware(request);
+    return NextResponse.next();
   }
 
   const response = intlMiddleware(request);
