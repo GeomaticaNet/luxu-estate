@@ -121,6 +121,7 @@ export async function getProperties(
   let queryBuilder = supabase
     .from("properties")
     .select("*, property_images(*)", { count: "exact" })
+    .eq("active", true)
     .eq("is_featured", false);
 
   if (query) {
@@ -179,6 +180,7 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
   const { data, error } = await supabase
     .from("properties")
     .select("*, property_images(*)")
+    .eq("active", true)
     .eq("is_featured", true)
     .order("created_at", { ascending: true });
 
@@ -200,6 +202,7 @@ export async function getPropertyBySlug(slug: string) {
   const { data: propertyData, error: propertyError } = await supabase
     .from("properties")
     .select("*, property_images(*)")
+    .eq("active", true)
     .eq("slug", slug)
     .single();
 
