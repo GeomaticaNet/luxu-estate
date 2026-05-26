@@ -14,6 +14,7 @@ interface Property {
   area: number;
   active: boolean;
   is_featured: boolean;
+  type: string;
 }
 
 interface PropertyListProps {
@@ -35,7 +36,7 @@ export function PropertyList(props: PropertyListProps) {
   const stats = [
     { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
     { label: "Active Properties", value: activeProperties, icon: "check_circle", color: "bg-hint-of-green text-mosque" },
-    { label: "Pending Sale", value: rentProperties, icon: "pending", color: "bg-orange-100 text-orange-600" },
+    { label: "For Rent", value: rentProperties, icon: "home", color: "bg-blue-100 text-blue-600" },
   ];
 
   return (

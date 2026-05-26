@@ -17,12 +17,13 @@ interface PropertyRowProps {
     area: number;
     active: boolean;
     is_featured: boolean;
+    type: string;
   };
   mainImage: string | null;
   isLast: boolean;
 }
 
-function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: boolean }) {
+function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured: boolean; type: string }) {
   return (
     <div className="flex flex-col gap-1">
       {active ? (
@@ -34,6 +35,12 @@ function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: bool
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
           <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
           Inactive
+        </span>
+      )}
+      {type === 'RENT' && (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
+          Rent
         </span>
       )}
       {isFeatured && (
@@ -143,7 +150,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={isActive} isFeatured={property.is_featured} />
+        <StatusBadge active={isActive} isFeatured={property.is_featured} type={property.type} />
       </div>
 
       {/* Actions */}
