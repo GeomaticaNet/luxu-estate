@@ -203,14 +203,14 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
                 onClick={() => setMenuOpen(false)}
               />
               {/* Menu */}
-              <div className="absolute right-0 bottom-full mb-1 z-50 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+              <div className="absolute right-0 top-full mt-1 z-[60] w-40 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
                 {menuItems.map((item) => (
                   <button
                     key={item.action}
                     onClick={() => handleAction(item.action)}
-                    className="w-full text-left px-4 py-2 text-sm text-nordic-dark hover:bg-background-light transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-1.5 text-xs text-nordic-dark hover:bg-background-light transition-colors flex items-center gap-2"
                   >
-                    <span className="material-icons text-base text-gray-400">{item.icon}</span>
+                    <span className="material-icons text-sm text-gray-400">{item.icon}</span>
                     {item.label}
                   </button>
                 ))}
