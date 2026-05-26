@@ -13,8 +13,29 @@ interface Props {
 
 const BLUR_PLACEHOLDER = "data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v+AEAA=";
 
+function getBadgeStyle(type: string) {
+  switch (type) {
+    case 'SOLD': return 'bg-gray-500/90';
+    case 'RENTED': return 'bg-blue-900/90';
+    case 'SALE': return 'bg-nordic-dark/90';
+    case 'RENT': return 'bg-mosque/90';
+    default: return 'bg-nordic-dark/90';
+  }
+}
+
+function getBadgeText(t: any, type: string) {
+  switch (type) {
+    case 'SOLD': return 'Sold';
+    case 'RENTED': return 'Rented';
+    case 'SALE': return t("for_sale");
+    case 'RENT': return t("for_rent");
+    default: return type;
+  }
+}
+
 export const PropertyCard = ({ property, className = "" }: Props) => {
   const t = useTranslations("PropertyCard");
+  const isInactive = !property.active;
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
       <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">
@@ -24,7 +45,7 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             alt={property.imageAlt} 
-            className="object-cover transition-transform duration-700 group-hover:scale-110" 
+            className={`object-cover transition-transform duration-700 group-hover:scale-110 ${isInactive ? 'grayscale opacity-70' : ''}`} 
             src={property.imageUrl}
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
@@ -33,8 +54,8 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
             slug={property.slug}
             className="absolute top-3 right-3 p-2 rounded-full"
           />
-          <div className={`absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${property.type === 'SALE' ? 'bg-nordic-dark/90' : 'bg-mosque/90'}`}>
-            {property.type === 'SALE' ? t("for_sale") : t("for_rent")}
+          <div className={`absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${getBadgeStyle(property.type)}`}>
+            {getBadgeText(t, property.type)}
           </div>
         </div>
         <div className="p-4 flex flex-col flex-grow">

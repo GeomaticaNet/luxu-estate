@@ -47,6 +47,10 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
     sort_order: 0,
   };
 
+  const isSold = property.type === "SOLD";
+  const isRented = property.type === "RENTED";
+  const isUnavailable = isSold || isRented;
+
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -86,6 +90,22 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      
+      {/* Sold/Rented Banner */}
+      {isUnavailable && (
+        <div className={`mb-6 p-4 rounded-xl text-center ${isSold ? 'bg-gray-200 text-gray-700' : 'bg-blue-100 text-blue-800'}`}>
+          <span className="material-icons text-2xl mb-1 block">
+            {isSold ? 'domain_disabled' : 'handshake'}
+          </span>
+          <p className="font-bold text-lg">
+            {isSold ? 'This property has been sold' : 'This property has been rented'}
+          </p>
+          <p className="text-sm mt-1 opacity-80">
+            Contact us to find similar properties
+          </p>
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
         
         {/* Left Column: Gallery */}
@@ -138,16 +158,33 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group">
-                  <span className="material-icons text-xl group-hover:scale-110 transition-transform">
-                    calendar_today
-                  </span>
-                  {t("schedule_visit")}
-                </button>
-                <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
-                  <span className="material-icons text-xl">mail_outline</span>
-                  {t("contact_agent")}
-                </button>
+                {isUnavailable ? (
+                  <>
+                    <button className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group">
+                      <span className="material-icons text-xl group-hover:scale-110 transition-transform">
+                        notifications
+                      </span>
+                      Notify me of similar properties
+                    </button>
+                    <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
+                      <span className="material-icons text-xl">mail_outline</span>
+                      {t("contact_agent")}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group">
+                      <span className="material-icons text-xl group-hover:scale-110 transition-transform">
+                        calendar_today
+                      </span>
+                      {t("schedule_visit")}
+                    </button>
+                    <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
+                      <span className="material-icons text-xl">mail_outline</span>
+                      {t("contact_agent")}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 

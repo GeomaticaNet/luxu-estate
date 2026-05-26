@@ -79,7 +79,8 @@ function rowToProperty(row: { [key: string]: unknown; property_images?: Property
     priceLabel: (row.price_label as string | null) ?? undefined,
     location: row.location as string,
     address: row.address as string,
-    type: row.type as "SALE" | "RENT",
+    type: row.type as "SALE" | "RENT" | "SOLD" | "RENTED",
+    active: row.active as boolean,
     bedrooms: Number(row.bedrooms),
     bathrooms: Number(row.bathrooms),
     garages: Number(row.garages),
@@ -152,6 +153,7 @@ export async function getProperties(
   }
 
   const { data, count, error } = await queryBuilder
+    .order("active", { ascending: false })
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -202,7 +204,6 @@ export async function getPropertyBySlug(slug: string) {
   const { data: propertyData, error: propertyError } = await supabase
     .from("properties")
     .select("*, property_images(*)")
-    .eq("active", true)
     .eq("slug", slug)
     .single();
 

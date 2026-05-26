@@ -6,7 +6,8 @@ export interface Property {
   priceLabel?: string;
   location: string;
   address: string;
-  type: "SALE" | "RENT";
+  type: "SALE" | "RENT" | "SOLD" | "RENTED";
+  active: boolean;
   bedrooms: number;
   bathrooms: number;
   garages?: number;
