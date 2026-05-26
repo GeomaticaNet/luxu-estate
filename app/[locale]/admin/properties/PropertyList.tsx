@@ -93,7 +93,6 @@ export function PropertyList(props: PropertyListProps) {
             property={property}
             mainImage={mainImages[property.id] || null}
             isLast={index === properties.length - 1}
-            currentPage={currentPage}
           />
         ))}
       </div>

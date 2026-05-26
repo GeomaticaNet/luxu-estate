@@ -1,6 +1,8 @@
 "use client";
 
-import { togglePropertyActive } from "./actions";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 interface PropertyRowProps {
   property: {
@@ -18,7 +20,6 @@ interface PropertyRowProps {
   };
   mainImage: string | null;
   isLast: boolean;
-  currentPage: number;
 }
 
 function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: boolean }) {
@@ -45,7 +46,48 @@ function StatusBadge({ active, isFeatured }: { active: boolean; isFeatured: bool
   );
 }
 
-export function PropertyRow({ property, mainImage, isLast, currentPage }: PropertyRowProps) {
+export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
+  const [isActive, setIsActive] = useState(property.active);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleToggle = async () => {
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert("Not logged in");
+        return;
+      }
+
+      const newActive = !isActive;
+
+      const res = await fetch("/api/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: property.id,
+          active: newActive,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        alert("Error: " + err);
+        return;
+      }
+
+      setIsActive(newActive);
+      router.refresh();
+    } catch (err) {
+      alert("Error: " + String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div 
       className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 hover:bg-background-light transition-colors items-center ${
@@ -60,9 +102,9 @@ export function PropertyRow({ property, mainImage, isLast, currentPage }: Proper
               <img 
                 src={mainImage} 
                 alt={property.title}
-                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!property.active ? 'grayscale opacity-60' : ''}`}
+                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive ? 'grayscale opacity-60' : ''}`}
               />
-              {!property.active && (
+              {!isActive && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                   <span className="material-icons text-white/80 text-2xl">visibility_off</span>
                 </div>
@@ -101,28 +143,28 @@ export function PropertyRow({ property, mainImage, isLast, currentPage }: Proper
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={property.active} isFeatured={property.is_featured} />
+        <StatusBadge active={isActive} isFeatured={property.is_featured} />
       </div>
 
       {/* Actions */}
       <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
-        <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all" title="Edit Property">
+        <button className="p-2 rounded-lg text-gray-400 hover:text-mosque hover:bg-hint-of-green/30 transition-all cursor-pointer" title="Edit Property">
           <span className="material-icons text-xl">edit</span>
         </button>
-        <form action={togglePropertyActive}>
-          <input type="hidden" name="propertyId" value={property.id} />
-          <input type="hidden" name="currentActive" value={property.active ? "true" : "false"} />
-          <input type="hidden" name="currentPage" value={currentPage} />
-          <button 
-            type="submit"
-            className={`p-2 rounded-lg transition-all ${property.active ? 'text-mosque hover:bg-hint-of-green/30' : 'text-gray-400 hover:text-nordic-dark hover:bg-gray-100'}`}
-            title={property.active ? 'Deactivate Property' : 'Activate Property'}
-          >
-            <span className="material-icons text-xl">
-              {property.active ? 'visibility' : 'visibility_off'}
-            </span>
-          </button>
-        </form>
+        <button 
+          onClick={handleToggle}
+          disabled={isLoading}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            isActive 
+              ? 'text-mosque hover:bg-hint-of-green/30' 
+              : 'text-gray-400 hover:text-nordic-dark hover:bg-gray-100'
+          } ${isLoading ? 'opacity-50' : ''}`}
+          title={isActive ? 'Deactivate Property' : 'Activate Property'}
+        >
+          <span className="material-icons text-xl">
+            {isActive ? 'visibility' : 'visibility_off'}
+          </span>
+        </button>
       </div>
     </div>
   );
