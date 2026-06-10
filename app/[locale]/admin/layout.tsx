@@ -35,8 +35,9 @@ export default async function AdminLayout({
       <AdminNavbar 
         userEmail={user.email || undefined}
         userAvatar={user.user_metadata?.avatar_url}
+        isAdmin={true}
       />
-      <div className="flex-grow overflow-y-auto pt-16" style={{ scrollbarGutter: 'stable' }}>
+      <div className="flex-grow overflow-y-auto pt-16">
         {children}
       </div>
     </div>

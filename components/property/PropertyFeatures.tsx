@@ -53,7 +53,7 @@ export const PropertyFeatures = ({ property }: Props) => {
         <h2 className="text-lg font-semibold mb-4 text-nordic">{t("about_this_home")}</h2>
         <div className="prose prose-slate max-w-none text-nordic/70 leading-relaxed whitespace-pre-line">
           <p className="mb-4">
-            {getTranslation(`descriptions.${property.title}`, property.description || t("no_description"))}
+            {property.description || t("no_description")}
           </p>
         </div>
       </div>

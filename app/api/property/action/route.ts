@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 
-type ActionType = "toggle" | "forSale" | "forRent" | "sold" | "rented";
+type ActionType = "toggle" | "forSale" | "forRent" | "sold" | "rented" | "toggleFeatured";
 
 const actionMap: Record<ActionType, { type: string; active: boolean }> = {
-  toggle: { type: "", active: true }, // special: toggle current active state
+  toggle: { type: "", active: true }, // special: toggle current active state only
   forSale: { type: "SALE", active: true },
   forRent: { type: "RENT", active: true },
-  sold: { type: "SOLD", active: false },
-  rented: { type: "RENTED", active: false },
+  sold: { type: "SOLD", active: true },
+  rented: { type: "RENTED", active: true },
+  toggleFeatured: { type: "", active: true }, // special: toggle is_featured
 };
 
 export async function POST(request: NextRequest) {
@@ -40,6 +41,26 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase
         .from("properties")
         .update({ active: !property.active })
+        .eq("id", propertyId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+    } else if (action === "toggleFeatured") {
+      // Get current state
+      const { data: property } = await supabase
+        .from("properties")
+        .select("is_featured")
+        .eq("id", propertyId)
+        .single();
+
+      if (!property) {
+        return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      }
+
+      const { error } = await supabase
+        .from("properties")
+        .update({ is_featured: !property.is_featured })
         .eq("id", propertyId);
 
       if (error) {

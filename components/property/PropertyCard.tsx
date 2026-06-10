@@ -35,7 +35,7 @@ function getBadgeText(t: any, type: string) {
 
 export const PropertyCard = ({ property, className = "" }: Props) => {
   const t = useTranslations("PropertyCard");
-  const isInactive = !property.active;
+  const isInactive = property.type === 'SOLD' || property.type === 'RENTED';
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
       <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">

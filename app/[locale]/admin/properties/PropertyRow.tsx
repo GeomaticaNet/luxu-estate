@@ -30,19 +30,9 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
   let dotColor: string;
 
   if (!active) {
-    if (type === "SOLD") {
-      badgeText = "Sold";
-      badgeColor = "bg-gray-200 text-gray-600";
-      dotColor = "bg-gray-500";
-    } else if (type === "RENTED") {
-      badgeText = "Rented";
-      badgeColor = "bg-blue-900 text-blue-100";
-      dotColor = "bg-blue-300";
-    } else {
-      badgeText = "Inactive";
-      badgeColor = "bg-gray-100 text-gray-500";
-      dotColor = "bg-gray-400";
-    }
+    badgeText = "Inactive";
+    badgeColor = "bg-gray-200 text-gray-600";
+    dotColor = "bg-gray-500";
   } else if (type === "SALE") {
     badgeText = "For Sale";
     badgeColor = "bg-green-100 text-green-700";
@@ -51,6 +41,14 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
     badgeText = "For Rent";
     badgeColor = "bg-blue-100 text-blue-700";
     dotColor = "bg-blue-500";
+  } else if (type === "SOLD") {
+    badgeText = "Sold";
+    badgeColor = "bg-gray-200 text-gray-600";
+    dotColor = "bg-gray-500";
+  } else if (type === "RENTED") {
+    badgeText = "Rented";
+    badgeColor = "bg-blue-900 text-blue-100";
+    dotColor = "bg-blue-300";
   } else {
     badgeText = "Active";
     badgeColor = "bg-hint-of-green text-mosque";
@@ -76,11 +74,17 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
 export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
   const [isActive, setIsActive] = useState(property.active);
   const [propertyType, setPropertyType] = useState(property.type);
+  const [isFeatured, setIsFeatured] = useState(property.is_featured);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
   const handleAction = async (action: string) => {
+    if (action === "edit") {
+      router.push(`/admin/properties/${property.id}`);
+      return;
+    }
+
     setIsLoading(true);
     setMenuOpen(false);
 
@@ -113,16 +117,14 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
         setIsActive(!isActive);
       } else if (action === "forSale") {
         setPropertyType("SALE");
-        setIsActive(true);
       } else if (action === "forRent") {
         setPropertyType("RENT");
-        setIsActive(true);
       } else if (action === "sold") {
         setPropertyType("SOLD");
-        setIsActive(false);
       } else if (action === "rented") {
         setPropertyType("RENTED");
-        setIsActive(false);
+      } else if (action === "toggleFeatured") {
+        setIsFeatured(!isFeatured);
       }
 
       router.refresh();
@@ -134,7 +136,9 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
   };
 
   const menuItems = [
+    { action: "edit", label: "Edit Property", icon: "edit" },
     { action: "toggle", label: isActive ? "Deactivate" : "Activate", icon: isActive ? "visibility_off" : "visibility" },
+    { action: "toggleFeatured", label: isFeatured ? "Unmark as Featured" : "Mark as Featured", icon: isFeatured ? "star_border" : "star" },
     { action: "forSale", label: "For Sale", icon: "home" },
     { action: "forRent", label: "For Rent", icon: "key" },
     { action: "sold", label: "Sold", icon: "check_circle" },
@@ -155,7 +159,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
               <img 
                 src={mainImage} 
                 alt={property.title}
-                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive ? 'grayscale opacity-50' : ''}`}
+                className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${!isActive || propertyType === 'SOLD' || propertyType === 'RENTED' ? 'grayscale opacity-50' : ''}`}
               />
               {!isActive && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/10">
@@ -166,7 +170,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           )}
         </div>
         <div>
-          <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer">
+          <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer" onClick={() => router.push(`/admin/properties/${property.id}`)}>
             {property.title}
           </h3>
           <p className="text-sm text-gray-500">{property.address}, {property.location}</p>
@@ -190,13 +194,13 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           ${Number(property.price).toLocaleString()}
         </div>
         {property.price_label && (
-          <div className="text-xs text-gray-400">Monthly: ${property.price_label}</div>
+          <div className="text-xs text-gray-400">{property.price_label}</div>
         )}
       </div>
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={isActive} isFeatured={property.is_featured} type={propertyType} />
+        <StatusBadge active={isActive} isFeatured={isFeatured} type={propertyType} />
       </div>
 
       {/* Actions - Menu */}

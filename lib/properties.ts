@@ -127,10 +127,8 @@ export async function getProperties(
     .select("*, property_images(*)", { count: "exact" })
     .eq("is_featured", false);
 
-  // Only show active properties when using search/filters
-  if (hasSearchFilters) {
-    queryBuilder = queryBuilder.eq("active", true);
-  }
+  // Only show active properties on public site
+  queryBuilder = queryBuilder.eq("active", true);
 
   if (query) {
     queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);

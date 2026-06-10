@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -8,12 +9,25 @@ import { useRouter } from "next/navigation";
 interface AdminNavbarProps {
   userEmail?: string;
   userAvatar?: string | null;
+  isAdmin?: boolean;
 }
 
-export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
+export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps) {
   const pathname = usePathname();
   const supabase = createClient();
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   
   const navItems = [
     { href: "/admin/properties", label: "Properties" },
@@ -57,7 +71,7 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
           </div>
         </div>
 
-        {/* Right: Search, Notifications, Avatar, Logout */}
+        {/* Right: Search, Notifications, Avatar */}
         <div className="flex items-center gap-5">
           <button className="text-nordic-dark/60 hover:text-mosque transition-colors">
             <span className="material-symbols-outlined text-xl">search</span>
@@ -67,24 +81,48 @@ export function AdminNavbar({ userEmail, userAvatar }: AdminNavbarProps) {
             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
           </button>
           
-          {/* Avatar */}
-          <div className="flex items-center gap-1">
-            <div className="h-8 w-8 rounded-full bg-nordic-dark/10 flex items-center justify-center overflow-hidden border border-nordic-dark/10">
-              {userAvatar ? (
-                <img src={userAvatar} alt="Profile" className="h-full w-full object-cover" />
-              ) : (
-                <span className="material-symbols-outlined text-nordic-dark/60 text-lg">person</span>
-              )}
-            </div>
-            
-            {/* Logout button - same style as UserMenu */}
+          {/* Avatar Dropdown */}
+          <div ref={ref} className="relative">
             <button
-              onClick={handleLogout}
-              className="flex items-center justify-center bg-white/10 p-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors ml-1"
-              title="Logout"
+              onClick={() => setIsOpen(!isOpen)}
+              className="flex items-center gap-1 bg-white/10 px-2 py-1.5 rounded-full border border-gray-200/20 hover:bg-white/20 transition-colors"
             >
-              <span className="material-icons text-sm text-nordic-dark/70">logout</span>
+              <div className="h-8 w-8 rounded-full bg-nordic-dark/10 flex items-center justify-center overflow-hidden border border-nordic-dark/10">
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="material-symbols-outlined text-nordic-dark/60 text-lg">person</span>
+                )}
+              </div>
+              <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
+                expand_more
+              </span>
             </button>
+
+            {isOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/85 backdrop-blur-lg shadow-xl border border-gray-200/30 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {isAdmin && (
+                  <Link
+                    href="/admin/properties"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm text-gray-400">admin_panel_settings</span>
+                    Administración
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm text-gray-400">logout</span>
+                  Salir
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

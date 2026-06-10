@@ -9,6 +9,7 @@ interface UserWithRole {
   full_name: string | null;
   avatar_url: string | null;
   role: string;
+  active: boolean;
   created_at: string;
 }
 
