@@ -5,7 +5,7 @@ import { getProperties, getFeaturedProperties } from "@/lib/properties";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ page?: string; q?: string; beds?: string; baths?: string; propertyType?: string; price_min?: string; price_max?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; beds?: string; baths?: string; propertyType?: string; price_min?: string; price_max?: string; type?: string }>;
 }
 
 export default async function Home(props: HomePageProps) {
@@ -19,9 +19,10 @@ export default async function Home(props: HomePageProps) {
 
   const priceMin = searchParams?.price_min ? parseInt(searchParams.price_min, 10) : undefined;
   const priceMax = searchParams?.price_max ? parseInt(searchParams.price_max, 10) : undefined;
+  const listingType = (searchParams?.type === "rent" ? "rent" : "buy") as "buy" | "rent";
 
   const [{ properties, currentPage, totalPages }, featuredProperties] =
-    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax), getFeaturedProperties()]);
+    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax, listingType), getFeaturedProperties()]);
 
   const isFiltering = query !== "" || beds !== undefined || baths !== undefined || propertyType !== undefined || priceMin !== undefined || priceMax !== undefined;
 
@@ -37,6 +38,7 @@ export default async function Home(props: HomePageProps) {
           currentPage={currentPage}
           totalPages={totalPages}
           searchParams={searchParams}
+          listingType={listingType}
         />
       </main>
     </>

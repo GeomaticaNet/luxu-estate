@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSelector } from "./LanguageSelector";
 import { createServerClient } from "@/lib/supabase/server";
 import { NavbarAuth } from "./NavbarAuth";
+import { NavLinks } from "./NavLinks";
 
 export const Navbar = async () => {
   const t = await getTranslations("Navigation");
@@ -39,9 +40,7 @@ export const Navbar = async () => {
 
           {/* Center: Navigation items */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link className="text-mosque font-medium text-sm border-b-2 border-mosque px-1 py-1" href="#">{t("buy")}</Link>
-            <Link className="text-nordic-dark/70 hover:text-nordic-dark font-medium text-sm hover:border-b-2 hover:border-nordic-dark/20 px-1 py-1 transition-all" href="#">{t("rent")}</Link>
-            <Link className="text-nordic-dark/70 hover:text-nordic-dark font-medium text-sm hover:border-b-2 hover:border-nordic-dark/20 px-1 py-1 transition-all" href="#">{t("sell")}</Link>
+            <NavLinks />
           </div>
 
           {/* Right: Controls */}
@@ -66,8 +65,8 @@ export const Navbar = async () => {
       </div>
       <div className="md:hidden border-t border-nordic-dark/5 bg-background-light overflow-hidden h-0 transition-all duration-300">
         <div className="px-4 py-2 space-y-1">
-          <Link className="block px-3 py-2 rounded-md text-base font-medium text-mosque bg-mosque/10" href="#">{t("buy")}</Link>
-          <Link className="block px-3 py-2 rounded-md text-base font-medium text-nordic-dark hover:bg-black/5" href="#">{t("rent")}</Link>
+          <Link className="block px-3 py-2 rounded-md text-base font-medium text-mosque bg-mosque/10" href="/">{t("buy")}</Link>
+          <Link className="block px-3 py-2 rounded-md text-base font-medium text-nordic-dark hover:bg-black/5" href="/?type=rent">{t("rent")}</Link>
           <Link className="block px-3 py-2 rounded-md text-base font-medium text-nordic-dark hover:bg-black/5" href="#">{t("sell")}</Link>
         </div>
       </div>

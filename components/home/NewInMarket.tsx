@@ -8,9 +8,10 @@ interface Props {
   currentPage: number;
   totalPages: number;
   searchParams?: Record<string, string | string[] | undefined>;
+  listingType: "buy" | "rent";
 }
 
-export const NewInMarket = ({ properties, currentPage, totalPages, searchParams }: Props) => {
+export const NewInMarket = ({ properties, currentPage, totalPages, searchParams, listingType }: Props) => {
   const t = useTranslations("NewInMarket");
   const hasPrev = currentPage > 1;
   const hasNext = currentPage < totalPages;
@@ -50,15 +51,20 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams 
           </p>
         </div>
         <div className="hidden md:flex bg-white p-1 rounded-lg">
-          <Link href="/" className="px-4 py-1.5 rounded-md text-sm font-medium bg-nordic-dark text-white shadow-sm">
-            {t("all")}
-          </Link>
-          <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nordic-muted hover:text-nordic-dark">
+          <Link href="/" className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            listingType === "buy"
+              ? "bg-nordic-dark text-white shadow-sm"
+              : "text-nordic-muted hover:text-nordic-dark"
+          }`}>
             {t("buy")}
-          </button>
-          <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nordic-muted hover:text-nordic-dark">
+          </Link>
+          <Link href="/?type=rent" className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+            listingType === "rent"
+              ? "bg-nordic-dark text-white shadow-sm"
+              : "text-nordic-muted hover:text-nordic-dark"
+          }`}>
             {t("rent")}
-          </button>
+          </Link>
         </div>
       </div>
 

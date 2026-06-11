@@ -133,7 +133,8 @@ export async function getProperties(
   baths?: number,
   propertyType?: string,
   priceMin?: number,
-  priceMax?: number
+  priceMax?: number,
+  listingType?: "buy" | "rent"
 ): Promise<GetPropertiesResult> {
   const supabase = createPublicClient();
   const currentPage = Math.max(1, page);
@@ -150,6 +151,13 @@ export async function getProperties(
 
   // Only show active properties on public site
   queryBuilder = queryBuilder.eq("active", true);
+
+  // Filter by listing type (buy = SALE + SOLD, rent = RENT + RENTED)
+  if (listingType === "buy") {
+    queryBuilder = queryBuilder.in("type", ["SALE", "SOLD"]);
+  } else if (listingType === "rent") {
+    queryBuilder = queryBuilder.in("type", ["RENT", "RENTED"]);
+  }
 
   if (query) {
     queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);
