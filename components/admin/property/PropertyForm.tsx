@@ -57,7 +57,7 @@ const PROPERTY_TYPES = [
   { value: "apartment", label: "Apartment" },
   { value: "house", label: "House" },
   { value: "villa", label: "Villa" },
-  { value: "commercial", label: "Commercial" },
+  { value: "penthouse", label: "Penthouse" },
 ];
 
 export default function PropertyForm({ initialData }: PropertyFormProps) {

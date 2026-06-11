@@ -15,6 +15,7 @@ interface Property {
   active: boolean;
   is_featured: boolean;
   type: string;
+  property_type: string;
 }
 
 interface PropertyListProps {
@@ -31,10 +32,18 @@ interface PropertyListProps {
   totalCount: number;
   currentPage: number;
   totalPages: number;
+  currentPropertyType?: string;
 }
 
 export function PropertyList(props: PropertyListProps) {
-  const { properties, mainImages, totalListings, activeProperties, forSaleCount, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages } = props;
+  const { properties, mainImages, totalListings, activeProperties, forSaleCount, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages, currentPropertyType } = props;
+
+  function pageUrl(page: number) {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    if (currentPropertyType) params.set("property_type", currentPropertyType);
+    return `?${params.toString()}`;
+  }
 
   const stats = [
     { label: "Total Listings", value: totalListings, icon: "apartment", color: "bg-mosque/10 text-mosque" },
@@ -69,13 +78,13 @@ export function PropertyList(props: PropertyListProps) {
         </div>
         <div className="flex gap-1">
           <a
-            href={currentPage > 1 ? `?page=${currentPage - 1}` : undefined}
+            href={currentPage > 1 ? pageUrl(currentPage - 1) : undefined}
             className={`px-2 py-1 text-xs border border-gray-200 rounded text-gray-500 hover:bg-white hover:text-nordic-dark transition-colors ${currentPage <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
           >
             <span className="material-icons text-sm">chevron_left</span>
           </a>
           <a
-            href={currentPage < totalPages ? `?page=${currentPage + 1}` : undefined}
+            href={currentPage < totalPages ? pageUrl(currentPage + 1) : undefined}
             className={`px-2 py-1 text-xs border border-gray-200 rounded text-gray-500 hover:bg-white hover:text-nordic-dark transition-colors ${currentPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}`}
           >
             <span className="material-icons text-sm">chevron_right</span>

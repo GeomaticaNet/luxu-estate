@@ -173,10 +173,7 @@ export async function getProperties(
   }
 
   if (propertyType) {
-    queryBuilder = queryBuilder.textSearch("title", `'${propertyType}'`, {
-      type: "plain",
-      config: "english",
-    });
+    queryBuilder = queryBuilder.eq("property_type", propertyType.toLowerCase());
   }
 
   if (priceMin !== undefined && priceMin > 0) {

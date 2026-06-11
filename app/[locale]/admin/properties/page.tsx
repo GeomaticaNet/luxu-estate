@@ -2,35 +2,48 @@ import { getTranslations } from "next-intl/server";
 import { createPublicClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
 import { PropertyList } from "./PropertyList";
+import { PropertyTypeFilter } from "./PropertyTypeFilter";
 
 const PAGE_SIZE = 10;
 
 export default async function AdminPropertiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; property_type?: string }>;
 }) {
   const t = await getTranslations("Admin");
   const publicClient = createPublicClient();
 
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, property_type: typeFilter } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam || "1", 10));
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   // Total count for pagination
-  const { count: totalCount } = await publicClient
+  const countQuery = publicClient
     .from('properties')
     .select('*', { count: 'exact', head: true });
 
+  if (typeFilter) {
+    countQuery.eq('property_type', typeFilter);
+  }
+
+  const { count: totalCount } = await countQuery;
+
   const totalPages = Math.ceil((totalCount || 0) / PAGE_SIZE);
 
-  const { data: properties, error } = await publicClient
+  const dataQuery = publicClient
     .from('properties')
     .select('*')
     .order('created_at', { ascending: false })
     .order('id', { ascending: true })
     .range(from, to);
+
+  if (typeFilter) {
+    dataQuery.eq('property_type', typeFilter);
+  }
+
+  const { data: properties, error } = await dataQuery;
 
   if (error) {
     console.error('Error loading properties:', error);
@@ -90,6 +103,13 @@ export default async function AdminPropertiesPage({
   const showingFrom = from + 1;
   const showingTo = Math.min(to + 1, totalCount || 0);
 
+  function pageUrl(page: number) {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    if (typeFilter) params.set("property_type", typeFilter);
+    return `/admin/properties?${params.toString()}`;
+  }
+
   return (
     <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header Section */}
@@ -99,9 +119,7 @@ export default async function AdminPropertiesPage({
           <p className="text-gray-500 mt-1 tracking-wide">Manage your portfolio and track performance.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="bg-white border border-gray-200 text-nordic-dark hover:bg-gray-50 px-4 py-2.5 rounded-[7px] text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-2">
-            <span className="material-icons text-base">filter_list</span> Filter
-          </button>
+          <PropertyTypeFilter />
           <Link href="/admin/properties/new" className="bg-mosque hover:bg-mosque/90 text-white px-5 py-2.5 rounded-[7px] text-sm font-medium shadow-md shadow-mosque/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2">
             <span className="material-icons text-base">add</span> Add New Property
           </Link>
@@ -123,6 +141,7 @@ export default async function AdminPropertiesPage({
         showingFrom={showingFrom}
         showingTo={showingTo}
         totalCount={totalCount || 0}
+        currentPropertyType={typeFilter || undefined}
       />
 
       {/* Pagination */}
@@ -132,13 +151,13 @@ export default async function AdminPropertiesPage({
         </div>
         <div className="flex gap-2">
           <Link
-            href={currentPage > 1 ? `/admin/properties?page=${currentPage - 1}` : '#'}
+            href={currentPage > 1 ? pageUrl(currentPage - 1) : '#'}
             className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage <= 1 ? 'opacity-50 pointer-events-none' : ''}`}
           >
             Previous
           </Link>
           <Link
-            href={currentPage < totalPages ? `/admin/properties?page=${currentPage + 1}` : '#'}
+            href={currentPage < totalPages ? pageUrl(currentPage + 1) : '#'}
             className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage >= totalPages ? 'opacity-50 pointer-events-none' : ''}`}
           >
             Next

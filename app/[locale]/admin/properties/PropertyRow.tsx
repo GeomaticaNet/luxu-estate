@@ -18,6 +18,7 @@ interface PropertyRowProps {
     active: boolean;
     is_featured: boolean;
     type: string;
+    property_type: string;
   };
   mainImage: string | null;
   isLast: boolean;
@@ -70,6 +71,13 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
     </div>
   );
 }
+
+const typeColors: Record<string, { bg: string; text: string }> = {
+  house: { bg: "bg-orange-100", text: "text-orange-700" },
+  apartment: { bg: "bg-blue-100", text: "text-blue-700" },
+  villa: { bg: "bg-purple-100", text: "text-purple-700" },
+  penthouse: { bg: "bg-rose-100", text: "text-rose-700" },
+};
 
 export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
   const [isActive, setIsActive] = useState(property.active);
@@ -170,8 +178,9 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           )}
         </div>
         <div>
-          <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer" onClick={() => router.push(`/admin/properties/${property.id}`)}>
+          <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer flex items-center gap-2" onClick={() => router.push(`/admin/properties/${property.id}`)}>
             {property.title}
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${typeColors[property.property_type]?.bg || "bg-gray-100"} ${typeColors[property.property_type]?.text || "text-gray-700"}`}>{property.property_type}</span>
           </h3>
           <p className="text-sm text-gray-500">{property.address}</p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
