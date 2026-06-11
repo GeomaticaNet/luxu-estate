@@ -76,7 +76,7 @@ const sections = [
 
 export function Footer() {
   return (
-    <footer className="bg-nordic-dark text-white/80">
+    <footer className="bg-mosque text-white/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
           <div>
@@ -90,7 +90,7 @@ export function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-mosque hover:text-white transition-colors text-white/70"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/70"
                 >
                   {s.svg}
                 </a>
