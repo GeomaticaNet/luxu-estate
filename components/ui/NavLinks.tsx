@@ -12,7 +12,7 @@ export function NavLinks() {
   return (
     <div className="flex items-center space-x-8">
       <Link
-        href="/"
+        href="/#new-in-market"
         className={`text-sm font-medium px-1 py-1 transition-all ${
           currentType === "buy"
             ? "text-mosque border-b-2 border-mosque"
@@ -22,7 +22,7 @@ export function NavLinks() {
         {t("buy")}
       </Link>
       <Link
-        href="/?type=rent"
+        href="/?type=rent#new-in-market"
         className={`text-sm font-medium px-1 py-1 transition-all ${
           currentType === "rent"
             ? "text-mosque border-b-2 border-mosque"

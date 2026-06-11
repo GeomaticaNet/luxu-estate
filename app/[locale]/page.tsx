@@ -1,6 +1,7 @@
 import { Hero } from "@/components/home/Hero";
 import { FeaturedCollections } from "@/components/home/FeaturedCollections";
 import { NewInMarket } from "@/components/home/NewInMarket";
+import { ScrollToHash } from "@/components/home/ScrollToHash";
 import { getProperties, getFeaturedProperties } from "@/lib/properties";
 
 interface HomePageProps {
@@ -19,7 +20,7 @@ export default async function Home(props: HomePageProps) {
 
   const priceMin = searchParams?.price_min ? parseInt(searchParams.price_min, 10) : undefined;
   const priceMax = searchParams?.price_max ? parseInt(searchParams.price_max, 10) : undefined;
-  const listingType = (searchParams?.type === "rent" ? "rent" : "buy") as "buy" | "rent";
+  const listingType = (searchParams?.type === "rent" ? "rent" : searchParams?.type === "all" ? "all" : "buy") as "buy" | "rent" | "all";
 
   const [{ properties, currentPage, totalPages }, featuredProperties] =
     await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax, listingType), getFeaturedProperties()]);
@@ -28,6 +29,7 @@ export default async function Home(props: HomePageProps) {
 
   return (
     <>
+      <ScrollToHash />
       <Hero />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {!isFiltering && (

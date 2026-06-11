@@ -8,7 +8,7 @@ interface Props {
   currentPage: number;
   totalPages: number;
   searchParams?: Record<string, string | string[] | undefined>;
-  listingType: "buy" | "rent";
+  listingType: "buy" | "rent" | "all";
 }
 
 export const NewInMarket = ({ properties, currentPage, totalPages, searchParams, listingType }: Props) => {
@@ -29,6 +29,20 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams,
     return `/?${params.toString()}`;
   };
 
+  const createTypeURL = (type: "buy" | "rent") => {
+    const params = new URLSearchParams();
+    if (searchParams) {
+      Object.entries(searchParams).forEach(([key, value]) => {
+        if (value !== undefined && key !== "page") {
+          params.set(key, String(value));
+        }
+      });
+    }
+    if (type === "rent") params.set("type", "rent");
+    else params.delete("type");
+    return `/?${params.toString()}`;
+  };
+
   // Build page numbers array (show up to 5 pages around current)
   const pageNumbers: number[] = [];
   const delta = 2;
@@ -41,7 +55,7 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams,
   }
 
   return (
-    <section>
+    <section id="new-in-market" className="scroll-mt-24">
       {/* Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
@@ -51,14 +65,14 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams,
           </p>
         </div>
         <div className="hidden md:flex bg-white p-1 rounded-lg">
-          <Link href="/" className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+          <Link href={createTypeURL("buy")} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
             listingType === "buy"
               ? "bg-nordic-dark text-white shadow-sm"
               : "text-nordic-muted hover:text-nordic-dark"
           }`}>
             {t("buy")}
           </Link>
-          <Link href="/?type=rent" className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+          <Link href={createTypeURL("rent")} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
             listingType === "rent"
               ? "bg-nordic-dark text-white shadow-sm"
               : "text-nordic-muted hover:text-nordic-dark"

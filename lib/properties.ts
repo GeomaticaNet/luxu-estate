@@ -134,7 +134,7 @@ export async function getProperties(
   propertyType?: string,
   priceMin?: number,
   priceMax?: number,
-  listingType?: "buy" | "rent"
+  listingType?: "buy" | "rent" | "all"
 ): Promise<GetPropertiesResult> {
   const supabase = createPublicClient();
   const currentPage = Math.max(1, page);
@@ -158,6 +158,7 @@ export async function getProperties(
   } else if (listingType === "rent") {
     queryBuilder = queryBuilder.in("type", ["RENT", "RENTED"]);
   }
+  // "all" = no type filter
 
   if (query) {
     queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);
