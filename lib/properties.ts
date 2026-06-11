@@ -64,6 +64,27 @@ function getFallbackImage(id: string) {
   return img;
 }
 
+/**
+ * Fetches properties by an array of slugs.
+ */
+export async function getPropertiesBySlugs(slugs: string[]): Promise<Property[]> {
+  if (!slugs.length) return [];
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*, property_images(*)")
+    .in("slug", slugs)
+    .eq("active", true);
+
+  if (error) {
+    console.error("[getPropertiesBySlugs] Supabase error:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map(rowToProperty);
+}
+
 /** Maps a raw Supabase row to the Property interface */
 function rowToProperty(row: { [key: string]: unknown; property_images?: PropertyImage[] }): Property {
   // Images handling (new schema)

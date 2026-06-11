@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { FavoritesProvider } from "@/hooks/FavoritesContext";
 import type { Metadata } from "next";
 import "../globals.css";
 
@@ -48,10 +49,12 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <GlobalPresence />
           <LocaleDebug />
-          <NavbarWrapper>
-            <Navbar />
-          </NavbarWrapper>
-          {children}
+          <FavoritesProvider>
+            <NavbarWrapper>
+              <Navbar />
+            </NavbarWrapper>
+            {children}
+          </FavoritesProvider>
         </NextIntlClientProvider>
       </body>
     </html>

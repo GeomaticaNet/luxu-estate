@@ -9,6 +9,17 @@ export const Navbar = async () => {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Check if user is admin
+  let isAdmin = false;
+  if (user) {
+    const { data: userRole } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+    isAdmin = userRole?.role === 'admin';
+  }
+
   const avatarUrl = user?.user_metadata?.avatar_url;
   const fullName = user?.user_metadata?.full_name;
 
@@ -49,6 +60,7 @@ export const Navbar = async () => {
               avatarUrl={avatarUrl}
               fullName={fullName}
               loginText={t("login") || "Login"}
+              isAdmin={isAdmin}
             />
           </div>
         </div>

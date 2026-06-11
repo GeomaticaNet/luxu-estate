@@ -11,9 +11,10 @@ interface NavbarAuthProps {
   avatarUrl?: string | null;
   fullName?: string | null;
   loginText: string;
+  isAdmin?: boolean;
 }
 
-export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText }: NavbarAuthProps) {
+export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText, isAdmin }: NavbarAuthProps) {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(initialUser);
 
@@ -36,7 +37,8 @@ export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText }: Navb
   return (
     <UserMenu 
       avatarUrl={user.user_metadata?.avatar_url ?? avatarUrl} 
-      fullName={user.user_metadata?.full_name ?? fullName} 
+      fullName={user.user_metadata?.full_name ?? fullName}
+      isAdmin={isAdmin}
     />
   );
 }

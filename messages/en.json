@@ -7,6 +7,9 @@
     "login": "Login",
     "logout": "Logout"
   },
+  "Common": {
+    "back": "Back"
+  },
   "LanguageSelector": {
     "es": "Spanish",
     "en": "English",
@@ -211,5 +214,11 @@
     "view": "View",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "Favorites": {
+    "title": "My Favorites",
+    "count": "{count} saved properties",
+    "empty_title": "No favorites yet",
+    "empty_description": "Browse properties and mark your favorites with the heart."
   }
 }

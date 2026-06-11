@@ -1,6 +1,6 @@
 "use client";
 
-import { useFavorites } from "@/hooks/useFavorites";
+import { useFavoritesContext } from "@/hooks/FavoritesContext";
 
 interface Props {
   slug: string;
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const FavoriteButton = ({ slug, className = "", iconSize = "text-lg" }: Props) => {
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
   const active = isFavorite(slug);
 
   return (
