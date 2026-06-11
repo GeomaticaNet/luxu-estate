@@ -10,7 +10,11 @@ const locales = [
   { code: "pt", label: "PT", flag: "🇧🇷" },
 ];
 
-export function LanguageSelector() {
+interface Props {
+  dropUp?: boolean;
+}
+
+export function LanguageSelector({ dropUp }: Props) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -51,7 +55,7 @@ export function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-24 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={`absolute right-0 ${dropUp ? "bottom-full mb-2" : "mt-2"} w-24 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in ${dropUp ? "slide-in-from-bottom-2" : "slide-in-from-top-2"} duration-200`}>
           {locales.map((l) => (
             <button
               key={l.code}

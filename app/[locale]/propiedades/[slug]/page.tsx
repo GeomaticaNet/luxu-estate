@@ -120,7 +120,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
           <div className="sticky top-28 space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-mosque/5">
               <div className="mb-4">
-                <h1 className="text-4xl font-display font-light text-nordic mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-light text-nordic mb-2">
                   {formattedPrice} {property.priceLabel && <span className="text-lg font-medium text-nordic/60">{property.priceLabel}</span>}
                 </h1>
                 <p className="text-nordic/60 font-medium flex items-center gap-1">

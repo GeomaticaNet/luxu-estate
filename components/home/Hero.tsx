@@ -96,51 +96,51 @@ const HeroContent = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent z-10" />
       </div>
       <div className="absolute bottom-0 left-0 right-0 h-32 md:h-48 bg-gradient-to-t from-background-light to-transparent z-10" />
-      <div className="relative z-20 max-w-3xl mx-auto text-center space-y-8">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight">
+      <div className="relative z-20 max-w-3xl mx-auto text-center space-y-5 md:space-y-8">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight px-4">
           {t("title_prefix")} <span className="relative inline-block">
             <span className="relative z-10 font-medium">{t("title_highlight")}</span>
             <span className="absolute bottom-2 left-0 w-full h-3 bg-mosque/40 -rotate-1 z-0"></span>
           </span>{t("title_suffix")}
         </h1>
-        <div className="relative group max-w-2xl mx-auto flex items-center">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-            <span className="material-icons text-white/60 text-2xl group-focus-within:text-mosque transition-colors">search</span>
+          <div className="relative group max-w-2xl mx-auto flex items-center">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+              <span className="material-icons text-white/60 text-2xl group-focus-within:text-mosque transition-colors">search</span>
+            </div>
+            <input
+              value={searchQuery}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="block w-full pl-12 pr-24 md:pr-44 py-3 md:py-4 rounded-xl border border-white/20 bg-white/15 text-white shadow-soft placeholder-white/50 focus:ring-2 focus:ring-mosque focus:bg-white/25 backdrop-blur-md transition-all text-base md:text-lg"
+              placeholder={t("search_placeholder")}
+              type="text"
+            />
+            <div className="absolute inset-y-2 right-2 flex items-center gap-1 md:gap-2">
+              {hasFilters && (
+                <div className="flex items-center bg-white/15 backdrop-blur-sm text-white pl-2 md:pl-3 pr-1 py-1 rounded-md text-xs md:text-sm font-medium">
+                  {t("filtered")}
+                  <button
+                    onClick={handleClearFilters}
+                    className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+                  >
+                    <span className="material-icons text-[14px]">close</span>
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={handleSearch}
+                className="px-4 md:px-6 h-full bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20 text-sm md:text-base whitespace-nowrap"
+              >
+                {t("search")}
+              </button>
+            </div>
           </div>
-          <input 
-            value={searchQuery}
-            onChange={(e) => handleQueryChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="block w-full pl-12 pr-44 py-4 rounded-xl border border-white/20 bg-white/15 text-white shadow-soft placeholder-white/50 focus:ring-2 focus:ring-mosque focus:bg-white/25 backdrop-blur-md transition-all text-lg" 
-            placeholder={t("search_placeholder")} 
-            type="text" 
-          />
-          <div className="absolute inset-y-2 right-2 flex items-center gap-2">
-            {hasFilters && (
-              <div className="flex items-center bg-white/15 backdrop-blur-sm text-white pl-3 pr-1 py-1 rounded-md text-sm font-medium">
-                {t("filtered")}
-                <button 
-                  onClick={handleClearFilters}
-                  className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
-                >
-                  <span className="material-icons text-[14px]">close</span>
-                </button>
-              </div>
-            )}
-            <button 
-              onClick={handleSearch}
-              className="px-6 h-full bg-mosque hover:bg-mosque/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-mosque/20"
-            >
-              {t("search")}
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center justify-center gap-3 overflow-x-auto hide-scroll py-2 px-4 -mx-4">
+        <div className="flex flex-wrap items-center justify-center gap-2 py-2 px-4">
           <button 
             onClick={() => {
               router.push("/");
             }}
-            className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-transform hover:-translate-y-0.5 ${
+            className={`whitespace-nowrap px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-transform hover:-translate-y-0.5 ${
               !currentPropertyType 
                 ? "bg-white text-nordic-dark shadow-lg" 
                 : "bg-white/15 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25"
@@ -152,7 +152,7 @@ const HeroContent = () => {
             <button 
               key={type}
               onClick={() => togglePropertyType(type)}
-              className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`whitespace-nowrap px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                 currentPropertyType === type
                   ? "bg-mosque text-white shadow-lg shadow-mosque/20"
                   : "bg-white/15 backdrop-blur-sm border border-white/20 text-white hover:bg-white/25"
@@ -161,12 +161,12 @@ const HeroContent = () => {
               {t(`types.${type}`)}
             </button>
           ))}
-          <div className="w-px h-6 bg-white/20 mx-2"></div>
+          <div className="w-px h-5 bg-white/20 mx-1"></div>
           <button 
             onClick={() => setIsFiltersOpen(true)}
-            className="whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full text-white text-sm font-medium bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 hover:ring-2 hover:ring-white/30 transition-all"
+            className="whitespace-nowrap flex items-center gap-1 px-3 sm:px-4 py-2 rounded-full text-white text-xs sm:text-sm font-medium bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 hover:ring-2 hover:ring-white/30 transition-all"
           >
-            <span className="material-icons text-base">tune</span> {t("filters")}
+            <span className="material-icons text-sm sm:text-base">tune</span> {t("filters")}
           </button>
         </div>
       </div>

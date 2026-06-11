@@ -4,13 +4,13 @@ import { LanguageSelector } from "./LanguageSelector";
 import { createServerClient } from "@/lib/supabase/server";
 import { NavbarAuth } from "./NavbarAuth";
 import { NavLinks } from "./NavLinks";
+import { MobileMenu } from "./MobileMenu";
 
 export const Navbar = async () => {
   const t = await getTranslations("Navigation");
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Check if user is admin
   let isAdmin = false;
   if (user) {
     const { data: userRole } = await supabase
@@ -27,9 +27,16 @@ export const Navbar = async () => {
   return (
     <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-black/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Left: Logo */}
-          <div className="flex-shrink-0">
+        <div className="flex justify-between items-center h-16 md:h-20">
+          {/* Left: Logo + Mobile hamburger */}
+          <div className="flex items-center gap-2">
+            <MobileMenu
+              buyLabel={t("buy")}
+              rentLabel={t("rent")}
+              sellLabel={t("sell")}
+              isLoggedIn={!!user}
+              loginLabel={t("login") || "Login"}
+            />
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
               <div className="w-8 h-8 rounded-lg bg-nordic-dark flex items-center justify-center">
                 <span className="material-icons text-white text-lg">apartment</span>
@@ -44,30 +51,20 @@ export const Navbar = async () => {
           </div>
 
           {/* Right: Controls */}
-          <div className="flex items-center space-x-6">
-            <LanguageSelector />
-            <button className="text-nordic-dark hover:text-mosque transition-colors">
-              <span className="material-icons">search</span>
-            </button>
-            <button className="text-nordic-dark hover:text-mosque transition-colors relative">
-              <span className="material-icons">notifications_none</span>
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light"></span>
-            </button>
-            <NavbarAuth 
-              initialUser={user}
-              avatarUrl={avatarUrl}
-              fullName={fullName}
-              loginText={t("login") || "Login"}
-              isAdmin={isAdmin}
-            />
+          <div className="flex items-center space-x-3 md:space-x-6">
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
+            <div className="hidden md:block">
+              <NavbarAuth
+                initialUser={user}
+                avatarUrl={avatarUrl}
+                fullName={fullName}
+                loginText={t("login") || "Login"}
+                isAdmin={isAdmin}
+              />
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="md:hidden border-t border-nordic-dark/5 bg-background-light overflow-hidden h-0 transition-all duration-300">
-        <div className="px-4 py-2 space-y-1">
-          <Link className="block px-3 py-2 rounded-md text-base font-medium text-mosque bg-mosque/10" href="/">{t("buy")}</Link>
-          <Link className="block px-3 py-2 rounded-md text-base font-medium text-nordic-dark hover:bg-black/5" href="/?type=rent">{t("rent")}</Link>
-          <Link className="block px-3 py-2 rounded-md text-base font-medium text-nordic-dark hover:bg-black/5" href="#">{t("sell")}</Link>
         </div>
       </div>
     </nav>

@@ -90,8 +90,8 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <header className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-30">
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900">{t("filters")}</h2>
+          <header className="px-4 sm:px-8 py-4 sm:py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-30">
+            <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-gray-900">{t("filters")}</h2>
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500"
@@ -101,7 +101,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
           </header>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto hide-scroll p-8 space-y-10">
+          <div className="flex-1 overflow-y-auto hide-scroll p-4 sm:p-8 space-y-6 sm:space-y-10">
             {/* Location */}
             <section>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
