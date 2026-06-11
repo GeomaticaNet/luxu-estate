@@ -51,7 +51,7 @@ export function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-24 rounded-xl bg-white/85 backdrop-blur-lg shadow-xl border border-gray-200/30 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-24 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {locales.map((l) => (
             <button
               key={l.code}
@@ -59,7 +59,7 @@ export function LanguageSelector() {
               className={`w-full flex items-center gap-1 px-4 py-2.5 text-sm transition-colors ${
                 l.code === locale
                   ? "bg-mosque/10 text-mosque font-semibold"
-                  : "text-nordic-dark hover:bg-gray-50"
+                  : "text-nordic-dark hover:bg-mosque/10"
               }`}
             >
               <span className="text-base">{l.flag}</span>

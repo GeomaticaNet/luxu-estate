@@ -38,7 +38,7 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
   const isInactive = property.type === 'SOLD' || property.type === 'RENTED';
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
-      <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">
+      <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1 border-2 border-gray-300 hover:border-mosque/40">
         <div className="relative aspect-[4/3] overflow-hidden">
           <Image 
             fill

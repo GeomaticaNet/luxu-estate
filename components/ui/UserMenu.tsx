@@ -62,12 +62,12 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/85 backdrop-blur-lg shadow-xl border border-gray-200/30 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {isAdmin && !inAdminArea && (
             <Link
               href="/admin/properties"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
             >
               <span className="material-symbols-outlined text-sm text-gray-400">admin_panel_settings</span>
               Administración
@@ -77,7 +77,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
             >
               <span className="material-symbols-outlined text-sm text-gray-400">public</span>
               Zona pública
@@ -86,7 +86,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
           <Link
             href="/favorites"
             onClick={() => setIsOpen(false)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
           >
             <span className="material-icons text-sm text-red-400">favorite</span>
             <span>Favoritos</span>
@@ -102,7 +102,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
               setIsOpen(false);
               handleLogout();
             }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
           >
             <span className="material-symbols-outlined text-sm text-gray-400">logout</span>
             Salir

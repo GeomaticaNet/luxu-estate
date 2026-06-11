@@ -10,7 +10,7 @@ interface Props {
 export const FeaturedCollections = ({ properties }: Props) => {
   const t = useTranslations("FeaturedCollections");
   return (
-    <section className="mb-16">
+    <section className="mb-6">
       <div className="flex items-end justify-between mb-8">
         <div>
           <h2 className="text-2xl font-light text-nordic-dark">

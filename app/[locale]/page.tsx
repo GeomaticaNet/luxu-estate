@@ -31,18 +31,18 @@ export default async function Home(props: HomePageProps) {
     <>
       <ScrollToHash />
       <Hero />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {!isFiltering && (
           <FeaturedCollections properties={featuredProperties} />
         )}
-        <NewInMarket
-          properties={properties}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          searchParams={searchParams}
-          listingType={listingType}
-        />
       </main>
+      <NewInMarket
+        properties={properties}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        searchParams={searchParams}
+        listingType={listingType}
+      />
     </>
   );
 }
