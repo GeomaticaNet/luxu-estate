@@ -173,7 +173,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer" onClick={() => router.push(`/admin/properties/${property.id}`)}>
             {property.title}
           </h3>
-          <p className="text-sm text-gray-500">{property.address}, {property.location}</p>
+          <p className="text-sm text-gray-500">{property.address}</p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
             <span className="flex items-center gap-1">
               <span className="material-icons text-[14px]">bed</span> {property.bedrooms} Beds

@@ -1,5 +1,4 @@
 import PropertyForm from "@/components/admin/property/PropertyForm";
-import { StickyBottomBar } from "../StickyBottomBar";
 import { Link } from "@/i18n/routing";
 
 export default function NewPropertyPage() {
@@ -24,7 +23,6 @@ export default function NewPropertyPage() {
       </header>
 
       <PropertyForm />
-      <StickyBottomBar />
     </main>
   );
 }

@@ -10,7 +10,7 @@ export function StickyBottomBar() {
             form="property-form"
             name="saveMode"
             value="draft"
-            className="px-5 py-2.5 rounded-[0.5rem] border border-mosque/20 bg-white text-mosque hover:bg-white/80 transition-colors font-medium font-sf-pro text-sm"
+            className="px-5 py-2.5 rounded-[0.5rem] border border-mosque/20 bg-white text-mosque hover:bg-white/80 transition-colors font-medium font-sf-pro text-sm cursor-pointer"
           >
             Save Draft
           </button>
@@ -19,7 +19,7 @@ export function StickyBottomBar() {
             form="property-form"
             name="saveMode"
             value="publish"
-            className="px-5 py-2.5 rounded-[0.5rem] bg-mosque hover:bg-nordic-dark text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm"
+            className="px-5 py-2.5 rounded-[0.5rem] bg-mosque hover:bg-nordic-dark text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm cursor-pointer"
           >
             <span className="material-icons text-sm">save</span>
             Save Property

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useCallback, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { upsertProperty } from "@/app/[locale]/admin/properties/actions";
+import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
+import { useLocale } from "next-intl";
 
 const InteractiveMap = dynamic(
   () => import("@/components/property/InteractiveLeafletMap"),
@@ -60,10 +62,20 @@ const PROPERTY_TYPES = [
 
 export default function PropertyForm({ initialData }: PropertyFormProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [isPending, startTransition] = useTransition();
+  const [toast, setToast] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryGridRef = useRef<HTMLDivElement>(null);
+  const savedPropertyIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>(() => {
@@ -85,6 +97,50 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
     return initialData?.property_images?.map((img: any) => img.url) || [];
   });
   const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
+  const geoTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const prevAddressRef = useRef(address);
+  const isForwardGeocodingRef = useRef(false);
+
+  const DEFAULT_LAT = 37.4419;
+  const DEFAULT_LNG = -122.143;
+
+  // Reverse geocode whenever lat/lng change from map interaction or manual input
+  useEffect(() => {
+    if (isForwardGeocodingRef.current) {
+      isForwardGeocodingRef.current = false;
+      return;
+    }
+    if (lat && lng && lat !== DEFAULT_LAT && lng !== DEFAULT_LNG) {
+      if (geoTimeoutRef.current) clearTimeout(geoTimeoutRef.current);
+      geoTimeoutRef.current = setTimeout(async () => {
+        const result = await reverseGeocode(lat, lng, locale);
+        if (result) setAddress(result);
+      }, 400);
+    }
+  }, [lat, lng, locale]);
+
+  const handleAddressChange = useCallback((value: string) => {
+    setAddress(value);
+    if (geoTimeoutRef.current) clearTimeout(geoTimeoutRef.current);
+    if (value.trim().length >= 5) {
+      geoTimeoutRef.current = setTimeout(async () => {
+        const result = await geocodeAddress(value);
+        if (result) {
+          isForwardGeocodingRef.current = true;
+          setLat(result.lat);
+          setLng(result.lng);
+        }
+      }, 800);
+    }
+  }, []);
+
+  const handleLatChange = useCallback((value: number) => {
+    setLat(value);
+  }, []);
+
+  const handleLngChange = useCallback((value: number) => {
+    setLng(value);
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -237,8 +293,9 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
     formData.set("is_featured", isFeatured.toString());
     formData.set("amenities", JSON.stringify(amenities));
 
-    if (initialData?.id) {
-      formData.append("id", initialData.id);
+    const existingId = initialData?.id || savedPropertyIdRef.current;
+    if (existingId) {
+      formData.append("id", existingId);
     }
     formData.set("deleted_images", JSON.stringify(deletedImageUrls));
 
@@ -287,7 +344,12 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
       const result = await upsertProperty(formData);
       console.log("[handleSubmit] Server result:", result);
       if (result.success) {
-        router.push("/admin/properties");
+        if (isDraft) {
+          if (result.id) savedPropertyIdRef.current = result.id;
+          setToast("Changes saved");
+        } else {
+          router.push("/admin/properties");
+        }
       } else {
         alert("Error saving property: " + result.error);
       }
@@ -295,7 +357,13 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
   };
 
   return (
-    <form
+    <>
+      {toast && (
+        <div className="fixed top-4 right-4 z-[9999] bg-green-600 text-white px-5 py-3 rounded-lg shadow-xl text-sm font-medium font-sf-pro animate-slide-in">
+          {toast}
+        </div>
+      )}
+      <form
       id="property-form"
       ref={formRef}
       onSubmit={handleSubmit}
@@ -551,27 +619,54 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 id="address"
                 name="address"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => handleAddressChange(e.target.value)}
                 placeholder="Street Address, City, Zip"
                 className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
               />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="lat" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                  Latitud
+                </label>
+                <input
+                  type="number"
+                  id="lat"
+                  name="lat"
+                  step="any"
+                  value={lat}
+                  onChange={(e) => handleLatChange(parseFloat(e.target.value) || 0)}
+                  placeholder="37.4419"
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
+                />
+              </div>
+              <div>
+                <label htmlFor="lng" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                  Longitud
+                </label>
+                <input
+                  type="number"
+                  id="lng"
+                  name="lng"
+                  step="any"
+                  value={lng}
+                  onChange={(e) => handleLngChange(parseFloat(e.target.value) || 0)}
+                  placeholder="-122.143"
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
+                />
+              </div>
             </div>
             <div className="relative h-48 w-full rounded-[0.5rem] overflow-hidden bg-gray-100 border border-gray-200 group">
               <InteractiveMap
                 lat={lat}
                 lng={lng}
                 address={address}
+                scrollWheelZoom={true}
                 onChange={(newLat, newLng) => {
                   setLat(newLat);
                   setLng(newLng);
                 }}
               />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="bg-white/90 text-nordic-dark px-3 py-1.5 rounded shadow-sm backdrop-blur-sm text-xs font-bold font-sf-pro flex items-center gap-1">
-                  <span className="material-icons text-sm text-mosque">map</span>
-                  Preview
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -729,6 +824,38 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
         </div>
       </div>
 
+      <div className="sticky bottom-0 z-50 bg-background-light/95 backdrop-blur-xl col-span-1 xl:col-span-12 mt-8">
+        <div className="bg-background-light rounded-b-[0.75rem] shadow-sm border border-gray-100 border-t-gray-300 h-16 flex items-center justify-end px-6">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                const input = document.getElementById("save-mode-input") as HTMLInputElement;
+                if (input) input.value = "draft";
+                formRef.current?.requestSubmit();
+              }}
+              className="px-5 py-2.5 rounded-[0.5rem] border border-mosque/20 bg-white text-mosque hover:bg-white/80 transition-colors font-medium font-sf-pro text-sm cursor-pointer"
+            >
+              Save Draft
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const input = document.getElementById("save-mode-input") as HTMLInputElement;
+                if (input) input.value = "publish";
+                formRef.current?.requestSubmit();
+              }}
+              className="px-5 py-2.5 rounded-[0.5rem] bg-mosque hover:bg-nordic-dark text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm cursor-pointer"
+            >
+              <span className="material-icons text-sm">save</span>
+              Save Property
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id="save-mode-input" name="saveMode" value="publish" />
     </form>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
@@ -23,9 +23,10 @@ interface Props {
   onChange?: (lat: number, lng: number) => void;
   address?: string;
   readOnly?: boolean;
+  scrollWheelZoom?: boolean;
 }
 
-function LocationMarker({ position, setPosition, readOnly }: { position: L.LatLng | null, setPosition: (pos: L.LatLng) => void, readOnly?: boolean }) {
+function LocationMarker({ position, setPosition, readOnly, address }: { position: L.LatLng | null, setPosition: (pos: L.LatLng) => void, readOnly?: boolean, address?: string }) {
   useMapEvents({
     click(e) {
       if (!readOnly) {
@@ -34,14 +35,31 @@ function LocationMarker({ position, setPosition, readOnly }: { position: L.LatLn
     },
   });
 
+  const eventHandlers = readOnly ? {} : {
+    dragend(e: L.LeafletEvent) {
+      const marker = e.target as L.Marker;
+      setPosition(marker.getLatLng());
+    },
+  };
+
   return position === null ? null : (
-    <Marker position={position} icon={customIcon}>
-      <Popup>Selected Location</Popup>
+    <Marker position={position} icon={customIcon} draggable={!readOnly} eventHandlers={eventHandlers}>
+      <Popup>{address || "Selected Location"}</Popup>
     </Marker>
   );
 }
 
-const InteractiveLeafletMap = ({ lat, lng, onChange, address, readOnly = false }: Props) => {
+function MapCenterUpdater({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    if (lat && lng) {
+      map.setView([lat, lng], map.getZoom(), { animate: true });
+    }
+  }, [lat, lng]);
+  return null;
+}
+
+const InteractiveLeafletMap = ({ lat, lng, onChange, address, readOnly = false, scrollWheelZoom = false }: Props) => {
   const [position, setPosition] = useState<L.LatLng | null>(
     lat && lng ? new L.LatLng(lat, lng) : null
   );
@@ -66,14 +84,16 @@ const InteractiveLeafletMap = ({ lat, lng, onChange, address, readOnly = false }
       <MapContainer 
         center={center} 
         zoom={13} 
-        scrollWheelZoom={false}
+        scrollWheelZoom={scrollWheelZoom}
+        zoomControl={false}
         className="w-full h-full"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationMarker position={position} setPosition={handlePositionChange} readOnly={readOnly} />
+        <LocationMarker position={position} setPosition={handlePositionChange} readOnly={readOnly} address={address} />
+        <MapCenterUpdater lat={lat} lng={lng} />
       </MapContainer>
       {address && (
         <a className="absolute bottom-2 right-2 bg-white/90 text-xs font-medium px-2 py-1 rounded shadow-sm text-nordic hover:text-mosque z-[1000]" href={`https://maps.google.com/?q=${address}`} target="_blank" rel="noopener noreferrer">

@@ -1,5 +1,4 @@
 import PropertyForm from "@/components/admin/property/PropertyForm";
-import { StickyBottomBar } from "../StickyBottomBar";
 import { Link } from "@/i18n/routing";
 import { createPublicClient } from "@/lib/supabase/server";
 
@@ -43,7 +42,6 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
       </header>
 
       <PropertyForm initialData={property} />
-      <StickyBottomBar />
     </main>
   );
 }

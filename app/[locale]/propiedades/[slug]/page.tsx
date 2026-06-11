@@ -125,7 +125,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
                 </h1>
                 <p className="text-nordic/60 font-medium flex items-center gap-1">
                   <span className="material-icons text-mosque text-sm">location_on</span>
-                  {property.address}, {property.location}
+                  {property.address}
                 </p>
               </div>
 
@@ -191,7 +191,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
             </div>
 
             <div className="bg-white p-2 rounded-xl shadow-sm border border-mosque/5">
-              <PropertyMap address={`${property.address}, ${property.location}`} lat={property.lat} lng={property.lng} />
+              <PropertyMap address={property.address} lat={property.lat} lng={property.lng} />
             </div>
           </div>
         </div>

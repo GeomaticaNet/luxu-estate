@@ -36,7 +36,8 @@ const PropertyMapComponent = ({ address, lat, lng }: Props) => {
       <MapContainer 
         center={position} 
         zoom={13} 
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
+        zoomControl={false}
         className="w-full h-full"
       >
         <TileLayer
