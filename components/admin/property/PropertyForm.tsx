@@ -656,7 +656,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 />
               </div>
             </div>
-            <div className="relative h-48 w-full rounded-[0.5rem] overflow-hidden bg-gray-100 border border-gray-200 group">
+            <div className="relative h-48 w-full rounded-lg shadow-[3px_3px_12px_rgba(0,0,0,0.25)] group">
               <InteractiveMap
                 lat={lat}
                 lng={lng}

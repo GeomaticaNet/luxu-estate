@@ -190,7 +190,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="bg-white p-2 rounded-xl shadow-sm border border-mosque/5">
+            <div className="bg-white p-2 rounded-xl shadow-[3px_3px_12px_rgba(0,0,0,0.25)]">
               <PropertyMap address={property.address} lat={property.lat} lng={property.lng} />
             </div>
           </div>
