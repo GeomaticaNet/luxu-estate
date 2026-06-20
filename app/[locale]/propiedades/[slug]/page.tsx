@@ -40,22 +40,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: propertyUrl,
       siteName: "Luxe Estate",
       type: "website",
-      images: property.imageUrl
-        ? [
-            {
-              url: property.imageUrl,
-              width: 1200,
-              height: 800,
-              alt: property.title,
-            },
-          ]
-        : [],
     },
     twitter: {
       card: "summary_large_image",
       title: `${property.title} | ${property.location} | LuxeEstate`,
       description: property.description ?? `Check out this amazing property in ${property.location}.`,
-      images: property.imageUrl ? [property.imageUrl] : [],
     },
   };
 }
