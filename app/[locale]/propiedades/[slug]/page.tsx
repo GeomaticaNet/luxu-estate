@@ -10,12 +10,13 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const data = await getPropertyBySlug(resolvedParams.slug);
+  const { locale, slug } = resolvedParams;
+  const data = await getPropertyBySlug(slug);
 
   if (!data || !data.property) {
     return {
@@ -24,9 +25,38 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { property } = data;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
+  const propertyUrl = `${siteUrl}/${locale}/propiedades/${slug}`;
+
   return {
     title: `${property.title} | ${property.location} | LuxeEstate`,
     description: property.description ?? `Check out this amazing property in ${property.location}.`,
+    alternates: {
+      canonical: propertyUrl,
+    },
+    openGraph: {
+      title: `${property.title} | ${property.location} | LuxeEstate`,
+      description: property.description ?? `Check out this amazing property in ${property.location}.`,
+      url: propertyUrl,
+      siteName: "Luxe Estate",
+      type: "website",
+      images: property.imageUrl
+        ? [
+            {
+              url: property.imageUrl,
+              width: 1200,
+              height: 800,
+              alt: property.title,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${property.title} | ${property.location} | LuxeEstate`,
+      description: property.description ?? `Check out this amazing property in ${property.location}.`,
+      images: property.imageUrl ? [property.imageUrl] : [],
+    },
   };
 }
 
@@ -40,6 +70,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
   }
 
   const { property, images } = data;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
   const mainImage = images.find((i) => i.is_main) || {
     id: "default",
     property_id: property.id,
@@ -63,7 +94,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
     "@type": "RealEstateListing",
     name: property.title,
     description: property.description,
-    url: `https://luxu-estate.vercel.app/propiedades/${property.slug}`,
+    url: `${siteUrl}/${resolvedParams.locale}/propiedades/${property.slug}`,
     image: property.imageUrl,
     offers: {
       "@type": "Offer",

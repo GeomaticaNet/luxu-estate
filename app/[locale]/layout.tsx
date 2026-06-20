@@ -11,9 +11,25 @@ import { FavoritesProvider } from "@/hooks/FavoritesContext";
 import type { Metadata } from "next";
 import "../globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Luxe Estate - Premium Real Estate",
   description: "Find your sanctuary.",
+  openGraph: {
+    title: "Luxe Estate - Premium Real Estate",
+    description: "Find your sanctuary.",
+    url: siteUrl,
+    siteName: "Luxe Estate",
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Luxe Estate - Premium Real Estate",
+    description: "Find your sanctuary.",
+  },
 };
 
 export default async function RootLayout({
