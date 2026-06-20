@@ -31,12 +31,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogImages = [...images]
     .sort((a, b) => a.sort_order - b.sort_order)
     .slice(0, 4)
-    .map((img) => ({
-      url: img.url,
-      width: 800,
-      height: 600,
-      alt: property.title,
-    }));
+    .map((img) => {
+      const cleanUrl = img.url.includes("images.unsplash.com")
+        ? img.url.replace(/\?.*/, "") + "?w=1200&h=630&fit=crop"
+        : img.url;
+      return {
+        url: cleanUrl,
+        width: 1200,
+        height: 630,
+        alt: property.title,
+      };
+    });
 
   return {
     title: `${property.title} | ${property.location} | LuxeEstate`,
