@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { PropertyCard } from "../property/PropertyCard";
 import { Property } from "@/interfaces/property";
+import { BackToTop } from "../ui/BackToTop";
 
 const PARADISE_IMAGE = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80";
 
@@ -55,6 +56,8 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams,
   ) {
     pageNumbers.push(i);
   }
+
+  const hasFilters = searchParams ? Object.keys(searchParams).some(k => k !== "page") : false;
 
   return (
     <section id="new-in-market" className="relative scroll-mt-24">
@@ -196,6 +199,10 @@ export const NewInMarket = ({ properties, currentPage, totalPages, searchParams,
             {t("page_info", { current: currentPage, total: totalPages })}
           </p>
         )}
+
+        <div className="flex justify-start mt-6">
+          <BackToTop visible={hasFilters} />
+        </div>
       </div>
     </section>
   );

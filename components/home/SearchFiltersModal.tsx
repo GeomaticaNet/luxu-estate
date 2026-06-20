@@ -61,7 +61,7 @@ export const SearchFiltersModal: React.FC<SearchFiltersModalProps> = ({
     if (maxPrice) params.append('price_max', maxPrice.replace(/[^0-9]/g, ''));
     if (propertyType) params.append('propertyType', propertyType);
     onClose();
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}#new-in-market`);
   };
 
   const clearFilters = () => {

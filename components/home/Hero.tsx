@@ -20,7 +20,7 @@ const HeroContent = () => {
   
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
 
-  const hasFilters = Array.from(searchParams?.keys() || []).some(key => key !== "q" && key !== "page");
+  const hasFilters = Array.from(searchParams?.keys() || []).some(key => key !== "page");
   const currentPropertyType = searchParams?.get("propertyType");
 
   const navigateWithQuery = useCallback((query: string) => {
@@ -31,7 +31,7 @@ const HeroContent = () => {
       params.delete("q");
     }
     params.delete("page");
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}#new-in-market`);
   }, [router, searchParams]);
 
   const handleSearch = () => {
@@ -83,7 +83,7 @@ const HeroContent = () => {
       params.set("propertyType", type);
     }
     params.delete("page");
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}#new-in-market`);
   };
 
   const propertyTypes = ["House", "Apartment", "Villa", "Penthouse"];
@@ -138,7 +138,7 @@ const HeroContent = () => {
         <div className="flex flex-wrap items-center justify-center gap-2 py-2 px-4">
           <button 
             onClick={() => {
-              router.push("/");
+              router.push("/#new-in-market");
             }}
             className={`whitespace-nowrap px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-transform hover:-translate-y-0.5 ${
               !currentPropertyType 
