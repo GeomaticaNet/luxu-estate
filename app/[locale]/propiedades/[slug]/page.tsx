@@ -32,11 +32,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .sort((a, b) => a.sort_order - b.sort_order)
     .slice(0, 4)
     .map((img) => {
-      const cleanUrl = img.url.includes("images.unsplash.com")
-        ? img.url.replace(/\?.*/, "") + "?w=1200&h=630&fit=crop"
-        : img.url;
+      const rawUrl = img.url;
+      let ogUrl: string;
+
+      if (rawUrl.includes("images.unsplash.com")) {
+        ogUrl = rawUrl.replace(/\?.*/, "") + "?w=1200&h=630&fit=crop";
+      } else if (rawUrl.includes("supabase.co")) {
+        ogUrl = `${siteUrl}/_next/image?url=${encodeURIComponent(rawUrl)}&w=1200&q=80`;
+      } else {
+        ogUrl = rawUrl;
+      }
+
       return {
-        url: cleanUrl,
+        url: ogUrl,
         width: 1200,
         height: 630,
         alt: property.title,
