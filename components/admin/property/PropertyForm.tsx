@@ -60,6 +60,43 @@ const PROPERTY_TYPES = [
   { value: "penthouse", label: "Penthouse" },
 ];
 
+async function resizeImage(file: File, maxDimension: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const { width, height } = img;
+      if (width <= maxDimension && height <= maxDimension) {
+        URL.revokeObjectURL(img.src);
+        resolve(file);
+        return;
+      }
+      const ratio = Math.min(maxDimension / width, maxDimension / height);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(img.src);
+        resolve(file);
+        return;
+      }
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(img.src);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else resolve(file);
+        },
+        "image/jpeg",
+        0.85
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 export default function PropertyForm({ initialData }: PropertyFormProps) {
   const router = useRouter();
   const locale = useLocale();
@@ -313,13 +350,14 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
       const blobUrl = newBlobUrls[i];
       if (!file || file.size === 0) continue;
 
-      const fileExt = file.name.split(".").pop();
+      const resizedBlob = await resizeImage(file, 1920);
+      const fileExt = "jpg";
       const fileName = `${Date.now()}-${i}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("property_images")
-        .upload(filePath, file);
+        .upload(filePath, resizedBlob);
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
