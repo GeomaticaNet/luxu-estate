@@ -122,6 +122,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
   const [lat, setLat] = useState(initialData?.lat || 37.4419);
   const [lng, setLng] = useState(initialData?.lng || -122.143);
   const [address, setAddress] = useState(initialData?.address || "");
+  const [city, setCity] = useState(initialData?.city || "");
   const [state, setState] = useState(initialData?.state || "");
   const [country, setCountry] = useState(initialData?.country || "");
   const [isFeatured, setIsFeatured] = useState(initialData?.is_featured || false);
@@ -155,6 +156,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
         const result = await reverseGeocode(lat, lng, locale);
         if (result) {
           setAddress(result.address);
+          if (result.city) setCity(result.city);
           if (result.state) setState(result.state);
           if (result.country) setCountry(result.country);
         }
@@ -329,6 +331,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
 
     formData.set("lat", lat.toString());
     formData.set("lng", lng.toString());
+    formData.set("city", city);
     formData.set("state", state);
     formData.set("country", country);
     formData.set("bedrooms", bedrooms.toString());
@@ -670,7 +673,22 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                  City / Locality
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Luján de Cuyo"
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
+                  readOnly
+                />
+              </div>
               <div>
                 <label htmlFor="state" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
                   State / Province

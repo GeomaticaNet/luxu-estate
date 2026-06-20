@@ -36,6 +36,7 @@ export async function upsertProperty(formData: FormData) {
     lat: parseFloat(formData.get('lat') as string || '0'),
     lng: parseFloat(formData.get('lng') as string || '0'),
     amenities: JSON.parse(formData.get('amenities') as string || '[]'),
+    city: formData.get('city') as string || null,
     state: formData.get('state') as string || null,
     country: formData.get('country') as string || null,
   };

@@ -157,7 +157,7 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
                 </h1>
                 <p className="text-nordic/60 font-medium flex items-center gap-1">
                   <span className="material-icons text-mosque text-sm">location_on</span>
-                  {property.address}
+                  {property.address}{property.city ? `, ${property.city}` : ""}
                 </p>
               </div>
 

@@ -16,6 +16,7 @@ export interface Property {
   amenities?: string[];
   lat: number;
   lng: number;
+  city?: string;
   state?: string;
   country?: string;
   imageUrl: string;

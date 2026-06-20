@@ -110,6 +110,7 @@ function rowToProperty(row: { [key: string]: unknown; property_images?: Property
     amenities: (row.amenities as string[] | null) ?? undefined,
     lat: Number(row.lat ?? 37.4419),
     lng: Number(row.lng ?? -122.1430),
+    city: (row.city as string | null) ?? undefined,
     state: (row.state as string | null) ?? undefined,
     country: (row.country as string | null) ?? undefined,
     imageUrl: mainImage?.url || getFallbackImage(row.id as string),

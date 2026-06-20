@@ -7,6 +7,7 @@ interface GeocodeResult {
 
 interface ReverseGeocodeResult {
   address: string;
+  city: string | null;
   state: string | null;
   country: string | null;
 }
@@ -45,6 +46,7 @@ export async function reverseGeocode(lat: number, lng: number, locale: string = 
 
     const street = props.street || "";
     const houseNumber = props.housenumber || "";
+    const city = props.city || props.town || props.village || props.locality || null;
     const state = props.state || null;
     const country = props.country || null;
 
@@ -63,7 +65,7 @@ export async function reverseGeocode(lat: number, lng: number, locale: string = 
       address = "";
     }
 
-    return { address, state, country };
+    return { address, city, state, country };
   } catch {
     return null;
   }
