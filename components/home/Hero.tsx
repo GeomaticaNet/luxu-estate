@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { SearchFiltersModal } from "./SearchFiltersModal";
 import { HeroVideoBackground } from "./HeroVideoBackground";
 
-const DEBOUNCE_MS = 350;
+const DEBOUNCE_MS = 800;
 
 const HERO_VIDEOS = ["/videos/1.mp4", "/videos/2.mp4", "/videos/4.mp4"];
 
