@@ -122,6 +122,8 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
   const [lat, setLat] = useState(initialData?.lat || 37.4419);
   const [lng, setLng] = useState(initialData?.lng || -122.143);
   const [address, setAddress] = useState(initialData?.address || "");
+  const [state, setState] = useState(initialData?.state || "");
+  const [country, setCountry] = useState(initialData?.country || "");
   const [isFeatured, setIsFeatured] = useState(initialData?.is_featured || false);
 
   const [bedrooms, setBedrooms] = useState(initialData?.bedrooms || 3);
@@ -151,7 +153,11 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
       if (geoTimeoutRef.current) clearTimeout(geoTimeoutRef.current);
       geoTimeoutRef.current = setTimeout(async () => {
         const result = await reverseGeocode(lat, lng, locale);
-        if (result) setAddress(result);
+        if (result) {
+          setAddress(result.address);
+          if (result.state) setState(result.state);
+          if (result.country) setCountry(result.country);
+        }
       }, 400);
     }
   }, [lat, lng, locale]);
@@ -323,6 +329,8 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
 
     formData.set("lat", lat.toString());
     formData.set("lng", lng.toString());
+    formData.set("state", state);
+    formData.set("country", country);
     formData.set("bedrooms", bedrooms.toString());
     formData.set("bathrooms", bathrooms.toString());
     formData.set("garages", garages.toString());
@@ -661,6 +669,38 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 placeholder="Street Address, City, Zip"
                 className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
               />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="state" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                  State / Province
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="Mendoza"
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
+                  readOnly
+                />
+              </div>
+              <div>
+                <label htmlFor="country" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  id="country"
+                  name="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="Argentina"
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
+                  readOnly
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

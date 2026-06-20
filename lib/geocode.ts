@@ -1,6 +1,17 @@
 const PHOTON_URL = "https://photon.komoot.io";
 
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+interface GeocodeResult {
+  lat: number;
+  lng: number;
+}
+
+interface ReverseGeocodeResult {
+  address: string;
+  state: string | null;
+  country: string | null;
+}
+
+export async function geocodeAddress(address: string): Promise<GeocodeResult | null> {
   if (!address || address.trim().length < 5) return null;
 
   const url = `${PHOTON_URL}/api/?q=${encodeURIComponent(address)}&limit=1`;
@@ -20,7 +31,7 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
   }
 }
 
-export async function reverseGeocode(lat: number, lng: number, locale: string = "en"): Promise<string | null> {
+export async function reverseGeocode(lat: number, lng: number, locale: string = "en"): Promise<ReverseGeocodeResult | null> {
   if (!lat || !lng) return null;
 
   const url = `${PHOTON_URL}/reverse?lat=${lat}&lon=${lng}`;
@@ -34,16 +45,25 @@ export async function reverseGeocode(lat: number, lng: number, locale: string = 
 
     const street = props.street || "";
     const houseNumber = props.housenumber || "";
+    const state = props.state || null;
+    const country = props.country || null;
 
+    let address: string;
     if (street && houseNumber) {
       if (locale === "es" || locale === "pt") {
-        return `${street}, ${houseNumber}`;
+        address = `${street}, ${houseNumber}`;
+      } else {
+        address = `${houseNumber} ${street}`;
       }
-      return `${houseNumber} ${street}`;
+    } else if (street) {
+      address = street;
+    } else if (props.name) {
+      address = props.name;
+    } else {
+      address = "";
     }
-    if (street) return street;
-    if (props.name) return props.name;
-    return null;
+
+    return { address, state, country };
   } catch {
     return null;
   }
