@@ -28,10 +28,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
   const propertyUrl = `${siteUrl}/${locale}/propiedades/${slug}`;
 
-  const imageUrls = [...images]
+  const ogImages = [...images]
     .sort((a, b) => a.sort_order - b.sort_order)
     .slice(0, 4)
-    .map((img) => img.url);
+    .map((img) => ({
+      url: img.url,
+      width: 800,
+      height: 600,
+      alt: property.title,
+    }));
 
   return {
     title: `${property.title} | ${property.location} | LuxeEstate`,
@@ -45,13 +50,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: propertyUrl,
       siteName: "Luxe Estate",
       type: "website",
-      images: imageUrls,
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: `${property.title} | ${property.location} | LuxeEstate`,
       description: property.description ?? `Check out this amazing property in ${property.location}.`,
-      images: imageUrls.length > 0 ? [imageUrls[0]] : [],
+      images: ogImages.length > 0 ? [ogImages[0].url] : [],
     },
   };
 }
