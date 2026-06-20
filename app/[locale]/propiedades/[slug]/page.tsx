@@ -24,9 +24,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const { property } = data;
+  const { property, images } = data;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
   const propertyUrl = `${siteUrl}/${locale}/propiedades/${slug}`;
+
+  const sortedImages = [...images].sort(
+    (a, b) => a.sort_order - b.sort_order
+  );
+  const ogImages = sortedImages.slice(0, 4).map((img) => ({
+    url: img.url,
+    width: 1200,
+    height: 800,
+    alt: property.title,
+  }));
 
   return {
     title: `${property.title} | ${property.location} | LuxeEstate`,
@@ -40,11 +50,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: propertyUrl,
       siteName: "Luxe Estate",
       type: "website",
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: `${property.title} | ${property.location} | LuxeEstate`,
       description: property.description ?? `Check out this amazing property in ${property.location}.`,
+      images: ogImages.length > 0 ? [ogImages[0].url] : [],
     },
   };
 }
