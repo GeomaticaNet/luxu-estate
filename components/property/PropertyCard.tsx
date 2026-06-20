@@ -66,7 +66,9 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
             </h3>
           </div>
           <h4 className="text-nordic-dark font-medium truncate mb-1">{property.title}</h4>
-          <p className="text-nordic-muted text-xs mb-4">{property.address}</p>
+          <p className="text-nordic-muted text-xs mb-4 truncate">
+            {[property.address, property.city, property.state].filter(Boolean).join(", ")}
+          </p>
           <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
             <div className="flex items-center gap-1 text-nordic-muted text-xs">
               <span className="material-icons text-sm text-mosque/80">king_bed</span> {property.bedrooms}

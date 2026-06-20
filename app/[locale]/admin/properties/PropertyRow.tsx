@@ -12,6 +12,8 @@ interface PropertyRowProps {
     price_label?: string;
     address: string;
     location: string;
+    city?: string;
+    state?: string;
     bedrooms: number;
     bathrooms: number;
     area: number;
@@ -182,7 +184,9 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
             {property.title}
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${typeColors[property.property_type]?.bg || "bg-gray-100"} ${typeColors[property.property_type]?.text || "text-gray-700"}`}>{property.property_type}</span>
           </h3>
-          <p className="text-sm text-gray-500">{property.address}</p>
+          <p className="text-sm text-gray-500 truncate">
+            {[property.address, property.city, property.state].filter(Boolean).join(", ")}
+          </p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
             <span className="flex items-center gap-1">
               <span className="material-icons text-[14px]">bed</span> {property.bedrooms} Beds
