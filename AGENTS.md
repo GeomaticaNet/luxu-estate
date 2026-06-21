@@ -8,6 +8,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Luxe Estate — Reglas del Proyecto
 
+## ⚠️ Regla ABSOLUTA: Siempre en ramas temporales
+- **NUNCA trabajar directamente en `main`**, bajo ninguna circunstancia
+- Cada tarea/modiﬁcación se hace en una rama con nombre tipo `feat/...`, `fix/...`, etc.
+- Solo commiteo/mergeo/pusheo cuando el usuario lo pide explícitamente
+- Esto aplica incluso si el usuario dice "comitea, mergea y pushea" — primero creo una rama, luego mergeo siguiendo el flujo
+
 ## Objetivo
 App de bienes raíces premium llamada **Luxe Estate** con Next.js (App Router) + Tailwind CSS v4 + Supabase. Diseño moderno, premium y minimalista siguiendo referencias en `antigravity/resources/`.
 
