@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -82,6 +83,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    revalidateTag('properties', 'max');
+    revalidateTag('featured-properties', 'max');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

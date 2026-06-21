@@ -1,7 +1,7 @@
 "use server";
 
 import { createServerClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function upsertProperty(formData: FormData) {
   const supabase = await createServerClient();
@@ -121,6 +121,8 @@ export async function upsertProperty(formData: FormData) {
   }
 
   revalidatePath("/[locale]/admin/properties", "page");
+  revalidateTag('properties', 'max');
+  revalidateTag('featured-properties', 'max');
 
   return { success: true, id: savedPropertyId };
 }

@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { Property, FeaturedProperty, PropertyImage } from "@/interfaces/property";
 import { createPublicClient } from "@/lib/supabase/server";
 
@@ -129,7 +130,7 @@ function rowToFeaturedProperty(row: Record<string, unknown>): FeaturedProperty {
 /**
  * Fetches paginated "new in market" properties from Supabase.
  */
-export async function getProperties(
+const _getProperties = async (
   page: number = 1,
   query?: string,
   beds?: number,
@@ -138,13 +139,12 @@ export async function getProperties(
   priceMin?: number,
   priceMax?: number,
   listingType?: "buy" | "rent" | "all"
-): Promise<GetPropertiesResult> {
+): Promise<GetPropertiesResult> => {
   const supabase = createPublicClient();
   const currentPage = Math.max(1, page);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  // Check if user is using search filters
   const hasSearchFilters = query || (beds && beds > 0) || (baths && baths > 0) || propertyType || (priceMin && priceMin > 0) || (priceMax && priceMax > 0);
 
   let queryBuilder = supabase
@@ -152,16 +152,13 @@ export async function getProperties(
     .select("*, property_images(*)", { count: "exact" })
     .eq("is_featured", false);
 
-  // Only show active properties on public site
   queryBuilder = queryBuilder.eq("active", true);
 
-  // Filter by listing type (buy = SALE + SOLD, rent = RENT + RENTED)
   if (listingType === "buy") {
     queryBuilder = queryBuilder.in("type", ["SALE", "SOLD"]);
   } else if (listingType === "rent") {
     queryBuilder = queryBuilder.in("type", ["RENT", "RENTED"]);
   }
-  // "all" = no type filter
 
   if (query) {
     const { data: matchingIds } = await supabase.rpc('search_property_ids', {
@@ -214,12 +211,18 @@ export async function getProperties(
     totalPages,
     currentPage,
   };
-}
+};
+
+export const getProperties = unstable_cache(
+  _getProperties,
+  ['properties'],
+  { tags: ['properties'], revalidate: 60 }
+);
 
 /**
  * Fetches all featured properties from Supabase.
  */
-export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
+const _getFeaturedProperties = async (): Promise<FeaturedProperty[]> => {
   const supabase = createPublicClient();
 
   const { data, error } = await supabase
@@ -235,7 +238,13 @@ export async function getFeaturedProperties(): Promise<FeaturedProperty[]> {
   }
 
   return (data ?? []).map(rowToFeaturedProperty);
-}
+};
+
+export const getFeaturedProperties = unstable_cache(
+  _getFeaturedProperties,
+  ['featured-properties'],
+  { tags: ['featured-properties'], revalidate: 300 }
+);
 
 /**
  * Fetches a single property by slug and its associated images.
