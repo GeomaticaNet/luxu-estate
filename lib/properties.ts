@@ -164,7 +164,15 @@ export async function getProperties(
   // "all" = no type filter
 
   if (query) {
-    queryBuilder = queryBuilder.or(`location.ilike.%${query}%,title.ilike.%${query}%,address.ilike.%${query}%`);
+    const { data: matchingIds } = await supabase.rpc('search_property_ids', {
+      search_term: query
+    });
+
+    if (matchingIds && matchingIds.length > 0) {
+      queryBuilder = queryBuilder.in('id', matchingIds.map((r: { id: string }) => r.id));
+    } else {
+      queryBuilder = queryBuilder.in('id', []);
+    }
   }
 
   if (beds !== undefined && beds > 0) {

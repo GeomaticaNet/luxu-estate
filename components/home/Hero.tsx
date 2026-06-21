@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useRef, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { SearchFiltersModal } from "./SearchFiltersModal";
 import { HeroVideoBackground } from "./HeroVideoBackground";
-
-const DEBOUNCE_MS = 800;
 
 const HERO_VIDEOS = ["/videos/1.mp4", "/videos/2.mp4", "/videos/4.mp4"];
 
@@ -16,7 +14,8 @@ const HeroContent = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
   
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") ?? "");
 
@@ -24,7 +23,7 @@ const HeroContent = () => {
   const currentPropertyType = searchParams?.get("propertyType");
 
   const navigateWithQuery = useCallback((query: string) => {
-    const params = new URLSearchParams(searchParams?.toString());
+    const params = new URLSearchParams(searchParamsRef.current?.toString());
     if (query.trim()) {
       params.set("q", query.trim());
     } else {
@@ -32,40 +31,18 @@ const HeroContent = () => {
     }
     params.delete("page");
     router.push(`/?${params.toString()}#new-in-market`);
-  }, [router, searchParams]);
+  }, [router]);
 
   const handleSearch = () => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
     navigateWithQuery(searchQuery);
   };
 
   const handleQueryChange = (value: string) => {
     setSearchQuery(value);
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      navigateWithQuery(value);
-    }, DEBOUNCE_MS);
   };
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
     router.push("/");
   };
 
