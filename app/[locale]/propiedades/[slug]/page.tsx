@@ -8,9 +8,31 @@ import { BackButton } from "@/components/ui/BackButton";
 import Image from "next/image";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { createPublicClient } from "@/lib/supabase/server";
+
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const supabase = createPublicClient();
+  const { data: slugs } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("active", true);
+
+  const locales = ["es", "en", "pt"];
+  const params: { locale: string; slug: string }[] = [];
+
+  for (const locale of locales) {
+    for (const row of slugs ?? []) {
+      params.push({ locale, slug: row.slug });
+    }
+  }
+
+  return params;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

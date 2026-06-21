@@ -249,7 +249,7 @@ export const getFeaturedProperties = unstable_cache(
 /**
  * Fetches a single property by slug and its associated images.
  */
-export async function getPropertyBySlug(slug: string) {
+const _getPropertyBySlug = async (slug: string) => {
   const supabase = createPublicClient();
 
   // Fetch property with its images
@@ -271,4 +271,10 @@ export async function getPropertyBySlug(slug: string) {
     property: rowToProperty(propertyData),
     images: imagesData,
   };
-}
+};
+
+export const getPropertyBySlug = unstable_cache(
+  _getPropertyBySlug,
+  ['property-by-slug'],
+  { tags: ['properties'], revalidate: 60 }
+);
