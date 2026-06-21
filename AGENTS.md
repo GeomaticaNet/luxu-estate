@@ -8,6 +8,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Luxe Estate — Reglas del Proyecto
 
+## ⚠️ Regla ABSOLUTA: Leer AGENTS.md en cada prompt
+- **Antes de cualquier acción, releer este archivo completo**
+- Ignorar su contenido = error grave
+
 ## ⚠️ Regla ABSOLUTA: Siempre en ramas temporales
 - **NUNCA trabajar directamente en `main`**, bajo ninguna circunstancia
 - Cada tarea/modiﬁcación se hace en una rama con nombre tipo `feat/...`, `fix/...`, etc.
