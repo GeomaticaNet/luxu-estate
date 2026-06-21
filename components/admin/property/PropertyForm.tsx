@@ -48,16 +48,16 @@ const AMENITIES_LIST = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: "SALE", label: "For Sale" },
-  { value: "RENT", label: "For Rent" },
-  { value: "SOLD", label: "Sold" },
+  { value: "SALE", labelKey: "for_sale" },
+  { value: "RENT", labelKey: "for_rent" },
+  { value: "SOLD", labelKey: "sold" },
 ];
 
 const PROPERTY_TYPES = [
-  { value: "apartment", label: "Apartment" },
-  { value: "house", label: "House" },
-  { value: "villa", label: "Villa" },
-  { value: "penthouse", label: "Penthouse" },
+  { value: "apartment", labelKey: "type_apartment" },
+  { value: "house", labelKey: "type_house" },
+  { value: "villa", labelKey: "type_villa" },
+  { value: "penthouse", labelKey: "type_penthouse" },
 ];
 
 async function resizeImage(file: File, maxDimension: number): Promise<Blob> {
@@ -396,7 +396,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
       if (result.success) {
         if (isDraft) {
           if (result.id) savedPropertyIdRef.current = result.id;
-          setToast("Changes saved");
+          setToast(t("changes_saved"));
         } else {
           router.push("/admin/properties");
         }
@@ -427,12 +427,12 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
             <div className="w-8 h-8 rounded-full bg-hint-of-green flex items-center justify-center text-nordic-dark">
               <span className="material-icons !text-[17px]">info</span>
             </div>
-            <h2 className="text-xl font-bold text-nordic-dark">Basic Information</h2>
+            <h2 className="text-xl font-bold text-nordic-dark">{t("basic_information")}</h2>
           </div>
           <div className="p-8 space-y-6">
             <div className="group">
               <label htmlFor="title" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                Property Title <span className="text-red-500">*</span>
+                {t("property_title")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -440,14 +440,14 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 name="title"
                 required
                 defaultValue={initialData?.title}
-                placeholder="e.g. Modern Penthouse with Ocean View"
+                placeholder={t("title_placeholder")}
                 className="w-full text-base px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all font-sf-pro"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Price <span className="text-red-500">*</span>
+                  {t("price_field")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-sf-pro text-sm">$</span>
@@ -457,14 +457,14 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                     name="price"
                     required
                     defaultValue={initialData?.price}
-                    placeholder="0.00"
+                    placeholder={t("price_placeholder")}
                     className="w-full pl-7 pr-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-medium font-sf-pro"
                   />
                 </div>
               </div>
               <div>
                 <label htmlFor="type" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Status
+                  {t("status_field")}
                 </label>
                 <select
                   id="type"
@@ -474,14 +474,14 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(opt.labelKey)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label htmlFor="property_type" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Property Type
+                  {t("property_type_field")}
                 </label>
                 <select
                   id="property_type"
@@ -491,7 +491,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 >
                   {PROPERTY_TYPES.map((opt) => (
                     <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(opt.labelKey)}
                     </option>
                   ))}
                 </select>
@@ -507,7 +507,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 className="w-4 h-4 text-mosque border-gray-300 rounded focus:ring-mosque cursor-pointer"
               />
               <label htmlFor="is_featured" className="text-sm font-medium text-nordic-dark font-sf-pro cursor-pointer">
-                Mark as featured property
+                {t("mark_as_featured")}
               </label>
             </div>
             <div className="flex items-center gap-3 pt-2">
@@ -520,7 +520,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 className="w-4 h-4 text-mosque border-gray-300 rounded focus:ring-mosque cursor-pointer"
               />
               <label htmlFor="active" className="text-sm font-medium text-nordic-dark font-sf-pro cursor-pointer">
-                Visible on public site
+                {t("visible_on_site")}
               </label>
             </div>
           </div>
@@ -532,7 +532,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
             <div className="w-8 h-8 rounded-full bg-hint-of-green flex items-center justify-center text-nordic-dark">
               <span className="material-icons !text-[17px]">description</span>
             </div>
-            <h2 className="text-xl font-bold text-nordic-dark">Description</h2>
+            <h2 className="text-xl font-bold text-nordic-dark">{t("description_section")}</h2>
           </div>
           <div className="p-8">
             <div className="mb-3 flex gap-2 border-b border-gray-100 pb-2">
@@ -552,11 +552,11 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               defaultValue={initialData?.description}
               onChange={handleDescriptionChange}
               maxLength={2000}
-              placeholder="Describe the property features, neighborhood, and unique selling points..."
+              placeholder={t("description_placeholder")}
               className="w-full px-4 py-3 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro leading-relaxed resize-y min-h-[200px]"
             />
             <div className="mt-2 text-right text-xs text-gray-400 font-sf-pro">
-              {descLength} / 2000 characters
+              {t("character_count", { count: descLength })}
             </div>
           </div>
         </div>
@@ -568,10 +568,10 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               <div className="w-8 h-8 rounded-full bg-hint-of-green flex items-center justify-center text-nordic-dark">
                 <span className="material-icons !text-[17px]">image</span>
               </div>
-              <h2 className="text-xl font-bold text-nordic-dark">Gallery</h2>
+              <h2 className="text-xl font-bold text-nordic-dark">{t("gallery_section")}</h2>
             </div>
             <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded font-sf-pro">
-              JPG, PNG, WEBP
+              {t("accepted_formats")}
             </span>
           </div>
           <div className="p-8">
@@ -590,10 +590,10 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 </div>
                 <div className="space-y-1">
                   <p className="text-base font-medium text-nordic-dark font-sf-pro">
-                    Click or drag images here
+                    {t("click_or_drag")}
                   </p>
                   <p className="text-xs text-gray-400 font-sf-pro">
-                    Max file size 5MB per image
+                    {t("max_file_size")}
                   </p>
                 </div>
               </div>
@@ -620,7 +620,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                       <button
                         type="button"
                         onClick={() => setMainImage(index)}
-                        title={index === 0 ? "Remove from Main" : "Set as Main"}
+                        title={index === 0 ? t("set_as_main") : t("remove_from_main")}
                         className="w-8 h-8 rounded-full bg-white hover:bg-gray-400 flex items-center justify-center transition-colors"
                       >
                         <span className={`material-icons text-sm ${index === 0 ? "text-yellow-500" : "text-mosque"}`}>
@@ -630,7 +630,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                     </div>
                     {index === 0 && (
                       <span className="absolute top-2 left-2 bg-mosque text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm font-sf-pro uppercase tracking-wider">
-                        Main
+                        {t("main_badge")}
                       </span>
                     )}
                   </div>
@@ -641,7 +641,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                   className="aspect-square rounded-[0.5rem] border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-mosque hover:border-mosque hover:bg-hint-of-green/20 transition-all group"
                 >
                   <span className="material-icons group-hover:scale-110 transition-transform">add</span>
-                  <span className="text-xs mt-1 font-medium font-sf-pro">Add More</span>
+                  <span className="text-xs mt-1 font-medium font-sf-pro">{t("add_more")}</span>
                 </button>
               </div>
             )}
@@ -774,13 +774,13 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
             <div className="w-8 h-8 rounded-full bg-hint-of-green flex items-center justify-center text-nordic-dark">
               <span className="material-icons !text-[17px]">straighten</span>
             </div>
-            <h2 className="text-lg font-bold text-nordic-dark">Details</h2>
+            <h2 className="text-lg font-bold text-nordic-dark">{t("details_section")}</h2>
           </div>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="group">
                 <label htmlFor="area" className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block">
-                  Area (m²)
+                  {t("area_m2")}
                 </label>
                 <input
                   type="number"
@@ -793,7 +793,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               </div>
               <div className="group">
                 <label htmlFor="year_built" className="text-xs text-gray-500 font-medium font-sf-pro mb-1 block">
-                  Year Built
+                  {t("year_built")}
                 </label>
                 <input
                   type="number"
@@ -812,7 +812,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-nordic-dark font-sf-pro flex items-center gap-2">
                   <span className="material-icons text-gray-400 text-sm">bed</span>
-                  Bedrooms
+                  {t("bedrooms_label")}
                 </label>
                 <div className="flex items-center border border-gray-200 rounded-[0.375rem] overflow-hidden bg-white shadow-sm">
                   <button
@@ -840,7 +840,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-nordic-dark font-sf-pro flex items-center gap-2">
                   <span className="material-icons text-gray-400 text-sm">shower</span>
-                  Bathrooms
+                  {t("bathrooms_label")}
                 </label>
                 <div className="flex items-center border border-gray-200 rounded-[0.375rem] overflow-hidden bg-white shadow-sm">
                   <button
@@ -868,7 +868,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-nordic-dark font-sf-pro flex items-center gap-2">
                   <span className="material-icons text-gray-400 text-sm">directions_car</span>
-                  Parking
+                  {t("parking_label")}
                 </label>
                 <div className="flex items-center border border-gray-200 rounded-[0.375rem] overflow-hidden bg-white shadow-sm">
                   <button
@@ -899,7 +899,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
 
             <div>
               <h3 className="text-xs font-bold text-nordic-dark mb-3 font-sf-pro uppercase tracking-wider text-gray-500">
-                Amenities
+                {t("amenities_section")}
               </h3>
               <div className="space-y-2">
                 {AMENITIES_LIST.map((amenity) => (
@@ -933,7 +933,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               }}
               className="px-5 py-2.5 rounded-[0.5rem] border border-mosque/20 bg-white text-mosque hover:bg-white/80 transition-colors font-medium font-sf-pro text-sm cursor-pointer"
             >
-              Save Draft
+              {t("save_draft")}
             </button>
             <button
               type="button"
@@ -945,7 +945,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               className="px-5 py-2.5 rounded-[0.5rem] bg-mosque hover:bg-nordic-dark text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 font-sf-pro text-sm cursor-pointer"
             >
               <span className="material-icons text-sm">save</span>
-              Save Property
+              {t("save_property")}
             </button>
           </div>
         </div>

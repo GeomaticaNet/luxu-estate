@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -26,34 +27,34 @@ interface PropertyRowProps {
   isLast: boolean;
 }
 
-function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured: boolean; type: string }) {
+function StatusBadge({ active, isFeatured, type, t }: { active: boolean; isFeatured: boolean; type: string; t: (key: string) => string }) {
   // Determine the primary badge text, color, and dot
   let badgeText: string;
   let badgeColor: string;
   let dotColor: string;
 
   if (!active) {
-    badgeText = "Inactive";
+    badgeText = t("inactive");
     badgeColor = "bg-gray-200 text-gray-600";
     dotColor = "bg-gray-500";
   } else if (type === "SALE") {
-    badgeText = "For Sale";
+    badgeText = t("for_sale");
     badgeColor = "bg-green-100 text-green-700";
     dotColor = "bg-green-500";
   } else if (type === "RENT") {
-    badgeText = "For Rent";
+    badgeText = t("for_rent");
     badgeColor = "bg-blue-100 text-blue-700";
     dotColor = "bg-blue-500";
   } else if (type === "SOLD") {
-    badgeText = "Sold";
+    badgeText = t("sold");
     badgeColor = "bg-gray-200 text-gray-600";
     dotColor = "bg-gray-500";
   } else if (type === "RENTED") {
-    badgeText = "Rented";
+    badgeText = t("rented");
     badgeColor = "bg-blue-900 text-blue-100";
     dotColor = "bg-blue-300";
   } else {
-    badgeText = "Active";
+    badgeText = t("active_prop");
     badgeColor = "bg-hint-of-green text-mosque";
     dotColor = "bg-mosque";
   }
@@ -67,7 +68,7 @@ function StatusBadge({ active, isFeatured, type }: { active: boolean; isFeatured
       {isFeatured && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
-          Featured
+          {t("featured_badge")}
         </span>
       )}
     </div>
@@ -82,6 +83,7 @@ const typeColors: Record<string, { bg: string; text: string }> = {
 };
 
 export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
+  const t = useTranslations("Admin");
   const [isActive, setIsActive] = useState(property.active);
   const [propertyType, setPropertyType] = useState(property.type);
   const [isFeatured, setIsFeatured] = useState(property.is_featured);
@@ -146,13 +148,13 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
   };
 
   const menuItems = [
-    { action: "edit", label: "Edit Property", icon: "edit" },
-    { action: "toggle", label: isActive ? "Deactivate" : "Activate", icon: isActive ? "visibility_off" : "visibility" },
-    { action: "toggleFeatured", label: isFeatured ? "Unmark as Featured" : "Mark as Featured", icon: isFeatured ? "star_border" : "star" },
-    { action: "forSale", label: "For Sale", icon: "home" },
-    { action: "forRent", label: "For Rent", icon: "key" },
-    { action: "sold", label: "Sold", icon: "check_circle" },
-    { action: "rented", label: "Rented", icon: "handshake" },
+    { action: "edit", label: t("edit_property"), icon: "edit" },
+    { action: "toggle", label: isActive ? t("deactivate") : t("activate"), icon: isActive ? "visibility_off" : "visibility" },
+    { action: "toggleFeatured", label: isFeatured ? t("unmark_featured") : t("mark_featured"), icon: isFeatured ? "star_border" : "star" },
+    { action: "forSale", label: t("for_sale"), icon: "home" },
+    { action: "forRent", label: t("for_rent"), icon: "key" },
+    { action: "sold", label: t("sold"), icon: "check_circle" },
+    { action: "rented", label: t("rented"), icon: "handshake" },
   ];
 
   return (
@@ -189,14 +191,14 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           </p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
             <span className="flex items-center gap-1">
-              <span className="material-icons text-[14px]">bed</span> {property.bedrooms} Beds
+              <span className="material-icons text-[14px]">bed</span> {property.bedrooms} {t("beds")}
             </span>
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
             <span className="flex items-center gap-1">
-              <span className="material-icons text-[14px]">bathtub</span> {property.bathrooms} Baths
+              <span className="material-icons text-[14px]">bathtub</span> {property.bathrooms} {t("baths")}
             </span>
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span>{property.area} sqft</span>
+            <span>{property.area} {t("sqft")}</span>
           </div>
         </div>
       </div>
@@ -213,7 +215,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
 
       {/* Status */}
       <div className="col-span-6 md:col-span-2">
-        <StatusBadge active={isActive} isFeatured={isFeatured} type={propertyType} />
+        <StatusBadge active={isActive} isFeatured={isFeatured} type={propertyType} t={t} />
       </div>
 
       {/* Actions - Menu */}

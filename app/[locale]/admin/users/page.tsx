@@ -36,6 +36,7 @@ export default async function AdminUsersPage({
     return (
       <div className="min-h-screen bg-background-light flex items-center justify-center">
         <div className="text-red-600">Error loading users: {error.message}</div>
+
       </div>
     );
   }
@@ -68,9 +69,9 @@ export default async function AdminUsersPage({
   });
 
   const tabs = [
-    { id: 'all', label: 'All Users' },
-    { id: 'users', label: 'Users' },
-    { id: 'admins', label: 'Admins' },
+    { id: 'all', labelKey: 'tab_all_users' },
+    { id: 'users', labelKey: 'tab_users' },
+    { id: 'admins', labelKey: 'tab_admins' },
   ];
 
   return (
@@ -78,8 +79,8 @@ export default async function AdminUsersPage({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-nordic-dark tracking-wide">User Directory</h1>
-          <p className="text-gray-500 mt-1 tracking-wide">Manage user access and roles for your properties.</p>
+          <h1 className="text-3xl font-extrabold text-nordic-dark tracking-wide">{t("user_directory")}</h1>
+          <p className="text-gray-500 mt-1 tracking-wide">{t("user_directory_desc")}</p>
         </div>
         <div className="flex items-center gap-3">
           <form action="/admin/users" method="GET" className="relative group">
@@ -91,30 +92,30 @@ export default async function AdminUsersPage({
               name="search"
               defaultValue={searchQuery || ''}
               className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-white text-nordic-dark shadow-soft placeholder-nordic-dark/30 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-sm"
-              placeholder="Search by name, email..."
+              placeholder={t("search_users_placeholder")}
               type="text"
             />
           </form>
           <button className="inline-flex items-center justify-center px-4 py-2.5 border border-mosque text-sm font-medium rounded-lg text-mosque bg-transparent hover:bg-mosque/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mosque transition-colors whitespace-nowrap">
             <span className="material-icons text-lg mr-2">add</span>
-            Add User
+            {t("add_user")}
           </button>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-6 border-b border-nordic-dark/10 overflow-x-auto mb-8">
-        {tabs.map((t) => (
+        {tabs.map((tab) => (
           <Link
-            key={t.id}
-            href={`/admin/users?tab=${t.id}`}
+            key={tab.id}
+            href={`/admin/users?tab=${tab.id}`}
             className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap ${
-              activeTab === t.id
+              activeTab === tab.id
                 ? 'text-mosque border-b-2 border-mosque font-semibold'
                 : 'text-nordic-dark/60 hover:text-nordic-dark'
             }`}
           >
-            {t.label}
+            {t(tab.labelKey)}
           </Link>
         ))}
       </div>
@@ -125,8 +126,10 @@ export default async function AdminUsersPage({
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-500">
-              Showing <span className="font-medium text-nordic-dark">{filteredUsers.length}</span> of <span className="font-medium text-nordic-dark">{formattedUsers.length}</span> users
-              {search && <span className="ml-1">for "<span className="font-medium text-mosque">{searchQuery}</span>"</span>}
+              {search
+                ? t("showing_users_for", { count: filteredUsers.length, total: formattedUsers.length, query: searchQuery || "" })
+                : t("showing_users", { count: filteredUsers.length, total: formattedUsers.length })
+              }
             </p>
           </div>
         </div>

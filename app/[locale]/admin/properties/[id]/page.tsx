@@ -1,8 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import PropertyForm from "@/components/admin/property/PropertyForm";
 import { Link } from "@/i18n/routing";
 import { createPublicClient } from "@/lib/supabase/server";
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations("Admin");
   const { id } = await params;
   const supabase = createPublicClient();
   
@@ -13,7 +15,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     .single();
 
   if (error || !property) {
-    return <div className="p-8 text-red-500">Property not found</div>;
+    return <div className="p-8 text-red-500">{t("property_not_found")}</div>;
   }
 
   // Sort images
@@ -27,15 +29,15 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         <div className="space-y-4">
           <nav aria-label="Breadcrumb" className="flex">
             <ol className="flex items-center space-x-2 text-sm text-gray-500 font-medium font-sf-pro">
-              <li><Link href="/admin/properties" className="hover:text-mosque transition-colors">Properties</Link></li>
+              <li><Link href="/admin/properties" className="hover:text-mosque transition-colors">{t("properties_breadcrumb")}</Link></li>
               <li><span className="material-icons text-xs text-gray-400">chevron_right</span></li>
-              <li aria-current="page" className="text-nordic-dark">Edit</li>
+              <li aria-current="page" className="text-nordic-dark">{t("edit_breadcrumb")}</li>
             </ol>
           </nav>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-nordic-dark tracking-tight mb-2">Edit Property</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-nordic-dark tracking-tight mb-2">{t("edit_title")}</h1>
             <p className="text-base text-gray-500 max-w-2xl font-normal font-sf-pro">
-              Update the details below.
+              {t("edit_desc")}
             </p>
           </div>
         </div>

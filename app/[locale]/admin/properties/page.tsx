@@ -47,7 +47,7 @@ export default async function AdminPropertiesPage({
 
   if (error) {
     console.error('Error loading properties:', error);
-    return <div className="text-red-600">Error loading properties: {error.message}</div>;
+    return <div className="text-red-600">{t("error_loading", { message: error.message })}</div>;
   }
 
   // Fetch main images for displayed properties
@@ -115,13 +115,13 @@ export default async function AdminPropertiesPage({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-nordic-dark tracking-wide">My Properties</h1>
-          <p className="text-gray-500 mt-1 tracking-wide">Manage your portfolio and track performance.</p>
+          <h1 className="text-3xl font-extrabold text-nordic-dark tracking-wide">{t("my_properties_title")}</h1>
+          <p className="text-gray-500 mt-1 tracking-wide">{t("manage_portfolio_desc")}</p>
         </div>
         <div className="flex items-center gap-3">
           <PropertyTypeFilter />
           <Link href="/admin/properties/new" className="bg-mosque hover:bg-mosque/90 text-white px-5 py-2.5 rounded-[7px] text-sm font-medium shadow-md shadow-mosque/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2">
-            <span className="material-icons text-base">add</span> Add New Property
+            <span className="material-icons text-base">add</span> {t("add_new_property")}
           </Link>
         </div>
       </div>
@@ -147,20 +147,20 @@ export default async function AdminPropertiesPage({
       {/* Pagination */}
       <div className="mt-6 px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-lg">
         <div className="text-sm text-gray-500">
-          Showing <span className="font-medium text-nordic-dark">{showingFrom}</span> to <span className="font-medium text-nordic-dark">{showingTo}</span> of <span className="font-medium text-nordic-dark">{totalCount || 0}</span> results
+          {t("showing_results", { from: showingFrom, to: showingTo, total: totalCount || 0 })}
         </div>
         <div className="flex gap-2">
           <Link
             href={currentPage > 1 ? pageUrl(currentPage - 1) : '#'}
             className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage <= 1 ? 'opacity-50 pointer-events-none' : ''}`}
           >
-            Previous
+            {t("previous")}
           </Link>
           <Link
             href={currentPage < totalPages ? pageUrl(currentPage + 1) : '#'}
             className={`px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-white ${currentPage >= totalPages ? 'opacity-50 pointer-events-none' : ''}`}
           >
-            Next
+            {t("next")}
           </Link>
         </div>
       </div>

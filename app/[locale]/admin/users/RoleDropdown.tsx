@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { updateUserRole, toggleUserActive } from "./actions";
 
 interface RoleDropdownProps {
@@ -12,6 +13,7 @@ interface RoleDropdownProps {
 }
 
 export default function RoleDropdown({ userId, currentRole, currentUserId, active, isFirst }: RoleDropdownProps) {
+  const t = useTranslations("Admin");
   const [isOpen, setIsOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [showConfirmDemote, setShowConfirmDemote] = useState(false);
@@ -65,7 +67,7 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               : "border-gray-200 bg-transparent text-nordic-dark/70 hover:border-nordic-dark hover:text-nordic-dark"
         }`}
       >
-        {updating ? 'Saving...' : 'Change Role'}
+        {updating ? t("saving") : t("change_role")}
         <span className="material-icons text-[16px] ml-2">
           {isOpen ? 'expand_less' : 'expand_more'}
         </span>
@@ -84,7 +86,7 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               }`}
             >
               <span className={`material-icons text-sm mr-3 ${currentRole === 'admin' ? 'text-white/20' : 'text-white/50'}`}>shield</span>
-              {currentRole === 'admin' ? 'Already Admin' : 'Promote to Admin'}
+              {currentRole === 'admin' ? t("already_admin") : t("promote_to_admin")}
             </button>
             <button
               onClick={() => handleRoleChange('user')}
@@ -96,7 +98,7 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               }`}
             >
               <span className={`material-icons text-sm mr-3 ${currentRole === 'user' ? 'text-white/20' : 'text-white/50'}`}>person</span>
-              {currentRole === 'user' ? 'Already User' : 'Demote to User'}
+              {currentRole === 'user' ? t("already_user") : t("demote_to_user")}
             </button>
             <div className="border-t border-white/10 my-1"></div>
             <button
@@ -113,7 +115,7 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               <span className={`material-icons text-sm mr-3 ${isCurrentUser ? 'text-red-300/40' : active ? 'text-red-300' : 'text-green-300'}`}>
                 {active ? 'block' : 'check_circle'}
               </span>
-              {isCurrentUser ? 'Cannot suspend yourself' : active ? 'Suspend User' : 'Re-activate User'}
+              {isCurrentUser ? t("cannot_suspend_self") : active ? t("suspend_user") : t("reactivate_user")}
             </button>
           </div>
         </div>
@@ -127,23 +129,23 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
                 <span className="material-icons text-orange-600">warning</span>
               </div>
-              <h3 className="text-lg font-bold text-nordic-dark">Confirm Action</h3>
+              <h3 className="text-lg font-bold text-nordic-dark">{t("confirm_action")}</h3>
             </div>
             <p className="text-gray-600 text-sm mb-6">
-              You are about to <strong>demote this admin to a regular user</strong>. They will lose all admin privileges immediately. Are you sure?
+              {t("confirm_demote_text")}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => { setShowConfirmDemote(false); setPendingRole(null); }}
                 className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-nordic-dark hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={confirmDemote}
                 className="flex-1 px-4 py-2.5 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors"
               >
-                Yes, Demote
+                {t("yes_demote")}
               </button>
             </div>
           </div>

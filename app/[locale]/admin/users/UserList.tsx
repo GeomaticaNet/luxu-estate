@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import RoleDropdown from "./RoleDropdown";
 import { getPageLabel } from "@/lib/utils/getPageLabel";
@@ -26,6 +27,7 @@ export default function UserList({
   currentUserId: string | null;
   locale: string;
 }) {
+  const t = useTranslations("Admin");
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
   const [userPages, setUserPages] = useState<Map<string, string>>(new Map());
 
@@ -80,10 +82,10 @@ export default function UserList({
     <>
       <div className="flex-grow w-full pb-12 space-y-4">
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-sm font-semibold uppercase tracking-wider text-nordic-dark/50 mb-2">
-        <div className="col-span-4">User Details</div>
-        <div className="col-span-3">Role & Status</div>
-        <div className="col-span-3">Performance</div>
-        <div className="col-span-2 text-right">Actions</div>
+        <div className="col-span-4">{t("user_details_header")}</div>
+        <div className="col-span-3">{t("role_status_header")}</div>
+        <div className="col-span-3">{t("performance_header")}</div>
+        <div className="col-span-2 text-right">{t("actions")}</div>
       </div>
 
       {users.map((user) => {
@@ -112,11 +114,11 @@ export default function UserList({
                 )}
               </div>
                 <div className="ml-4 overflow-hidden">
-                  <div className="text-sm font-bold text-nordic-dark truncate">{user.full_name || 'Unknown User'}</div>
+                  <div className="text-sm font-bold text-nordic-dark truncate">{user.full_name || t("unknown_user")}</div>
                   <div className="text-xs text-nordic-dark/70 truncate">{user.email}</div>
                   <div className="mt-1 flex items-center gap-1.5">
                     <span className="text-[10px] px-2 py-0.5 inline-block rounded bg-orange-100 text-orange-700 font-medium">
-                      ID: #{user.id.slice(0, 8).toUpperCase()}
+                      {t("id_prefix")} #{user.id.slice(0, 8).toUpperCase()}
                     </span>
                     {isOnline && userPages.has(user.id) && (
                       <span className="text-[10px] px-2 py-0.5 inline-flex items-center gap-1 rounded bg-hint-of-green/50 text-mosque">
@@ -132,23 +134,23 @@ export default function UserList({
               <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
                 user.role === 'admin' ? 'bg-nordic-dark text-white' : 'bg-mosque/10 text-mosque'
               }`}>
-                {user.role === 'admin' ? 'Administrator' : 'User'}
+                {user.role === 'admin' ? t("administrator_role") : t("user_role")}
               </span>
               <div className={`flex items-center text-xs ${user.active ? 'text-nordic-dark/60' : 'text-red-500'}`}>
                 <span className={`material-icons text-[14px] mr-1 ${user.active ? 'text-mosque' : 'text-red-500'}`}>
                   {user.active ? 'check_circle' : 'cancel'}
                 </span>
-                {user.active ? 'Active' : 'Inactive'}
+                {user.active ? t("active_status") : t("inactive")}
               </div>
             </div>
 
             <div className="col-span-12 md:col-span-3 w-full grid grid-cols-2 gap-4">
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-nordic-dark/50">Properties</div>
+                <div className="text-[10px] uppercase tracking-wider text-nordic-dark/50">{t("properties_header")}</div>
                 <div className="text-sm font-semibold text-nordic-dark">-</div>
               </div>
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-nordic-dark/50">Joined</div>
+                <div className="text-[10px] uppercase tracking-wider text-nordic-dark/50">{t("joined_header")}</div>
                 <div className="text-sm font-semibold text-nordic-dark">
                   {new Date(user.created_at).toLocaleDateString()}
                 </div>
