@@ -101,6 +101,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("Admin");
+  const ta = useTranslations("PropertyDetails");
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -911,7 +912,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                       className="w-4 h-4 text-mosque border-gray-300 rounded focus:ring-mosque"
                     />
                     <span className="text-sm text-gray-700 font-sf-pro group-hover:text-nordic-dark transition-colors">
-                      {amenity}
+                      {ta(`amenities_map.${amenity}`)}
                     </span>
                   </label>
                 ))}
