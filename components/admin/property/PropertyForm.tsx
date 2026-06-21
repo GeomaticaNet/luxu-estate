@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { upsertProperty } from "@/app/[locale]/admin/properties/actions";
 import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const InteractiveMap = dynamic(
   () => import("@/components/property/InteractiveLeafletMap"),
@@ -100,6 +100,7 @@ async function resizeImage(file: File, maxDimension: number): Promise<Blob> {
 export default function PropertyForm({ initialData }: PropertyFormProps) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("Admin");
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -656,12 +657,12 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
             <div className="w-8 h-8 rounded-full bg-hint-of-green flex items-center justify-center text-nordic-dark">
               <span className="material-icons !text-[17px]">place</span>
             </div>
-            <h2 className="text-lg font-bold text-nordic-dark">Location</h2>
+            <h2 className="text-lg font-bold text-nordic-dark">{t("location")}</h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                Address
+                {t("address_field")}
               </label>
               <input
                 type="text"
@@ -669,14 +670,14 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                 name="address"
                 value={address}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                placeholder="Street Address, City, Zip"
+                placeholder={t("street_address_placeholder")}
                 className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  City / Locality
+                  {t("city_locality")}
                 </label>
                 <input
                   type="text"
@@ -691,7 +692,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               </div>
               <div>
                 <label htmlFor="state" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  State / Province
+                  {t("state_province")}
                 </label>
                 <input
                   type="text"
@@ -706,7 +707,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               </div>
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Country
+                  {t("country_field")}
                 </label>
                 <input
                   type="text"
@@ -723,7 +724,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="lat" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Latitud
+                  {t("latitude")}
                 </label>
                 <input
                   type="number"
@@ -738,7 +739,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
               </div>
               <div>
                 <label htmlFor="lng" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
-                  Longitud
+                  {t("longitude")}
                 </label>
                 <input
                   type="number"

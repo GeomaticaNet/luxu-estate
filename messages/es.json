@@ -213,7 +213,14 @@
     "actions": "Acciones",
     "view": "Ver",
     "edit": "Editar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "city_locality": "Localidad",
+    "state_province": "Provincia",
+    "country_field": "País",
+    "address_field": "Dirección",
+    "street_address_placeholder": "Calle, Ciudad, CP",
+    "latitude": "Latitud",
+    "longitude": "Longitud"
   },
   "Favorites": {
     "title": "Mis Favoritos",

@@ -2,7 +2,9 @@
 
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { UserMenu } from "@/components/ui/UserMenu";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 interface AdminNavbarProps {
   userEmail?: string;
@@ -12,10 +14,11 @@ interface AdminNavbarProps {
 
 export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps) {
   const pathname = usePathname();
+  const t = useTranslations("Admin");
 
   const navItems = [
-    { href: "/admin/properties", label: "Properties" },
-    { href: "/admin/users", label: "Users" },
+    { href: "/admin/properties", label: t("properties") },
+    { href: "/admin/users", label: t("users") },
   ];
 
   const isActive = (href: string) => {
@@ -49,8 +52,9 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
           </div>
         </div>
 
-        {/* Right: Search, Notifications, Avatar */}
-        <div className="flex items-center gap-5">
+        {/* Right: Language, Search, Notifications, Avatar */}
+        <div className="flex items-center gap-3">
+          <LanguageSelector />
           <button className="text-nordic-dark/60 hover:text-mosque transition-colors">
             <span className="material-symbols-outlined text-xl">search</span>
           </button>
