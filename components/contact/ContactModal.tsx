@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Portal } from "@/components/ui/Portal";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -179,11 +180,9 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
                   <label className="block text-sm font-medium text-nordic-dark mb-1">
                     {t("preferred_date")}
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={preferredDate}
-                    onChange={(e) => setPreferredDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-nordic-dark focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm"
+                    onChange={setPreferredDate}
                   />
                 </div>
               )}
