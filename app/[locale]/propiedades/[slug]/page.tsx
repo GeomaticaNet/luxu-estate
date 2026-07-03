@@ -5,6 +5,7 @@ import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { MortgageCalculator } from "@/components/property/MortgageCalculator";
 import PropertyMap from "@/components/property/PropertyMap";
 import { BackButton } from "@/components/ui/BackButton";
+import { PropertyContactSection } from "@/components/contact/PropertyContactSection";
 import Image from "next/image";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -213,35 +214,12 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {isUnavailable ? (
-                  <>
-                    <button className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group">
-                      <span className="material-icons text-xl group-hover:scale-110 transition-transform">
-                        notifications
-                      </span>
-                      Notify me of similar properties
-                    </button>
-                    <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
-                      <span className="material-icons text-xl">mail_outline</span>
-                      {t("contact_agent")}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group">
-                      <span className="material-icons text-xl group-hover:scale-110 transition-transform">
-                        calendar_today
-                      </span>
-                      {t("schedule_visit")}
-                    </button>
-                    <button className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
-                      <span className="material-icons text-xl">mail_outline</span>
-                      {t("contact_agent")}
-                    </button>
-                  </>
-                )}
-              </div>
+              <PropertyContactSection
+                isUnavailable={isUnavailable}
+                isSold={isSold}
+                propertyId={property.id}
+                propertyTitle={property.title}
+              />
             </div>
 
             <div className="bg-white p-2 rounded-xl shadow-[3px_3px_12px_rgba(0,0,0,0.25)]">

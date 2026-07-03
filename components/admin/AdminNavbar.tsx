@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { UserMenu } from "@/components/ui/UserMenu";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { createClient } from "@/lib/supabase/client";
 
 interface AdminNavbarProps {
   userEmail?: string;
@@ -15,9 +17,40 @@ interface AdminNavbarProps {
 export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps) {
   const pathname = usePathname();
   const t = useTranslations("Admin");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function fetchUnreadCount() {
+      const { count } = await supabase
+        .from("contact_leads")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "new");
+      if (count !== null) setUnreadCount(count);
+    }
+
+    fetchUnreadCount();
+
+    const channel = supabase
+      .channel("admin-badge")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contact_leads" },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const navItems = [
     { href: "/admin/properties", label: t("properties") },
+    { href: "/admin/messages", label: t("messages_title") || "Messages" },
     { href: "/admin/users", label: t("users") },
   ];
 
@@ -38,9 +71,9 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
           <div className="hidden md:flex space-x-8">
             {navItems.map((item) => (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
-                className={`px-1 py-2 text-sm font-medium transition-colors ${
+                className={`px-1 py-2 text-sm font-medium transition-colors relative ${
                   isActive(item.href)
                     ? "text-mosque border-b-2 border-mosque"
                     : "text-nordic-dark/60 hover:text-mosque"
@@ -58,10 +91,17 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
           <button className="text-nordic-dark/60 hover:text-mosque transition-colors">
             <span className="material-symbols-outlined text-xl">search</span>
           </button>
-          <button className="text-nordic-dark/60 hover:text-mosque transition-colors relative">
+          <Link
+            href="/admin/messages"
+            className="text-nordic-dark/60 hover:text-mosque transition-colors relative"
+          >
             <span className="material-symbols-outlined text-xl">notifications</span>
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-          </button>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight shadow-lg">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Link>
           
           <UserMenu
             avatarUrl={userAvatar}

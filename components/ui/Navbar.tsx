@@ -5,6 +5,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { NavbarAuth } from "./NavbarAuth";
 import { NavLinks } from "./NavLinks";
 import { MobileMenu } from "./MobileMenu";
+import { AdminNotificationBadge } from "./AdminNotificationBadge";
 
 export const Navbar = async () => {
   const t = await getTranslations("Navigation");
@@ -52,7 +53,8 @@ export const Navbar = async () => {
 
           {/* Right: Controls */}
           <div className="flex items-center space-x-3 md:space-x-6">
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-3">
+              <AdminNotificationBadge isAdmin={isAdmin} />
               <LanguageSelector />
             </div>
             <div className="hidden md:block">
