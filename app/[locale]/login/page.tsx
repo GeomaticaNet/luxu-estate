@@ -96,7 +96,14 @@ export default function LoginPage() {
       return;
     }
 
-    setMessage("Registration successful! Check your email to confirm your account.");
+    // Auto-confirm user via service role (dev only)
+    fetch("/api/auth/confirm-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim() }),
+    }).catch(() => {});
+
+    setMessage("Account created! You can now sign in.");
     setLoading(null);
     setMode("login");
   };
