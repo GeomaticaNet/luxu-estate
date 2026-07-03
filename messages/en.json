@@ -348,6 +348,13 @@
     "leads_update_status": "Update status",
     "leads_received": "Received",
     "leads_validation_required": "Name, email and message are required",
+    "leads_available": "Available",
+    "leads_taken": "Taken",
+    "leads_take": "Take Lead",
+    "leads_taken_by_you": "Assigned to you",
+    "leads_taken_by_other": "Assigned to another agent",
+    "leads_open_whatsapp": "Open WhatsApp",
+    "leads_call": "Call",
     "cancel": "Cancel",
     "yes_demote": "Yes, Demote"
   },

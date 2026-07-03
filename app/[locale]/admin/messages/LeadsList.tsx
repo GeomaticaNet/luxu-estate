@@ -15,6 +15,8 @@ interface Lead {
   lead_type: string;
   status: string;
   preferred_date: string | null;
+  assigned_to: string | null;
+  assigned_at: string | null;
   created_at: string;
 }
 
@@ -41,6 +43,8 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [assigning, setAssigning] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
   const fetchLeads = useCallback(async () => {
@@ -55,6 +59,13 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
   useEffect(() => {
     setLeads(initialLeads);
   }, [initialLeads]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) setCurrentUserId(session.user.id);
+    });
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -73,6 +84,42 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
       supabase.removeChannel(channel);
     };
   }, [fetchLeads]);
+
+  async function assignLead(id: string) {
+    setAssigning(id);
+    try {
+      const res = await fetch("/api/contact/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.status === 409) {
+        alert(t("leads_taken_by_other"));
+        fetchLeads();
+        return;
+      }
+
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("Error:", err);
+        return;
+      }
+
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === id ? { ...l, assigned_to: currentUserId, assigned_at: new Date().toISOString() } : l
+        )
+      );
+      if (selectedLead?.id === id) {
+        setSelectedLead((prev) => (prev ? { ...prev, assigned_to: currentUserId } : null));
+      }
+    } catch (err) {
+      console.error("Error assigning lead:", err);
+    } finally {
+      setAssigning(null);
+    }
+  }
 
   async function updateStatus(id: string, status: string) {
     setUpdating(id);
@@ -171,15 +218,17 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
           {/* Desktop Table Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-sm font-semibold text-gray-500 uppercase tracking-wider">
             <div className="col-span-3">{t("leads_table_name")}</div>
-            <div className="col-span-2">{t("leads_table_email")}</div>
+            <div className="col-span-1">{t("leads_table_email")}</div>
             <div className="col-span-2">{t("leads_table_type")}</div>
             <div className="col-span-2">{t("leads_table_date")}</div>
             <div className="col-span-2">{t("leads_table_status")}</div>
+            <div className="col-span-1">Asignado</div>
             <div className="col-span-1"></div>
           </div>
 
           {filteredLeads.map((lead) => {
             const colors = typeColors[lead.lead_type] || typeColors.contact;
+            const isAssignedToCurrentUser = lead.assigned_to && currentUserId && lead.assigned_to === currentUserId;
             return (
               <div key={lead.id}>
                 <div
@@ -190,7 +239,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                     <div className="text-sm font-medium text-nordic-dark truncate">{lead.name}</div>
                     <div className="text-xs text-gray-400 truncate">{lead.property_title || lead.message.slice(0, 50)}</div>
                   </div>
-                  <div className="col-span-2 text-sm text-gray-600 truncate hidden md:block">{lead.email}</div>
+                  <div className="col-span-1 text-sm text-gray-600 truncate hidden md:block">{lead.email}</div>
                   <div className="col-span-2 hidden md:block">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
                       <span className="material-icons text-xs">{colors.icon}</span>
@@ -210,6 +259,26 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                       <span className={`w-1.5 h-1.5 rounded-full ${statusColors[lead.status] || "bg-gray-400"}`}></span>
                       {statusLabel(lead.status)}
                     </span>
+                  </div>
+                  <div className="col-span-1 hidden md:block">
+                    {lead.assigned_to ? (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                        isAssignedToCurrentUser
+                          ? "bg-mosque/10 text-mosque"
+                          : "bg-gray-100 text-gray-400"
+                      }`}>
+                        <span className="material-icons text-[12px]">person</span>
+                        {isAssignedToCurrentUser ? t("leads_taken_by_you") : t("leads_taken")}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); assignLead(lead.id); }}
+                        disabled={assigning === lead.id}
+                        className="text-[10px] font-medium text-mosque hover:text-mosque/80 transition-colors"
+                      >
+                        {assigning === lead.id ? "..." : t("leads_take")}
+                      </button>
+                    )}
                   </div>
                   <div className="col-span-1 text-right hidden md:block">
                     <span className="material-icons text-gray-300 text-lg">chevron_right</span>
@@ -250,12 +319,34 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                 {selectedLead.phone && (
                   <div>
                     <p className="text-xs text-gray-500 mb-1">{t("leads_phone")}</p>
-                    <p className="text-sm text-nordic-dark">{selectedLead.phone}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-nordic-dark">{selectedLead.phone}</p>
+                      <div className="flex gap-1">
+                        <a
+                          href={`tel:${selectedLead.phone.replace(/[^+\d]/g, "")}`}
+                          className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center transition-colors"
+                          title={t("leads_call")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="material-icons text-sm">phone</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${selectedLead.phone.replace(/[^+\d]/g, "")}`}
+                          className="w-7 h-7 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
+                          title={t("leads_open_whatsapp")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="material-icons text-sm">chat</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3">
                 <div>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                     (typeColors[selectedLead.lead_type] || typeColors.contact).bg
@@ -280,6 +371,28 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                   <p className="text-sm font-medium text-nordic-dark">{selectedLead.property_title}</p>
                 </div>
               )}
+
+              <div className="border border-gray-100 rounded-lg p-3">
+                {selectedLead.assigned_to ? (
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="material-icons text-sm text-mosque">person_pin</span>
+                    <span className="text-gray-600">
+                      {selectedLead.assigned_to === currentUserId
+                        ? t("leads_taken_by_you")
+                        : t("leads_taken_by_other")
+                      }
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => assignLead(selectedLead.id)}
+                    disabled={assigning === selectedLead.id}
+                    className="w-full py-2 rounded-lg bg-mosque text-white text-xs font-medium hover:bg-mosque/90 transition-colors disabled:opacity-50"
+                  >
+                    {assigning === selectedLead.id ? "..." : t("leads_take")}
+                  </button>
+                )}
+              </div>
 
               <div>
                 <p className="text-xs text-gray-500 mb-1">{t("message")}</p>

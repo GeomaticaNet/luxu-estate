@@ -348,6 +348,13 @@
     "leads_update_status": "Actualizar estado",
     "leads_received": "Recibido",
     "leads_validation_required": "Nombre, email y mensaje son obligatorios",
+    "leads_available": "Disponible",
+    "leads_taken": "Tomado",
+    "leads_take": "Tomar Lead",
+    "leads_taken_by_you": "Asignado a ti",
+    "leads_taken_by_other": "Asignado a otro agente",
+    "leads_open_whatsapp": "Abrir WhatsApp",
+    "leads_call": "Llamar",
     "cancel": "Cancelar",
     "yes_demote": "Sí, Degradar"
   },

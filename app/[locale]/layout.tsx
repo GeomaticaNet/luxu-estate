@@ -1,6 +1,7 @@
 import { NavbarWrapper } from "@/components/ui/NavbarWrapper";
 import { Navbar } from "@/components/ui/Navbar";
 import { FooterWrapper } from "@/components/ui/FooterWrapper";
+import { WhatsAppWrapper } from "@/components/ui/WhatsAppWrapper";
 import { LocaleDebug } from "@/components/ui/LocaleDebug";
 import GlobalPresence from "@/components/ui/GlobalPresence";
 import { NextIntlClientProvider } from 'next-intl';
@@ -72,6 +73,7 @@ export default async function RootLayout({
             </NavbarWrapper>
             {children}
             <FooterWrapper />
+            <WhatsAppWrapper />
           </FavoritesProvider>
         </NextIntlClientProvider>
       </body>
