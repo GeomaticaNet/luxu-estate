@@ -39,6 +39,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
   const t = useTranslations("Admin");
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [updating, setUpdating] = useState<string | null>(null);
 
@@ -104,21 +105,46 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
   const typeLabel = (type: string) => t(`leads_type_${type}`) || type;
   const statusLabel = (status: string) => t(`leads_status_${status}`) || status;
 
-  const filteredLeads = statusFilter === "all"
-    ? leads
-    : leads.filter((l) => l.status === statusFilter);
+  const filteredLeads = leads.filter((l) => {
+    if (typeFilter !== "all" && l.lead_type !== typeFilter) return false;
+    if (statusFilter !== "all" && l.status !== statusFilter) return false;
+    return true;
+  });
 
   const newCount = leads.filter((l) => l.status === "new").length;
   const statusTabs = [
-    { id: "all", label: "All" },
-    { id: "new", label: `New (${newCount})` },
-    { id: "read", label: "Read" },
-    { id: "contacted", label: "Contacted" },
-    { id: "closed", label: "Closed" },
+    { id: "all", label: t("leads_status_all") },
+    { id: "new", label: `${statusLabel("new")} (${newCount})` },
+    { id: "read", label: statusLabel("read") },
+    { id: "contacted", label: statusLabel("contacted") },
+    { id: "closed", label: statusLabel("closed") },
   ];
 
   return (
     <>
+      {/* Type Filter */}
+      <div className="flex gap-3 mb-4 overflow-x-auto">
+        {[
+          { id: "all", label: t("leads_type_all") },
+          { id: "contact", label: typeLabel("contact") },
+          { id: "visit", label: typeLabel("visit") },
+          { id: "sell", label: typeLabel("sell") },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setTypeFilter(tab.id)}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${
+              typeFilter === tab.id
+                ? "bg-mosque text-white"
+                : "bg-white border border-gray-200 text-gray-500 hover:border-mosque hover:text-mosque"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Status Filter */}
       <div className="flex gap-3 mb-6 overflow-x-auto">
         {statusTabs.map((tab) => (
           <button
@@ -223,7 +249,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                 </div>
                 {selectedLead.phone && (
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Phone</p>
+                    <p className="text-xs text-gray-500 mb-1">{t("leads_phone")}</p>
                     <p className="text-sm text-nordic-dark">{selectedLead.phone}</p>
                   </div>
                 )}
@@ -250,7 +276,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
 
               {selectedLead.property_title && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Property</p>
+                  <p className="text-xs text-gray-500 mb-1">{t("leads_property")}</p>
                   <p className="text-sm font-medium text-nordic-dark">{selectedLead.property_title}</p>
                 </div>
               )}
@@ -261,7 +287,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 mb-2">Update status</p>
+                <p className="text-xs text-gray-500 mb-2">{t("leads_update_status")}</p>
                 <div className="flex gap-2">
                   {["new", "read", "contacted", "closed"].map((s) => (
                     <button
@@ -281,7 +307,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
               </div>
 
               <div className="text-xs text-gray-400 pt-2 border-t border-gray-100">
-                Received: {new Date(selectedLead.created_at).toLocaleString()}
+                {t("leads_received")}: {new Date(selectedLead.created_at).toLocaleString()}
               </div>
             </div>
           </div>
