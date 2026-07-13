@@ -19,16 +19,16 @@ export default function GlobalPresence() {
 
   const checkIfSuspended = useCallback(async (userId: string) => {
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data, error } = await supabase
       .from('user_roles')
       .select('active')
       .eq('user_id', userId)
       .single();
     
-    if (error) {
-      console.error('Error checking suspension:', error);
-      return;
-    }
+    if (error) return;
     
     if (data && data.active === false) {
       setShowSuspendedToast(true);

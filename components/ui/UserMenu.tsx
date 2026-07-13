@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useFavoritesContext } from "@/hooks/FavoritesContext";
+import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 
 interface UserMenuProps {
   avatarUrl?: string | null;
@@ -19,6 +20,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
   const supabase = createClient();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: favoritesCount } = useFavoritesContext();
 
@@ -96,6 +98,16 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
               </span>
             )}
           </Link>
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              setIsPasswordModalOpen(true);
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm text-gray-400">lock</span>
+            Cambiar contraseña
+          </button>
           <div className="border-t border-gray-100 my-1" />
           <button
             onClick={() => {
@@ -109,6 +121,11 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
           </button>
         </div>
       )}
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
     </div>
   );
 }
