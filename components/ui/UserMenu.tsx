@@ -1,26 +1,25 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useFavoritesContext } from "@/hooks/FavoritesContext";
-import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 
 interface UserMenuProps {
   avatarUrl?: string | null;
   fullName?: string | null;
+  email?: string | null;
   logoutText?: string;
   isAdmin?: boolean;
   inAdminArea?: boolean;
 }
 
-export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, inAdminArea }: UserMenuProps) {
+export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", isAdmin, inAdminArea }: UserMenuProps) {
   const supabase = createClient();
-  const router = useRouter();
+  const t = useTranslations("Settings");
   const [isOpen, setIsOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: favoritesCount } = useFavoritesContext();
 
@@ -36,8 +35,10 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.refresh();
+    window.location.href = "/";
   };
+
+  const displayName = fullName || email?.split("@")[0] || "User";
 
   return (
     <div ref={ref} className="relative">
@@ -50,7 +51,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
             <Image 
               fill
               sizes="36px"
-              alt={fullName || "Profile"} 
+              alt={displayName}
               className="object-cover" 
               src={avatarUrl}
             />
@@ -64,12 +65,20 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 min-w-44 w-max max-w-64 rounded-lg bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* User info header */}
+          <div className="px-3 py-3 border-b border-gray-100">
+            <p className="text-sm font-semibold text-nordic-dark truncate">{displayName}</p>
+            {email && (
+              <p className="text-xs text-nordic-dark/50 truncate mt-0.5">{email}</p>
+            )}
+          </div>
+
           {isAdmin && !inAdminArea && (
             <Link
               href="/admin/properties"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
             >
               <span className="material-symbols-outlined text-sm text-gray-400">admin_panel_settings</span>
               Administración
@@ -79,7 +88,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
             >
               <span className="material-symbols-outlined text-sm text-gray-400">public</span>
               Zona pública
@@ -88,7 +97,7 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
           <Link
             href="/favorites"
             onClick={() => setIsOpen(false)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
           >
             <span className="material-icons text-sm text-red-400">favorite</span>
             <span>Favoritos</span>
@@ -98,34 +107,27 @@ export function UserMenu({ avatarUrl, fullName, logoutText = "Logout", isAdmin, 
               </span>
             )}
           </Link>
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              setIsPasswordModalOpen(true);
-            }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+          <Link
+            href="/settings"
+            onClick={() => setIsOpen(false)}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
           >
-            <span className="material-symbols-outlined text-sm text-gray-400">lock</span>
-            Cambiar contraseña
-          </button>
+            <span className="material-symbols-outlined text-sm text-gray-400">settings</span>
+            {t("title")}
+          </Link>
           <div className="border-t border-gray-100 my-1" />
           <button
             onClick={() => {
               setIsOpen(false);
               handleLogout();
             }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
           >
             <span className="material-symbols-outlined text-sm text-gray-400">logout</span>
             Salir
           </button>
         </div>
       )}
-
-      <ChangePasswordModal
-        isOpen={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
-      />
     </div>
   );
 }

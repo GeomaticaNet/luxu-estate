@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { updateUserRole, toggleUserActive } from "./actions";
+import { updateUserRole, toggleUserActive, deleteUser } from "./actions";
 
 interface RoleDropdownProps {
   userId: string;
@@ -18,6 +18,7 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
   const [updating, setUpdating] = useState(false);
   const [showConfirmDemote, setShowConfirmDemote] = useState(false);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const isCurrentUser = userId === currentUserId;
 
@@ -51,6 +52,13 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
     setUpdating(true);
     setIsOpen(false);
     await toggleUserActive(userId, !active);
+    setUpdating(false);
+  }
+
+  async function confirmDelete() {
+    setUpdating(true);
+    setShowConfirmDelete(false);
+    await deleteUser(userId);
     setUpdating(false);
   }
 
@@ -117,6 +125,51 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               </span>
               {isCurrentUser ? t("cannot_suspend_self") : active ? t("suspend_user") : t("reactivate_user")}
             </button>
+            <div className="border-t border-white/10 my-1"></div>
+            <button
+              onClick={() => { setIsOpen(false); setShowConfirmDelete(true); }}
+              disabled={isCurrentUser || updating}
+              className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
+                isCurrentUser
+                  ? 'text-red-200/40 cursor-not-allowed'
+                  : 'text-red-200 hover:bg-red-500/20 hover:text-red-100'
+              }`}
+            >
+              <span className={`material-icons text-sm mr-3 ${isCurrentUser ? 'text-red-300/40' : 'text-red-300'}`}>delete_forever</span>
+              {isCurrentUser ? t("cannot_delete_self") : t("delete_user")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Delete Modal */}
+      {showConfirmDelete && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="material-icons text-red-600">delete_forever</span>
+              </div>
+              <h3 className="text-lg font-bold text-nordic-dark">{t("confirm_delete_title")}</h3>
+            </div>
+            <p className="text-gray-600 text-sm mb-6">
+              {t("confirm_delete_text")}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmDelete(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-nordic-dark hover:bg-gray-50 transition-colors"
+              >
+                {t("cancel")}
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
+                disabled={updating}
+              >
+                {updating ? t("deleting") : t("yes_delete")}
+              </button>
+            </div>
           </div>
         </div>
       )}

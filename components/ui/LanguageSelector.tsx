@@ -55,12 +55,12 @@ export function LanguageSelector({ dropUp }: Props) {
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 ${dropUp ? "bottom-full mb-2" : "mt-2"} w-24 rounded-xl bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in ${dropUp ? "slide-in-from-bottom-2" : "slide-in-from-top-2"} duration-200`}>
+        <div className={`absolute right-0 ${dropUp ? "bottom-full mb-2" : "mt-2"} w-24 rounded-lg bg-white shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in ${dropUp ? "slide-in-from-bottom-2" : "slide-in-from-top-2"} duration-200`}>
           {locales.map((l) => (
             <button
               key={l.code}
               onClick={() => handleSelect(l.code)}
-              className={`w-full flex items-center gap-1 px-4 py-2.5 text-sm transition-colors ${
+              className={`w-full flex items-center gap-1 pl-3 pr-4 py-2 text-sm transition-colors ${
                 l.code === locale
                   ? "bg-mosque/10 text-mosque font-semibold"
                   : "text-nordic-dark hover:bg-mosque/10"

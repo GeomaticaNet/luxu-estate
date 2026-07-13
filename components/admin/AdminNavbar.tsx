@@ -106,6 +106,7 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
           <UserMenu
             avatarUrl={userAvatar}
             fullName={userEmail}
+            email={userEmail}
             isAdmin={isAdmin}
             inAdminArea={true}
           />

@@ -38,6 +38,7 @@ export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText, isAdmi
     <UserMenu 
       avatarUrl={user.user_metadata?.avatar_url ?? avatarUrl} 
       fullName={user.user_metadata?.full_name ?? fullName}
+      email={user.email}
       isAdmin={isAdmin}
     />
   );
