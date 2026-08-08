@@ -24,14 +24,14 @@ export async function GET() {
   const supabase = createPublicClient();
   const { data: properties } = await supabase
     .from("properties")
-    .select("slug, updated_at")
+    .select("slug, created_at")
     .eq("active", true);
 
   for (const locale of locales) {
     for (const property of properties ?? []) {
       entries.push({
         url: `${siteUrl}/${locale}/propiedades/${property.slug}`,
-        lastmod: property.updated_at ? new Date(property.updated_at).toISOString() : new Date().toISOString(),
+        lastmod: property.created_at ? new Date(property.created_at).toISOString() : new Date().toISOString(),
         changefreq: "weekly",
         priority: "0.8",
       });
