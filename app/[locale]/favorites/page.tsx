@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { useFavoritesContext } from "@/hooks/FavoritesContext";
 import { Property } from "@/interfaces/property";
+import { BackButton } from "@/components/ui/BackButton";
 
 export default function FavoritesPage() {
   const t = useTranslations("Favorites");
@@ -36,6 +37,7 @@ export default function FavoritesPage() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <BackButton />
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-nordic-dark">{t("title")}</h1>
         {favorites.size > 0 && (

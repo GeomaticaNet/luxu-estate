@@ -14,24 +14,48 @@ import "../globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inmo-estate.vercel.app";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: "Luxe Estate - Premium Real Estate",
-  description: "Find your sanctuary.",
-  openGraph: {
-    title: "Luxe Estate - Premium Real Estate",
-    description: "Find your sanctuary.",
-    url: siteUrl,
-    siteName: "Luxe Estate",
-    locale: "es_AR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Luxe Estate - Premium Real Estate",
-    description: "Find your sanctuary.",
-  },
+const localeMap: Record<string, string> = {
+  es: "es_AR",
+  en: "en_US",
+  pt: "pt_BR",
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const ogLocale = localeMap[locale] ?? "es_AR";
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: "Luxe Estate - Premium Real Estate",
+      template: "%s | Luxe Estate",
+    },
+    description: "Find your sanctuary.",
+    openGraph: {
+      title: "Luxe Estate - Premium Real Estate",
+      description: "Find your sanctuary.",
+      url: siteUrl,
+      siteName: "Luxe Estate",
+      locale: ogLocale,
+      type: "website",
+      images: [`${siteUrl}/og-image.png`],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Luxe Estate - Premium Real Estate",
+      description: "Find your sanctuary.",
+      images: [`${siteUrl}/og-image.png`],
+    },
+    alternates: {
+      canonical: `${siteUrl}/${locale}`,
+      languages: {
+        "es-AR": `${siteUrl}/es`,
+        "en-US": `${siteUrl}/en`,
+        "pt-BR": `${siteUrl}/pt`,
+      },
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

@@ -361,6 +361,16 @@
     "leads_taken_by_other": "Atribuído a outro corretor",
     "leads_open_whatsapp": "Abrir WhatsApp",
     "leads_call": "Ligar",
+    "leads_reply": "Responder",
+    "leads_reply_placeholder": "Escreva sua resposta...",
+    "leads_reply_send": "Enviar resposta",
+    "leads_reply_sent": "Resposta enviada com sucesso",
+    "leads_reply_history": "Resposta enviada",
+    "leads_reply_error": "Erro ao enviar resposta",
+    "leads_close": "Fechar transação",
+    "leads_close_confirm": "Marcar como fechado?",
+    "leads_closed_title": "Transação fechada",
+    "message": "Mensagem",
     "cancel": "Cancelar",
     "yes_demote": "Sim, Rebaixar"
   },
@@ -425,6 +435,10 @@
     "avatar_updated": "Avatar atualizado",
     "cancel": "Cancelar",
     "deleting": "Excluindo..."
+  },
+  "SEO": {
+    "home_title": "Luxe Estate - Propriedades Premium",
+    "home_description": "Encontre o seu santuário. Propriedades exclusivas à venda e para alugar."
   }
 }
 }

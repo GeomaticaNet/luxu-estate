@@ -17,6 +17,8 @@ interface Lead {
   preferred_date: string | null;
   assigned_to: string | null;
   assigned_at: string | null;
+  replied_at: string | null;
+  reply_message: string | null;
   created_at: string;
 }
 
@@ -46,6 +48,9 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
+  const [replyExpanded, setReplyExpanded] = useState(false);
 
   const fetchLeads = useCallback(async () => {
     const supabase = createClient();
@@ -149,6 +154,50 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
     }
   }
 
+  async function handleReply(lead: Lead) {
+    if (!replyText.trim()) return;
+    setReplySending(true);
+
+    try {
+      const res = await fetch("/api/leads/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadId: lead.id,
+          leadName: lead.name,
+          leadEmail: lead.email,
+          replyText: replyText.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || t("leads_reply_error"));
+      }
+
+      const now = new Date().toISOString();
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === lead.id
+            ? { ...l, replied_at: now, reply_message: replyText.trim(), status: "contacted" }
+            : l
+        )
+      );
+      setSelectedLead((prev) =>
+        prev?.id === lead.id
+          ? { ...prev, replied_at: now, reply_message: replyText.trim(), status: "contacted" }
+          : prev
+      );
+      setReplyText("");
+      setReplyExpanded(false);
+    } catch (err) {
+      console.error("Error sending reply:", err);
+      alert(err instanceof Error ? err.message : t("leads_reply_error"));
+    } finally {
+      setReplySending(false);
+    }
+  }
+
   const typeLabel = (type: string) => t(`leads_type_${type}`) || type;
   const statusLabel = (status: string) => t(`leads_status_${status}`) || status;
 
@@ -217,8 +266,8 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {/* Desktop Table Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-sm font-semibold text-gray-500 uppercase tracking-wider">
-            <div className="col-span-3">{t("leads_table_name")}</div>
-            <div className="col-span-1">{t("leads_table_email")}</div>
+            <div className="col-span-2">{t("leads_table_name")}</div>
+            <div className="col-span-2">{t("leads_table_email")}</div>
             <div className="col-span-2">{t("leads_table_type")}</div>
             <div className="col-span-2">{t("leads_table_date")}</div>
             <div className="col-span-2">{t("leads_table_status")}</div>
@@ -235,11 +284,11 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                   className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 hover:bg-background-light transition-colors items-center cursor-pointer"
                   onClick={() => setSelectedLead(lead)}
                 >
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <div className="text-sm font-medium text-nordic-dark truncate">{lead.name}</div>
                     <div className="text-xs text-gray-400 truncate">{lead.property_title || lead.message.slice(0, 50)}</div>
                   </div>
-                  <div className="col-span-1 text-sm text-gray-600 truncate hidden md:block">{lead.email}</div>
+                  <div className="col-span-2 text-sm text-gray-600 truncate hidden md:block">{lead.email}</div>
                   <div className="col-span-2 hidden md:block">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
                       <span className="material-icons text-xs">{colors.icon}</span>
@@ -262,7 +311,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                   </div>
                   <div className="col-span-1 hidden md:block">
                     {lead.assigned_to ? (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${
                         isAssignedToCurrentUser
                           ? "bg-mosque/10 text-mosque"
                           : "bg-gray-100 text-gray-400"
@@ -274,7 +323,7 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                       <button
                         onClick={(e) => { e.stopPropagation(); assignLead(lead.id); }}
                         disabled={assigning === lead.id}
-                        className="text-[10px] font-medium text-mosque hover:text-mosque/80 transition-colors"
+                        className="text-[10px] font-medium text-mosque hover:text-mosque/80 transition-colors whitespace-nowrap"
                       >
                         {assigning === lead.id ? "..." : t("leads_take")}
                       </button>
@@ -297,9 +346,10 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
           onClick={() => setSelectedLead(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[80vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="p-6 overflow-y-auto max-h-[80vh]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-nordic-dark">{selectedLead.name}</h3>
               <button
@@ -399,6 +449,55 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
                 <p className="text-sm text-nordic-dark bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">{selectedLead.message}</p>
               </div>
 
+              {/* Reply */}
+              <div className="border border-gray-100 rounded-lg p-3">
+                {selectedLead.replied_at && selectedLead.reply_message && (
+                  <div className="mb-3 pb-3 border-b border-gray-100">
+                    <p className="text-xs text-mosque font-medium mb-1 flex items-center gap-1">
+                      <span className="material-icons text-xs">check_circle</span>
+                      {t("leads_reply_history")} ({new Date(selectedLead.replied_at).toLocaleString()})
+                    </p>
+                    <p className="text-sm text-nordic-dark bg-mosque/5 rounded-lg p-2.5 whitespace-pre-wrap">{selectedLead.reply_message}</p>
+                  </div>
+                )}
+
+                {!replyExpanded ? (
+                  <button
+                    onClick={() => setReplyExpanded(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-mosque text-mosque text-xs font-medium hover:bg-mosque/5 transition-colors"
+                  >
+                    <span className="material-icons text-sm">reply</span>
+                    {t("leads_reply")}
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder={t("leads_reply_placeholder")}
+                      rows={4}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleReply(selectedLead)}
+                        disabled={replySending || !replyText.trim()}
+                        className="flex-1 py-2 rounded-lg bg-mosque text-white text-xs font-medium hover:bg-mosque/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                      >
+                        {replySending && <span className="material-icons text-sm animate-spin">refresh</span>}
+                        {t("leads_reply_send")}
+                      </button>
+                      <button
+                        onClick={() => { setReplyExpanded(false); setReplyText(""); }}
+                        className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        {t("cancel")}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <p className="text-xs text-gray-500 mb-2">{t("leads_update_status")}</p>
                 <div className="flex gap-2">
@@ -422,6 +521,28 @@ export function LeadsList({ leads: initialLeads }: LeadsListProps) {
               <div className="text-xs text-gray-400 pt-2 border-t border-gray-100">
                 {t("leads_received")}: {new Date(selectedLead.created_at).toLocaleString()}
               </div>
+
+              {selectedLead.status !== "closed" && (
+                <button
+                  onClick={() => updateStatus(selectedLead.id, "closed")}
+                  disabled={updating === selectedLead.id}
+                  className="w-full mt-3 py-2.5 rounded-lg bg-nordic-dark text-white text-sm font-medium hover:bg-nordic-dark/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {updating === selectedLead.id ? (
+                    <span className="material-icons text-sm animate-spin">refresh</span>
+                  ) : (
+                    <span className="material-icons text-sm">check_circle</span>
+                  )}
+                  {updating === selectedLead.id ? "..." : t("leads_close")}
+                </button>
+              )}
+              {selectedLead.status === "closed" && (
+                <div className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium">
+                  <span className="material-icons text-sm">check_circle</span>
+                  {t("leads_closed_title")}
+                </div>
+              )}
+            </div>
             </div>
           </div>
         </div>

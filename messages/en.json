@@ -361,6 +361,16 @@
     "leads_taken_by_other": "Assigned to another agent",
     "leads_open_whatsapp": "Open WhatsApp",
     "leads_call": "Call",
+    "leads_reply": "Reply",
+    "leads_reply_placeholder": "Write your reply...",
+    "leads_reply_send": "Send reply",
+    "leads_reply_sent": "Reply sent successfully",
+    "leads_reply_history": "Reply sent",
+    "leads_reply_error": "Failed to send reply",
+    "leads_close": "Close transaction",
+    "leads_close_confirm": "Mark as closed?",
+    "leads_closed_title": "Transaction closed",
+    "message": "Message",
     "cancel": "Cancel",
     "yes_demote": "Yes, Demote"
   },
@@ -425,6 +435,10 @@
     "avatar_updated": "Avatar updated",
     "cancel": "Cancel",
     "deleting": "Deleting..."
+  },
+  "SEO": {
+    "home_title": "Luxe Estate - Premium Real Estate",
+    "home_description": "Find your sanctuary. Exclusive properties for sale and rent."
   }
 }
 }
