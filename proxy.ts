@@ -100,6 +100,6 @@ export const config = {
   matcher: [
     '/', 
     '/(es|en|pt)/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico|auth/callback|.*\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm)$).*)'
+    '/((?!api|_next/static|_next/image|favicon.ico|auth/callback|robots.txt|sitemap.xml|.*\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm)$).*)'
   ]
 };
