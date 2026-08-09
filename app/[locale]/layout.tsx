@@ -54,6 +54,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         "pt-BR": `${siteUrl}/pt`,
       },
     },
+    verification: {
+      google: "PeYwD2FRSWf61vTA93CmlRW2JVe7CpvZVF_Hd5neFeE",
+    },
   };
 }
 
