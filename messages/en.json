@@ -56,7 +56,9 @@
     "beds": "Beds",
     "baths": "Baths",
     "featured": "FEATURED",
-    "exclusive": "EXCLUSIVE"
+    "exclusive": "EXCLUSIVE",
+    "prev_image": "Previous image",
+    "next_image": "Next image"
   },
   "PropertyDetails": {
     "property_not_found": "Property Not Found",

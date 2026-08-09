@@ -21,6 +21,7 @@ export interface Property {
   country?: string;
   imageUrl: string;
   imageAlt: string;
+  images?: string[];
 }
 
 export interface PropertyImage {

@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { FeaturedProperty } from "@/interfaces/property";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { PropertyImageCarousel } from "@/components/property/PropertyImageCarousel";
 
 interface Props {
   property: FeaturedProperty;
@@ -14,25 +15,34 @@ const BLUR_PLACEHOLDER = "data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQC
 
 export const FeaturedPropertyCard = ({ property }: Props) => {
   const t = useTranslations("PropertyCard");
+  const images = property.images && property.images.length > 0 ? property.images : [property.imageUrl];
   return (
     <Link href={`/propiedades/${property.slug}`} className="block group relative rounded-xl overflow-hidden shadow-soft bg-white cursor-pointer transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
       <div className="aspect-[4/3] w-full overflow-hidden relative">
-        <Image 
-          fill
-          priority
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          alt={property.imageAlt} 
-          className="object-cover transition-transform duration-700 group-hover:scale-105" 
-          src={property.imageUrl}
-          placeholder="blur"
-          blurDataURL={BLUR_PLACEHOLDER}
-        />
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark">
+        {images.length > 1 ? (
+          <PropertyImageCarousel
+            images={images}
+            alt={property.imageAlt}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <Image
+            fill
+            priority
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            alt={property.imageAlt}
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            src={images[0]}
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
+          />
+        )}
+        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark z-30">
           {property.featuredLabel === 'Exclusive' ? t('exclusive') : t('featured')}
         </div>
         <FavoriteButton
           slug={property.slug}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-sm"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-sm z-30"
           iconSize="text-xl"
         />
         {/* Gradient shadow for specific visual effect on some cards if needed, optionally mapping logic, but keeping standard as per design */}

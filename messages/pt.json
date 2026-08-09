@@ -56,7 +56,9 @@
     "beds": "Quartos",
     "baths": "Banheiros",
     "featured": "DESTAQUE",
-    "exclusive": "EXCLUSIVO"
+    "exclusive": "EXCLUSIVO",
+    "prev_image": "Imagem anterior",
+    "next_image": "Imagem seguinte"
   },
   "PropertyDetails": {
     "property_not_found": "Propriedade Não Encontrada",

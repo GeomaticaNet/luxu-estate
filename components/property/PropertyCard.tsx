@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Property } from "@/interfaces/property";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { PropertyImageCarousel } from "@/components/property/PropertyImageCarousel";
 
 interface Props {
   property: Property;
@@ -36,23 +37,32 @@ function getBadgeText(t: any, type: string) {
 export const PropertyCard = ({ property, className = "" }: Props) => {
   const t = useTranslations("PropertyCard");
   const isInactive = property.type === 'SOLD' || property.type === 'RENTED';
+  const images = property.images && property.images.length > 0 ? property.images : [property.imageUrl];
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
       <article className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1 border-2 border-gray-300 hover:border-mosque/40">
         <div className="relative aspect-[4/3] overflow-hidden">
-          <Image 
-            fill
-            priority
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            alt={property.imageAlt} 
-            className={`object-cover transition-transform duration-700 group-hover:scale-110 ${isInactive ? 'grayscale opacity-70' : ''}`} 
-            src={property.imageUrl}
-            placeholder="blur"
-            blurDataURL={BLUR_PLACEHOLDER}
-          />
+          {images.length > 1 ? (
+            <PropertyImageCarousel
+              images={images}
+              alt={property.imageAlt}
+              isInactive={isInactive}
+            />
+          ) : (
+            <Image
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              alt={property.imageAlt}
+              className={`object-cover transition-transform duration-700 group-hover:scale-110 ${isInactive ? 'grayscale opacity-70' : ''}`}
+              src={images[0]}
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+            />
+          )}
           <FavoriteButton
             slug={property.slug}
-            className="absolute top-3 right-3 p-2 rounded-full"
+            className="absolute top-3 right-3 p-2 rounded-full z-30"
           />
           <div className={`absolute bottom-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${getBadgeStyle(property.type)}`}>
             {getBadgeText(t, property.type)}

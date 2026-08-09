@@ -91,7 +91,9 @@ function rowToProperty(row: { [key: string]: unknown; property_images?: Property
   // Images handling (new schema)
   const images = row.property_images ?? [];
   const mainImage = images.find((img) => img.is_main) ?? images[0];
-
+  const allImages = [...images]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((img) => img.url);
 
   return {
     id: row.id as string,
@@ -116,6 +118,7 @@ function rowToProperty(row: { [key: string]: unknown; property_images?: Property
     country: (row.country as string | null) ?? undefined,
     imageUrl: mainImage?.url || getFallbackImage(row.id as string),
     imageAlt: row.title as string,
+    images: allImages.length > 0 ? allImages : undefined,
   };
 }
 

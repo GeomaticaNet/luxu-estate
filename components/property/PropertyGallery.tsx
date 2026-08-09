@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PropertyImage } from "@/interfaces/property";
 
 interface Props {
@@ -16,7 +16,10 @@ export const PropertyGallery = ({ mainImage, images }: Props) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const allImages = images.length > 0 ? images : [mainImage];
+  const allImages = useMemo(
+    () => (images.length > 0 ? images : [mainImage]),
+    [images, mainImage]
+  );
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -32,6 +35,20 @@ export const PropertyGallery = ({ mainImage, images }: Props) => {
   const goPrev = useCallback(() => {
     setLightboxIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   }, [allImages.length]);
+
+  const goNextMain = useCallback(() => {
+    setActiveImage((prev) => {
+      const idx = allImages.findIndex((img) => img.id === prev.id);
+      return allImages[(idx + 1) % allImages.length];
+    });
+  }, [allImages]);
+
+  const goPrevMain = useCallback(() => {
+    setActiveImage((prev) => {
+      const idx = allImages.findIndex((img) => img.id === prev.id);
+      return allImages[(idx - 1 + allImages.length) % allImages.length];
+    });
+  }, [allImages]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -78,6 +95,27 @@ export const PropertyGallery = ({ mainImage, images }: Props) => {
               </span>
             )}
           </div>
+
+          {/* Navigation arrows — appear on hover over the main image */}
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={goPrevMain}
+                aria-label="Imagen anterior"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm text-nordic-dark shadow-md hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100"
+              >
+                <span className="material-icons text-2xl leading-none">chevron_left</span>
+              </button>
+              <button
+                onClick={goNextMain}
+                aria-label="Imagen siguiente"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm text-nordic-dark shadow-md hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100"
+              >
+                <span className="material-icons text-2xl leading-none">chevron_right</span>
+              </button>
+            </>
+          )}
+
           <button
             onClick={() => openLightbox(activeIndex >= 0 ? activeIndex : 0)}
             className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-nordic px-4 py-2 rounded-lg text-sm font-medium shadow-lg backdrop-blur transition-all flex items-center gap-2"
