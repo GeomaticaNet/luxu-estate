@@ -279,7 +279,7 @@
     "gallery_section": "Galería",
     "accepted_formats": "JPG, PNG, WEBP",
     "click_or_drag": "Haz clic o arrastra imágenes aquí",
-    "max_file_size": "Tamaño máximo 5MB por imagen",
+    "max_file_size": "Las imágenes se optimizan automáticamente a WebP",
     "main_badge": "Principal",
     "add_more": "Agregar Más",
     "set_as_main": "Establecer como Principal",

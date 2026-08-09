@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/client";
+import { optimizeImage } from "@/lib/image-optimize";
 import { BackButton } from "@/components/ui/BackButton";
 import { BackToTop } from "@/components/ui/BackToTop";
 
@@ -114,9 +115,9 @@ export default function SettingsPage() {
     if (!file || !user) return;
     setUploading(true);
     setError("");
-    const ext = file.name.split(".").pop();
-    const filePath = `${user.id}/avatar.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
+    const { blob, extension } = await optimizeImage(file, { maxDimension: 512 });
+    const filePath = `${user.id}/avatar.${extension}`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, blob, { upsert: true, contentType: `image/${extension}` });
     if (uploadError) { setError(uploadError.message); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
     const { error: updateError } = await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
