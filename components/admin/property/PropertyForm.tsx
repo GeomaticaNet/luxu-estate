@@ -17,6 +17,9 @@ const InteractiveMap = dynamic(
 
 interface PropertyFormProps {
   initialData?: any;
+  isAdmin?: boolean;
+  agents?: { user_id: string; full_name: string | null; avatar_url: string | null }[];
+  currentUserId?: string | null;
 }
 
 const AMENITIES_LIST = [
@@ -61,7 +64,7 @@ const PROPERTY_TYPES = [
   { value: "penthouse", labelKey: "type_penthouse" },
 ];
 
-export default function PropertyForm({ initialData }: PropertyFormProps) {
+export default function PropertyForm({ initialData, isAdmin = false, agents = [], currentUserId = null }: PropertyFormProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("Admin");
@@ -103,6 +106,7 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
     return initialData?.property_images?.map((img: any) => img.url) || [];
   });
   const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
+  const [agentId, setAgentId] = useState<string>(initialData?.agent_id || "");
   const geoTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const prevAddressRef = useRef(address);
   const isForwardGeocodingRef = useRef(false);
@@ -306,6 +310,9 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
     formData.set("active", active.toString());
     formData.set("is_featured", isFeatured.toString());
     formData.set("amenities", JSON.stringify(amenities));
+    if (isAdmin && agentId) {
+      formData.set("agent_id", agentId);
+    }
 
     const existingId = initialData?.id || savedPropertyIdRef.current;
     if (existingId) {
@@ -460,6 +467,27 @@ export default function PropertyForm({ initialData }: PropertyFormProps) {
                   ))}
                 </select>
               </div>
+              {isAdmin && (
+                <div>
+                  <label htmlFor="agent_id" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
+                    {t("agent_field") || "Agente asignado"}
+                  </label>
+                  <select
+                    id="agent_id"
+                    name="agent_id"
+                    value={agentId}
+                    onChange={(e) => setAgentId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-base font-sf-pro cursor-pointer"
+                  >
+                    <option value="">{t("agent_none") || "Sin asignar"}</option>
+                    {agents.map((agent) => (
+                      <option key={agent.user_id} value={agent.user_id}>
+                        {agent.full_name || agent.user_id.slice(0, 8)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3 pt-2">
               <input

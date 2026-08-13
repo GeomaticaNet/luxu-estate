@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { createPublicClient } from "@/lib/supabase/server";
+import { createPublicClient, createServerClient, createAdminClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
-import { PropertyList } from "./PropertyList";
+import { PropertyList, type Property } from "./PropertyList";
 import { PropertyTypeFilter } from "./PropertyTypeFilter";
 
 const PAGE_SIZE = 10;
@@ -13,6 +13,34 @@ export default async function AdminPropertiesPage({
 }) {
   const t = await getTranslations("Admin");
   const publicClient = createPublicClient();
+  const adminClient = createAdminClient();
+
+  // Resolve admin status + agent list (for the "Assign to" feature).
+  // The agent list is fetched with the service-role client so that agents also
+  // see every agent's name in the "Assigned to" column (RLS alone would return
+  // only the agent's own row).
+  const serverSupabase = await createServerClient();
+  const { data: { user } } = await serverSupabase.auth.getUser();
+  const { data: userRole } = await serverSupabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user?.id)
+    .single();
+  const roles: string[] = userRole?.role ?? [];
+  const isAdmin = roles.includes('admin');
+
+  const { data: agentRoleRows } = await adminClient
+    .from('user_roles')
+    .select('user_id')
+    .contains('role', ['agent']);
+
+  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+  const { data: agents } = agentIds.length > 0
+    ? await adminClient
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', agentIds)
+    : { data: [] };
 
   const { page: pageParam, property_type: typeFilter } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam || "1", 10));
@@ -32,18 +60,36 @@ export default async function AdminPropertiesPage({
 
   const totalPages = Math.ceil((totalCount || 0) / PAGE_SIZE);
 
-  const dataQuery = publicClient
-    .from('properties')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .order('id', { ascending: true })
-    .range(from, to);
+  // Agents always get their own properties first, so they are not buried
+  // behind a pagination page (which made them appear "locked" in gray).
+  const isAgent = !isAdmin && !!user;
 
-  if (typeFilter) {
-    dataQuery.eq('property_type', typeFilter);
+  let error: { message: string } | null = null;
+  let properties: Property[] = [];
+
+  const buildDataQuery = (withRange: boolean) => {
+    const q = publicClient
+      .from('properties')
+      .select('*')
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true });
+    if (typeFilter) q.eq('property_type', typeFilter);
+    if (withRange) q.range(from, to);
+    return q;
+  };
+
+  if (isAgent) {
+    const { data: allFiltered, error: err } = await buildDataQuery(false);
+    error = err;
+    const own = (allFiltered || []).filter((p) => p.agent_id === user?.id);
+    const rest = (allFiltered || []).filter((p) => p.agent_id !== user?.id);
+    properties = [...own, ...rest].slice(from, to + 1);
+  } else {
+    const { data, error: err } = await buildDataQuery(true);
+    error = err;
+    properties = data || [];
   }
-
-  const { data: properties, error } = await dataQuery;
 
   if (error) {
     console.error('Error loading properties:', error);
@@ -63,35 +109,45 @@ export default async function AdminPropertiesPage({
     imagesMap[img.property_id] = img.url;
   });
 
-  // Stats from database
-  const { data: allProperties } = await publicClient
-    .from('properties')
-    .select('id');
-  
-  const { data: activeProps } = await publicClient
-    .from('properties')
-    .select('id')
-    .eq('active', true);
+  // Stats from database. For agents these reflect the properties assigned to
+  // the logged-in agent only, not the whole portfolio.
+  const agentScope = isAgent ? user?.id : null;
 
-  const { data: rentProps } = await publicClient
-    .from('properties')
-    .select('id')
-    .eq('type', 'RENT');
+  const scopedAll = agentScope
+    ? await publicClient.from('properties').select('id').eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id');
 
-  const { data: saleProps } = await publicClient
-    .from('properties')
-    .select('id')
-    .eq('type', 'SALE');
+  const { data: allProperties } = scopedAll;
 
-  const { data: soldProps } = await publicClient
-    .from('properties')
-    .select('id')
-    .eq('type', 'SOLD');
+  const scopedActive = agentScope
+    ? await publicClient.from('properties').select('id').eq('active', true).eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id').eq('active', true);
 
-  const { data: rentedProps } = await publicClient
-    .from('properties')
-    .select('id')
-    .eq('type', 'RENTED');
+  const { data: activeProps } = scopedActive;
+
+  const scopedRent = agentScope
+    ? await publicClient.from('properties').select('id').eq('type', 'RENT').eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id').eq('type', 'RENT');
+
+  const { data: rentProps } = scopedRent;
+
+  const scopedSale = agentScope
+    ? await publicClient.from('properties').select('id').eq('type', 'SALE').eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id').eq('type', 'SALE');
+
+  const { data: saleProps } = scopedSale;
+
+  const scopedSold = agentScope
+    ? await publicClient.from('properties').select('id').eq('type', 'SOLD').eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id').eq('type', 'SOLD');
+
+  const { data: soldProps } = scopedSold;
+
+  const scopedRented = agentScope
+    ? await publicClient.from('properties').select('id').eq('type', 'RENTED').eq('agent_id', agentScope)
+    : await publicClient.from('properties').select('id').eq('type', 'RENTED');
+
+  const { data: rentedProps } = scopedRented;
 
   const totalListings = allProperties?.length || 0;
   const activeProperties = activeProps?.length || 0;
@@ -142,6 +198,9 @@ export default async function AdminPropertiesPage({
         showingTo={showingTo}
         totalCount={totalCount || 0}
         currentPropertyType={typeFilter || undefined}
+        isAdmin={isAdmin}
+        currentUserId={user?.id ?? null}
+        agents={agents || []}
       />
 
       {/* Pagination */}

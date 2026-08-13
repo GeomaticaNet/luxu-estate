@@ -22,9 +22,19 @@ interface PropertyRowProps {
     is_featured: boolean;
     type: string;
     property_type: string;
+    agent_id?: string | null;
   };
   mainImage: string | null;
   isLast: boolean;
+  isAdmin?: boolean;
+  currentUserId?: string | null;
+  agents?: Agent[];
+}
+
+interface Agent {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 function StatusBadge({ active, isFeatured, type, t }: { active: boolean; isFeatured: boolean; type: string; t: (key: string) => string }) {
@@ -60,15 +70,14 @@ function StatusBadge({ active, isFeatured, type, t }: { active: boolean; isFeatu
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
-        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotColor}`}></span>
+    <div className="flex flex-wrap items-center gap-1">
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${badgeColor}`}>
+        <span className={`w-1 h-1 rounded-full mr-1 ${dotColor}`}></span>
         {badgeText}
       </span>
       {isFeatured && (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
-          {t("featured_badge")}
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-100 text-orange-700 whitespace-nowrap" title={t("featured_badge")}>
+          <span className="material-icons text-[12px] leading-none mr-0.5">star</span>
         </span>
       )}
     </div>
@@ -82,14 +91,47 @@ const typeColors: Record<string, { bg: string; text: string }> = {
   penthouse: { bg: "bg-rose-100", text: "text-rose-700" },
 };
 
-export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
+export function PropertyRow({ property, mainImage, isLast, isAdmin = false, currentUserId = null, agents = [] }: PropertyRowProps) {
   const t = useTranslations("Admin");
   const [isActive, setIsActive] = useState(property.active);
   const [propertyType, setPropertyType] = useState(property.type);
   const [isFeatured, setIsFeatured] = useState(property.is_featured);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [agentId, setAgentId] = useState<string | null>(property.agent_id ?? null);
+  const [assignLoading, setAssignLoading] = useState(false);
   const router = useRouter();
+
+  const currentAgent = agents.find((a) => a.user_id === agentId) || null;
+  const availableAgents = agents.filter((a) => a.user_id !== agentId);
+  // Admin manages every property; agents only manage the ones assigned to them.
+  const canManage = isAdmin || (currentUserId && agentId === currentUserId);
+
+  const assignAgent = async (targetAgentId: string | null) => {
+    setAssignLoading(true);
+    try {
+      const res = await fetch("/api/property/assign-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: property.id, agentId: targetAgentId }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        alert("Error: " + err);
+        return;
+      }
+
+      setAgentId(targetAgentId);
+      setAssignOpen(false);
+      router.refresh();
+    } catch (err) {
+      alert("Error: " + String(err));
+    } finally {
+      setAssignLoading(false);
+    }
+  };
 
   const handleAction = async (action: string) => {
     if (action === "edit") {
@@ -159,12 +201,12 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
 
   return (
     <div 
-      className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 hover:bg-background-light transition-colors items-center ${
+      className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 transition-colors items-center ${
         isLast ? 'border-b-0' : ''
-      }`}
+      } ${canManage ? 'hover:bg-background-light' : 'opacity-60 grayscale'}`}
     >
       {/* Property Details */}
-      <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
+      <div className="col-span-12 md:col-span-4 flex gap-4 items-center">
         <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
           {mainImage && (
             <>
@@ -182,7 +224,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
           )}
         </div>
         <div>
-          <h3 className="text-lg font-bold text-nordic-dark group-hover:text-mosque transition-colors cursor-pointer flex items-center gap-2" onClick={() => router.push(`/admin/properties/${property.id}`)}>
+          <h3 className={`text-lg font-bold text-nordic-dark transition-colors flex items-center gap-2 ${canManage ? 'cursor-pointer group-hover:text-mosque' : ''}`} onClick={canManage ? () => router.push(`/admin/properties/${property.id}`) : undefined}>
             {property.title}
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${typeColors[property.property_type]?.bg || "bg-gray-100"} ${typeColors[property.property_type]?.text || "text-gray-700"}`}>{property.property_type}</span>
           </h3>
@@ -218,8 +260,103 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
         <StatusBadge active={isActive} isFeatured={isFeatured} type={propertyType} t={t} />
       </div>
 
+      {/* Assigned to */}
+      <div className="col-span-6 md:col-span-2">
+        <div className={`flex items-center gap-2 ${canManage && currentAgent ? "text-mosque" : "text-gray-500"}`}>
+          <span className="relative w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-gray-200">
+            {currentAgent?.avatar_url ? (
+              <img src={currentAgent.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="material-icons text-[13px] text-gray-400 absolute inset-0 flex items-center justify-center">
+                {currentAgent ? "person" : "person_off"}
+              </span>
+            )}
+          </span>
+          <span className="text-xs font-medium truncate">
+            {currentAgent ? currentAgent.full_name || currentAgent.user_id.slice(0, 8) : t("unassigned")}
+          </span>
+        </div>
+      </div>
+
       {/* Actions - Menu */}
-      <div className="col-span-12 md:col-span-2 flex items-center justify-end">
+      <div className="col-span-6 md:col-span-2 flex items-center justify-end gap-2">
+        {!canManage && (
+          <span
+            className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-100 text-gray-400"
+            title={t("assigned_other_agent")}
+          >
+            <span className="material-icons text-[15px]">lock</span>
+            <span className="text-[11px] font-medium">{t("locked_property")}</span>
+          </span>
+        )}
+        {/* Assign to agent (admin only) */}
+        {isAdmin && canManage && (
+          <div className="relative">
+            <button
+              onClick={() => setAssignOpen(!assignOpen)}
+              disabled={assignLoading}
+              className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${
+                currentAgent
+                  ? "border-mosque/30 bg-mosque/5 text-mosque hover:bg-mosque/10"
+                  : "border-gray-200 bg-white text-gray-400 hover:border-mosque/40 hover:text-mosque"
+              }`}
+              title={t("assign_to")}
+            >
+              <span className="material-icons text-[15px]">person_add_alt</span>
+              <span className="max-w-[70px] truncate">
+                {currentAgent ? currentAgent.full_name : t("unassigned")}
+              </span>
+              <span className="material-icons text-[13px]">expand_more</span>
+            </button>
+
+            {assignOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setAssignOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-[60] w-52 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-400 font-semibold border-b border-gray-100">
+                    {t("assign_to")}
+                  </div>
+                  <button
+                    onClick={() => assignAgent(null)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-background-light transition-colors cursor-pointer ${
+                      agentId === null ? "text-mosque font-medium" : "text-nordic-dark"
+                    }`}
+                  >
+                    <span className="material-icons text-sm text-gray-400">person_off</span>
+                    {t("unassigned")}
+                  </button>
+                  {availableAgents.map((agent) => {
+                    const isCurrent = agent.user_id === agentId;
+                    return (
+                      <button
+                        key={agent.user_id}
+                        onClick={() => assignAgent(agent.user_id)}
+                        disabled={isCurrent || assignLoading}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors cursor-pointer ${
+                          isCurrent
+                            ? "bg-mosque/5 text-mosque font-medium cursor-default"
+                            : "text-nordic-dark hover:bg-background-light"
+                        }`}
+                      >
+                        <span className="relative w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-gray-200">
+                          {agent.avatar_url ? (
+                            <img src={agent.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="material-icons text-[13px] text-gray-400 absolute inset-0 flex items-center justify-center">person</span>
+                          )}
+                        </span>
+                        <span className="truncate">{agent.full_name || agent.user_id.slice(0, 8)}</span>
+                        {isCurrent && <span className="material-icons text-[14px] ml-auto text-mosque">check</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {canManage && (
         <div className="relative">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -253,6 +390,7 @@ export function PropertyRow({ property, mainImage, isLast }: PropertyRowProps) {
             </>
           )}
         </div>
+        )}
       </div>
     </div>
   );

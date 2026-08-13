@@ -1,96 +1,85 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
 
-const HEARTBEAT_INTERVAL = 5000;
-const CHECK_SUSPENSION_INTERVAL = 3000;
+const HEARTBEAT_INTERVAL = 30000;
+const CHECK_SUSPENSION_INTERVAL = 30000;
 
 export default function GlobalPresence() {
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  const supabase = useMemo(() => createClient(), []);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkRef = useRef<NodeJS.Timeout | null>(null);
   const [showSuspendedToast, setShowSuspendedToast] = useState(false);
 
-  const sendHeartbeat = useCallback(async (currentPage: string) => {
-    const supabase = createClient();
-    await supabase.rpc('update_user_presence', { p_current_page: currentPage });
-  }, []);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
-  const checkIfSuspended = useCallback(async (userId: string) => {
-    const supabase = createClient();
+  const sendHeartbeat = useCallback(async (currentPage: string) => {
+    await supabase.rpc("update_user_presence", { p_current_page: currentPage });
+  }, [supabase]);
+
+  const checkIfSuspended = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { data, error } = await supabase
-      .from('user_roles')
-      .select('active')
-      .eq('user_id', userId)
+      .from("user_roles")
+      .select("active")
+      .eq("user_id", user.id)
       .single();
-    
+
     if (error) return;
-    
+
     if (data && data.active === false) {
       setShowSuspendedToast(true);
       await supabase.auth.signOut();
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = "/";
       }, 2000);
     }
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
-    const supabase = createClient();
-    let checkInterval: NodeJS.Timeout | null = null;
+    let cancelled = false;
 
-    // Get current user
+    const clearTimers = () => {
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+      if (checkRef.current) { clearInterval(checkRef.current); checkRef.current = null; }
+    };
+
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        sendHeartbeat(pathname);
+      if (cancelled || !user) return;
 
-        // Setup broadcast channel
-        const channel = supabase.channel('presence', {
-          config: { broadcast: { self: true } },
-        });
+      sendHeartbeat(pathnameRef.current);
 
-        channel.subscribe();
+      intervalRef.current = setInterval(() => {
+        sendHeartbeat(pathnameRef.current);
+      }, HEARTBEAT_INTERVAL);
 
-        // Heartbeat interval
-        intervalRef.current = setInterval(() => {
-          sendHeartbeat(pathname);
-          channel.send({ type: 'broadcast', event: 'presence', payload: {} });
-        }, HEARTBEAT_INTERVAL);
-
-        // Check suspension every 3 seconds
-        checkInterval = setInterval(() => {
-          checkIfSuspended(user.id);
-        }, CHECK_SUSPENSION_INTERVAL);
-
-        // Cleanup on unmount
-        return () => {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          if (checkInterval) clearInterval(checkInterval);
-          supabase.removeChannel(channel);
-        };
-      }
+      checkRef.current = setInterval(() => {
+        checkIfSuspended();
+      }, CHECK_SUSPENSION_INTERVAL);
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
-        sendHeartbeat(pathname);
+        sendHeartbeat(pathnameRef.current);
       } else {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        if (checkInterval) clearInterval(checkInterval);
+        clearTimers();
       }
     });
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (checkInterval) clearInterval(checkInterval);
+      clearTimers();
     };
-  }, [pathname, sendHeartbeat, checkIfSuspended]);
+  }, [supabase, sendHeartbeat, checkIfSuspended]);
 
   return (
     <>

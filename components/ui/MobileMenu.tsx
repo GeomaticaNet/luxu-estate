@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Link, usePathname } from "@/i18n/routing";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LanguageSelector } from "./LanguageSelector";
 import { ContactModal } from "@/components/contact/ContactModal";
+import { isAuthenticated, buildContactNext } from "@/lib/contact-gate";
 
 interface MobileMenuProps {
   buyLabel: string;
@@ -20,7 +21,9 @@ export function MobileMenu({ buyLabel, rentLabel, sellLabel, isLoggedIn, loginLa
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const currentType = searchParams.get("type") === "rent" ? "rent" : "buy";
+  const handledContactRef = useRef(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -31,6 +34,27 @@ export function MobileMenu({ buyLabel, rentLabel, sellLabel, isLoggedIn, loginLa
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Re-open the sell modal after login returns with ?contact=sell (mobile only)
+  useEffect(() => {
+    if (handledContactRef.current) return;
+    if (searchParams.get("contact") !== "sell") return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 768px)").matches) return;
+    handledContactRef.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSellOpen(true);
+    router.replace(pathname);
+  }, [searchParams, pathname, router]);
+
+  const handleSell = async () => {
+    if (!(await isAuthenticated())) {
+      router.push(`/login?next=${encodeURIComponent(buildContactNext(pathname, searchParams, "sell"))}`);
+      return;
+    }
+    setOpen(false);
+    setSellOpen(true);
+  };
 
   const isActive = (href: string) => {
     if (href === "/") return currentType === "buy" && pathname === "/";
@@ -81,7 +105,7 @@ export function MobileMenu({ buyLabel, rentLabel, sellLabel, isLoggedIn, loginLa
               </Link>
 
               <button
-                onClick={() => { setOpen(false); setSellOpen(true); }}
+                onClick={handleSell}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-nordic-dark hover:bg-mosque/10 transition-all cursor-pointer"
               >
                 <span className="material-icons text-xl">sell</span>

@@ -13,13 +13,26 @@ const DEFAULT_MAX_DIMENSION = 1920;
 const DEFAULT_QUALITY = 0.8;
 const DEFAULT_MAX_SKIP_SIZE = 400 * 1024; // 400 KB
 
-function loadImage(file: File): Promise<HTMLImageElement> {
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("decode failed"));
-    img.src = URL.createObjectURL(file);
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); }
+    );
   });
+}
+
+function loadImage(file: File): Promise<HTMLImageElement> {
+  return withTimeout(
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("decode failed"));
+      img.src = URL.createObjectURL(file);
+    }),
+    10000
+  );
 }
 
 function drawToBlob(
@@ -28,30 +41,33 @@ function drawToBlob(
   mimeType: string,
   quality: number
 ): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    const { width, height } = img;
-    const ratio = Math.min(
-      maxDimension / width,
-      maxDimension / height,
-      1
-    );
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(width * ratio));
-    canvas.height = Math.max(1, Math.round(height * ratio));
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      resolve(null);
-      return;
-    }
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(
-      (blob) => resolve(blob),
-      mimeType,
-      quality
-    );
-  });
+  return withTimeout(
+    new Promise((resolve) => {
+      const { width, height } = img;
+      const ratio = Math.min(
+        maxDimension / width,
+        maxDimension / height,
+        1
+      );
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(width * ratio));
+      canvas.height = Math.max(1, Math.round(height * ratio));
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => resolve(blob),
+        mimeType,
+        quality
+      );
+    }),
+    10000
+  );
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/client";
@@ -63,7 +63,7 @@ export default function SettingsPage() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -115,24 +115,38 @@ export default function SettingsPage() {
     if (!file || !user) return;
     setUploading(true);
     setError("");
-    const { blob, extension } = await optimizeImage(file, { maxDimension: 512 });
-    const filePath = `${user.id}/avatar.${extension}`;
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, blob, { upsert: true, contentType: `image/${extension}` });
-    if (uploadError) { setError(uploadError.message); setUploading(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
-    const { error: updateError } = await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
-    if (updateError) { setError(updateError.message); setUploading(false); return; }
-    setAvatarUrl(publicUrl);
-    setUploading(false);
-    showSuccess(t("avatar_updated"));
+    try {
+      const { blob, extension } = await optimizeImage(file, { maxDimension: 512 });
+      const filePath = `${user.id}/avatar.${extension}`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, blob, { upsert: true, contentType: `image/${extension}` });
+      if (uploadError) { setError(uploadError.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const { error: updateError } = await supabase.auth.updateUser({ data: { avatar_url: publicUrl, custom_profile: true } });
+      if (updateError) { setError(updateError.message); return; }
+      setAvatarUrl(publicUrl);
+      showSuccess(t("avatar_updated"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setUploading(false);
+    }
   };
 
   // -- Profile --
   const handleSaveName = async () => {
     setSaving(true); setError("");
-    const { error: e } = await supabase.auth.updateUser({ data: { full_name: name } });
-    if (e) { setError(e.message); setSaving(false); return; }
-    setSaving(false); showSuccess(t("saved"));
+    try {
+      const res = await Promise.race([
+        supabase.auth.updateUser({ data: { full_name: name, custom_profile: true } }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timeout al guardar el nombre")), 15000)),
+      ]);
+      if (res.error) { setError(res.error.message); return; }
+      showSuccess(t("saved"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // -- Password --
@@ -140,10 +154,19 @@ export default function SettingsPage() {
     if (newPassword.length < 6) { setError("Password must be at least 6 characters"); return; }
     if (newPassword !== confirmNewPassword) { setError("Passwords do not match"); return; }
     setUpdatingPassword(true); setError("");
-    const { error: e } = await supabase.auth.updateUser({ password: newPassword });
-    if (e) { setError(e.message); setUpdatingPassword(false); return; }
-    setNewPassword(""); setConfirmNewPassword(""); setUpdatingPassword(false);
-    showSuccess(t("password_updated"));
+    try {
+      const res = await Promise.race([
+        supabase.auth.updateUser({ password: newPassword }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timeout al actualizar la contraseña")), 15000)),
+      ]);
+      if (res.error) { setError(res.error.message); return; }
+      setNewPassword(""); setConfirmNewPassword("");
+      showSuccess(t("password_updated"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setUpdatingPassword(false);
+    }
   };
 
   // -- Language --

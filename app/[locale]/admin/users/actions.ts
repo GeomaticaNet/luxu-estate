@@ -24,13 +24,13 @@ export async function deleteUser(userId: string) {
   return { success: true };
 }
 
-export async function updateUserRole(userId: string, newRole: string) {
+export async function updateUserRole(userId: string, roles: string[]) {
   const supabase = await createServerClient();
   
   const { error } = await supabase
     .rpc('update_user_role', {
       p_user_id: userId,
-      p_role: newRole,
+      p_roles: roles,
     });
 
   if (error) {
@@ -55,6 +55,29 @@ export async function toggleUserActive(userId: string, active: boolean) {
     console.error('Error toggling user active:', error);
     return { success: false, error: error.message };
   }
+
+  revalidatePath('/admin/users');
+  return { success: true };
+}
+
+export async function softDeleteUser(userId: string) {
+  const supabase = await createServerClient();
+
+  const { error: rpcError } = await supabase
+    .rpc('soft_delete_user', {
+      p_user_id: userId,
+    });
+
+  if (rpcError) {
+    console.error('Error soft deleting user:', rpcError);
+    return { success: false, error: rpcError.message };
+  }
+
+  // IMPORTANT: we do NOT touch auth.users here. Soft-deleting the auth user
+  // would free the email and let the person re-register (e.g. via Google OAuth),
+  // bypassing the ban. Keeping the auth row makes OAuth resolve to the same
+  // user, and the login page / auth callback catch the deleted/suspended flags.
+  // The user's active session is signed out by GlobalPresence (active=false).
 
   revalidatePath('/admin/users');
   return { success: true };

@@ -10,11 +10,13 @@ import { createClient } from "@/lib/supabase/client";
 
 interface AdminNavbarProps {
   userEmail?: string;
+  userFullName?: string | null;
   userAvatar?: string | null;
   isAdmin?: boolean;
+  canAccessAdmin?: boolean;
 }
 
-export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps) {
+export function AdminNavbar({ userEmail, userFullName, userAvatar, isAdmin, canAccessAdmin }: AdminNavbarProps) {
   const pathname = usePathname();
   const t = useTranslations("Admin");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -23,11 +25,17 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
     const supabase = createClient();
 
     async function fetchUnreadCount() {
-      const { count } = await supabase
+      const { count: newLeads } = await supabase
         .from("contact_leads")
         .select("*", { count: "exact", head: true })
         .eq("status", "new");
-      if (count !== null) setUnreadCount(count);
+      // Client messages not yet read by staff (agent opened the thread → marked read)
+      const { count: unreadUserMsgs } = await supabase
+        .from("lead_messages")
+        .select("*", { count: "exact", head: true })
+        .eq("sender_type", "user")
+        .eq("is_read", false);
+      setUnreadCount((newLeads || 0) + (unreadUserMsgs || 0));
     }
 
     fetchUnreadCount();
@@ -37,6 +45,13 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "contact_leads" },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lead_messages" },
         () => {
           fetchUnreadCount();
         }
@@ -51,7 +66,8 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
   const navItems = [
     { href: "/admin/properties", label: t("properties") },
     { href: "/admin/messages", label: t("messages_title") || "Messages" },
-    { href: "/admin/users", label: t("users") },
+    ...(isAdmin ? [{ href: "/admin/users", label: t("users") }] : []),
+    { href: "/admin/account", label: t("account") || "Cuenta" },
   ];
 
   const isActive = (href: string) => {
@@ -105,10 +121,12 @@ export function AdminNavbar({ userEmail, userAvatar, isAdmin }: AdminNavbarProps
           
           <UserMenu
             avatarUrl={userAvatar}
-            fullName={userEmail}
+            fullName={userFullName}
             email={userEmail}
             isAdmin={isAdmin}
+            canAccessAdmin={canAccessAdmin}
             inAdminArea={true}
+            role={isAdmin ? "admin" : "agent"}
           />
         </div>
       </div>

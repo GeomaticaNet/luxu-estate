@@ -22,6 +22,7 @@ export interface Property {
   imageUrl: string;
   imageAlt: string;
   images?: string[];
+  agentId?: string;
 }
 
 export interface PropertyImage {

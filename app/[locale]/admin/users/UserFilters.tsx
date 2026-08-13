@@ -8,7 +8,7 @@ interface UserWithRole {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: string;
+  roles: string[];
   active: boolean;
   created_at: string;
 }
@@ -16,6 +16,7 @@ interface UserWithRole {
 const tabs = [
   { id: "all", label: "All Users" },
   { id: "users", label: "Users" },
+  { id: "agents", label: "Agents" },
   { id: "admins", label: "Admins" },
 ];
 
@@ -32,8 +33,9 @@ export default function UserFilters({
 
   const filteredUsers = users.filter(user => {
     if (activeTab === "all") return true;
-    if (activeTab === "users") return user.role === "user";
-    if (activeTab === "admins") return user.role === "admin";
+    if (activeTab === "users") return user.roles.length === 0;
+    if (activeTab === "agents") return user.roles.includes("agent");
+    if (activeTab === "admins") return user.roles.includes("admin");
     return true;
   });
 

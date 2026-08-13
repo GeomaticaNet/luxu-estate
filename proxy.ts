@@ -6,8 +6,6 @@ import { createServerClient } from '@supabase/ssr';
 const intlMiddleware = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  console.log('[Proxy]', request.method, request.nextUrl.pathname);
-
   // Let Server Actions (POST) pass through without any processing
   if (request.method === 'POST') {
     return NextResponse.next();
@@ -15,7 +13,6 @@ export async function proxy(request: NextRequest) {
 
   // Skip locale middleware for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    console.log('[Proxy] skipping API route');
     return NextResponse.next();
   }
 

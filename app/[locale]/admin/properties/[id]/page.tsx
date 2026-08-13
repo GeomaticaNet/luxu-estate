@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import PropertyForm from "@/components/admin/property/PropertyForm";
 import { Link } from "@/i18n/routing";
-import { createPublicClient } from "@/lib/supabase/server";
+import { createPublicClient, createServerClient } from "@/lib/supabase/server";
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations("Admin");
@@ -23,6 +23,31 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     property.property_images.sort((a: any, b: any) => a.sort_order - b.sort_order);
   }
 
+  // Resolve admin/agent context and agent list
+  const serverSupabase = await createServerClient();
+  const { data: { user } } = await serverSupabase.auth.getUser();
+  const { data: userRole } = await serverSupabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user?.id)
+    .single();
+  const roles: string[] = userRole?.role ?? [];
+  const isAdmin = roles.includes('admin');
+
+  const { data: agentRoleRows } = await serverSupabase
+    .from('user_roles')
+    .select('user_id')
+    .contains('role', ['agent']);
+
+  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+
+  const { data: agents } = agentIds.length > 0
+    ? await serverSupabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', agentIds)
+    : { data: [] };
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
@@ -43,7 +68,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         </div>
       </header>
 
-      <PropertyForm initialData={property} />
+      <PropertyForm initialData={property} isAdmin={isAdmin} agents={agents || []} currentUserId={user?.id || null} />
     </main>
   );
 }

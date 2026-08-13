@@ -4,25 +4,27 @@ import { createServerClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const rawNext = searchParams.get('next') ?? '/';
+  // Only allow same-origin paths (no open redirect)
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   if (code) {
     const supabase = await createServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Check if user is suspended
+      // Check if user is suspended or deactivated
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: userRole } = await supabase
           .from('user_roles')
-          .select('active')
+          .select('active, deleted_at')
           .eq('user_id', user.id)
           .single();
         
-        if (userRole && userRole.active === false) {
-          // User is suspended, sign out and redirect to login with error
+        if (userRole && (userRole.active === false || userRole.deleted_at)) {
+          // User is suspended/deactivated, sign out and redirect to login with error
           await supabase.auth.signOut();
-          return NextResponse.redirect(`${origin}/login?error=suspended`);
+          return NextResponse.redirect(`${origin}/login?error=deactivated`);
         }
       }
       

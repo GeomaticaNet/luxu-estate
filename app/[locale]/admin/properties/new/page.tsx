@@ -1,9 +1,36 @@
 import { getTranslations } from "next-intl/server";
 import PropertyForm from "@/components/admin/property/PropertyForm";
 import { Link } from "@/i18n/routing";
+import { createServerClient } from "@/lib/supabase/server";
 
 export default async function NewPropertyPage() {
   const t = await getTranslations("Admin");
+  const supabase = await createServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: userRole } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user?.id)
+    .single();
+
+  const roles: string[] = userRole?.role ?? [];
+  const isAdmin = roles.includes('admin');
+
+  const { data: agentRoleRows } = await supabase
+    .from('user_roles')
+    .select('user_id')
+    .contains('role', ['agent']);
+
+  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+
+  const { data: agents } = agentIds.length > 0
+    ? await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', agentIds)
+    : { data: [] };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
@@ -25,7 +52,7 @@ export default async function NewPropertyPage() {
         </div>
       </header>
 
-      <PropertyForm />
+      <PropertyForm isAdmin={isAdmin} agents={agents || []} currentUserId={user?.id || null} />
     </main>
   );
 }

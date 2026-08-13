@@ -4,6 +4,10 @@ import { useState, FormEvent, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Portal } from "@/components/ui/Portal";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { createClient } from "@/lib/supabase/client";
+import { optimizeImage } from "@/lib/image-optimize";
+
+const MAX_IMAGES = 5;
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -20,10 +24,17 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageError, setImageError] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const overlayRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounterRef = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const prevPreviewsRef = useRef<string[]>([]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -32,11 +43,23 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
       setPhone("");
       setMessage("");
       setPreferredDate("");
+      setImages([]);
+      setImageError("");
       setSending(false);
       setSent(false);
       setError("");
     }
   }, [isOpen]);
+
+  // Keep previews in sync with images, revoking old object URLs
+  useEffect(() => {
+    const newPreviews = images.map((file) => URL.createObjectURL(file));
+    setImagePreviews(newPreviews);
+    return () => {
+      prevPreviewsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      prevPreviewsRef.current = newPreviews;
+    };
+  }, [images]);
 
   useEffect(() => {
     if (isOpen && leadType === "contact" && propertyTitle && !message) {
@@ -58,9 +81,51 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
         ? t("visit_message_placeholder")
         : t("contact_message_placeholder");
 
+  const addImages = (files: FileList | File[]) => {
+    setImageError("");
+    const incoming = Array.from(files);
+
+    for (const file of incoming) {
+      if (!file.type.startsWith("image/")) {
+        setImageError(t("image_invalid_type"));
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setImageError(t("image_too_large"));
+        continue;
+      }
+    }
+
+    if (incoming.some((f) => f.size > 10 * 1024 * 1024)) return;
+    if (incoming.some((f) => !f.type.startsWith("image/"))) return;
+
+    const available = MAX_IMAGES - images.length;
+    if (available <= 0) {
+      setImageError(t("image_max_reached", { max: MAX_IMAGES }));
+      return;
+    }
+    if (incoming.length > available) {
+      setImageError(t("image_max_limit", { max: MAX_IMAGES }));
+    }
+    setImages((prev) => [...prev, ...incoming.slice(0, available)]);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setDragging(false);
+    if (e.dataTransfer.files?.length) addImages(e.dataTransfer.files);
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImageError("");
+  };
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setImageError("");
 
     if (!name.trim() || !email.trim() || !message.trim()) {
       setError("Name, email and message are required");
@@ -70,6 +135,24 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
     setSending(true);
 
     try {
+      // Upload images, each optimized (WebP) and resized before uploading
+      const supabase = createClient();
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const { blob, extension } = await optimizeImage(images[i], { maxDimension: 1600, quality: 0.8 });
+        const fileName = `leads-${Date.now()}-${i}.${extension}`;
+        const { error: uploadError } = await supabase.storage
+          .from("leads")
+          .upload(fileName, blob, { contentType: blob.type || `image/${extension}` });
+        if (uploadError) {
+          console.error("Lead image upload error:", uploadError);
+          continue;
+        }
+        const { data: { publicUrl } } = supabase.storage.from("leads").getPublicUrl(fileName);
+        if (publicUrl) uploadedUrls.push(publicUrl);
+      }
+
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,6 +165,7 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
           property_title: propertyTitle || null,
           lead_type: leadType,
           preferred_date: preferredDate || null,
+          images: uploadedUrls,
         }),
       });
 
@@ -104,10 +188,10 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
     <Portal>
       <div
         ref={overlayRef}
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-start md:items-center justify-center bg-black/40 backdrop-blur-sm overflow-y-auto py-6 md:py-10"
         onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
       >
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
         {sent ? (
           <div className="text-center py-6">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -200,6 +284,62 @@ export function ContactModal({ isOpen, onClose, leadType, propertyId, propertyTi
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm resize-none"
                 />
               </div>
+
+              {/* Photo upload (drag & drop) — only for selling requests */}
+              {leadType === "sell" && (
+                <div>
+                  <label className="block text-sm font-medium text-nordic-dark mb-1">
+                    {t("image_upload_title")} <span className="text-xs text-gray-400 font-normal">({images.length}/{MAX_IMAGES})</span>
+                  </label>
+                  <div
+                    onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current <= 0) { dragCounterRef.current = 0; setDragging(false); } }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                      dragging
+                        ? "border-mosque bg-hint-of-green/20"
+                        : "border-gray-300 bg-gray-50/50 hover:border-mosque/50 hover:bg-hint-of-green/10"
+                    }`}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.length) addImages(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="flex flex-col items-center space-y-2 pointer-events-none">
+                      <span className="material-icons text-3xl text-mosque">add_photo_alternate</span>
+                      <p className="text-sm text-gray-500">{t("image_drop_hint")}</p>
+                      <p className="text-xs text-gray-400">{t("image_max", { max: MAX_IMAGES })}</p>
+                    </div>
+                  </div>
+                  {imageError && <p className="text-xs text-red-500 mt-1">{imageError}</p>}
+                </div>
+              )}
+
+              {leadType === "sell" && imagePreviews.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {imagePreviews.map((url, index) => (
+                    <div key={url} className="relative w-16 h-16 rounded-lg overflow-hidden group">
+                      <img src={url} alt={`${t("image_upload_title")} ${index + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      >
+                        <span className="material-icons text-white text-lg">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {error && (
                 <p className="text-sm text-red-500">{error}</p>

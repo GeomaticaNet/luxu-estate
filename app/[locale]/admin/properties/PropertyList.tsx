@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { PropertyRow } from "./PropertyRow";
 
-interface Property {
+export interface Property {
   id: string;
   title: string;
   price: number;
@@ -17,6 +17,13 @@ interface Property {
   is_featured: boolean;
   type: string;
   property_type: string;
+  agent_id?: string | null;
+}
+
+interface Agent {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 interface PropertyListProps {
@@ -34,11 +41,14 @@ interface PropertyListProps {
   currentPage: number;
   totalPages: number;
   currentPropertyType?: string;
+  isAdmin?: boolean;
+  currentUserId?: string | null;
+  agents?: Agent[];
 }
 
 export function PropertyList(props: PropertyListProps) {
   const t = useTranslations("Admin");
-  const { properties, mainImages, totalListings, activeProperties, forSaleCount, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages, currentPropertyType } = props;
+  const { properties, mainImages, totalListings, activeProperties, forSaleCount, forRentCount, soldCount, rentedCount, showingFrom, showingTo, totalCount, currentPage, totalPages, currentPropertyType, isAdmin = false, currentUserId = null, agents = [] } = props;
 
   function pageUrl(page: number) {
     const params = new URLSearchParams();
@@ -98,9 +108,10 @@ export function PropertyList(props: PropertyListProps) {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         {/* Table Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/50 border-b border-gray-100 text-sm font-semibold text-gray-500 uppercase tracking-wider">
-          <div className="col-span-6">{t("property_details")}</div>
+          <div className="col-span-4">{t("property_details")}</div>
           <div className="col-span-2">{t("price")}</div>
           <div className="col-span-2">{t("status")}</div>
+          <div className="col-span-2">{t("assigned_to_col")}</div>
           <div className="col-span-2 text-right">{t("actions")}</div>
         </div>
 
@@ -111,6 +122,9 @@ export function PropertyList(props: PropertyListProps) {
             property={property}
             mainImage={mainImages[property.id] || null}
             isLast={index === properties.length - 1}
+            isAdmin={isAdmin}
+            currentUserId={currentUserId}
+            agents={agents}
           />
         ))}
       </div>

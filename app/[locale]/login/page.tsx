@@ -25,6 +25,9 @@ export default function LoginPage() {
   const [formError, setFormError] = useState("");
   const [message, setMessage] = useState("");
   const [suggestGoogle, setSuggestGoogle] = useState(false);
+  const rawNext = searchParams.get('next') || "/";
+  // Only allow same-origin paths (no open redirect)
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   const handleOAuthLogin = async (provider: "google") => {
     setLoading(provider);
@@ -32,7 +35,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${siteUrl}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
   };
@@ -54,6 +57,19 @@ export default function LoginPage() {
     });
 
     if (signInError) {
+      // If the account was suspended or deleted, show a clearer message.
+      let deactivated = false;
+      try {
+        const { data } = await supabase.rpc('is_user_deactivated', { p_email: email.trim() });
+        deactivated = !!data;
+      } catch {
+        // ignore — fall back to the generic error below
+      }
+      if (deactivated) {
+        setFormError("Tu cuenta ha sido dada de baja o suspendida. Contactá con el administrador.");
+        setLoading(null);
+        return;
+      }
       const isInvalidCreds = signInError.message === "Invalid login credentials";
       setFormError(isInvalidCreds
         ? "Invalid email or password"
@@ -63,8 +79,25 @@ export default function LoginPage() {
       return;
     }
 
+    // Suspended/deleted users can still authenticate, so check the account state
+    // after a successful login and bounce them out if they were deactivated.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("active, deleted_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (roleRow && (roleRow.active === false || roleRow.deleted_at)) {
+        await supabase.auth.signOut();
+        setFormError("Tu cuenta ha sido dada de baja o suspendida. Contactá con el administrador.");
+        setLoading(null);
+        return;
+      }
+    }
+
     router.refresh();
-    router.push("/");
+    router.push(next);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -107,6 +140,14 @@ export default function LoginPage() {
         : signUpError.message);
       if (isExistingUser) setSuggestGoogle(true);
       setLoading(null);
+      return;
+    }
+
+    // Some projects have email confirmation enabled and some don't.
+    // If a session is returned immediately, the user is already logged in.
+    if (signUpData.session) {
+      router.refresh();
+      router.push(next);
       return;
     }
 
@@ -210,13 +251,13 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-black/5">
-          {/* Suspended alert */}
-          {error === 'suspended' && (
+          {/* Suspended/deactivated alert */}
+          {(error === 'suspended' || error === 'deactivated') && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4 flex items-start gap-3">
               <span className="material-icons text-red-500 text-xl">block</span>
               <div>
-                <p className="font-semibold text-red-700 text-sm">Usuario suspendido</p>
-                <p className="text-red-600/80 text-xs mt-0.5">Tu cuenta ha sido suspendida. Contacta con el administrador.</p>
+                <p className="font-semibold text-red-700 text-sm">Usuario dado de baja</p>
+                <p className="text-red-600/80 text-xs mt-0.5">Tu cuenta ha sido suspendida o eliminada. Contactá con el administrador.</p>
               </div>
             </div>
           )}

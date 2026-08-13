@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "@/i18n/routing";
 import { useState, useTransition, useRef, useEffect } from "react";
 
 const locales = [
-  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "es", label: "ES", flag: "🇦🇷" },
   { code: "en", label: "EN", flag: "🇺🇸" },
   { code: "pt", label: "PT", flag: "🇧🇷" },
 ];

@@ -1,64 +1,82 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { updateUserRole, toggleUserActive, deleteUser } from "./actions";
+import { updateUserRole, toggleUserActive, softDeleteUser } from "./actions";
 
 interface RoleDropdownProps {
   userId: string;
-  currentRole: string;
+  roles: string[];
   currentUserId: string | null;
   active: boolean;
   isFirst: boolean;
+  onDeleted?: (userId: string) => void;
 }
 
-export default function RoleDropdown({ userId, currentRole, currentUserId, active, isFirst }: RoleDropdownProps) {
+export default function RoleDropdown({ userId, roles: initialRoles, currentUserId, active, isFirst, onDeleted }: RoleDropdownProps) {
   const t = useTranslations("Admin");
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [showConfirmDemote, setShowConfirmDemote] = useState(false);
-  const [pendingRole, setPendingRole] = useState<string | null>(null);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [roles, setRoles] = useState<string[]>(initialRoles);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const isCurrentUser = userId === currentUserId;
+  const isAdmin = roles.includes('admin');
+  const isAgent = roles.includes('agent');
 
-  async function handleRoleChange(newRole: string) {
-    // If demoting admin to user, show confirmation first (even for self)
-    if (currentRole === 'admin' && newRole === 'user') {
-      setPendingRole(newRole);
-      setShowConfirmDemote(true);
-      setIsOpen(false);
+  async function toggleRole(role: string) {
+    // Prevent removing your own admin role (would lock yourself out)
+    if (isCurrentUser && role === 'admin' && roles.includes('admin')) {
+      setErrorMsg(t("cannot_remove_own_admin"));
+      setTimeout(() => setErrorMsg(null), 3000);
       return;
     }
-    
+    const next = roles.includes(role)
+      ? roles.filter((r) => r !== role)
+      : [...roles, role];
     setUpdating(true);
     setIsOpen(false);
-    await updateUserRole(userId, newRole);
-    setUpdating(false);
-  }
-
-  async function confirmDemote() {
-    if (pendingRole) {
-      setUpdating(true);
-      setShowConfirmDemote(false);
-      await updateUserRole(userId, pendingRole);
-      setPendingRole(null);
-      setUpdating(false);
+    setErrorMsg(null);
+    const res = await updateUserRole(userId, next);
+    if (res.success) {
+      setRoles(next);
+    } else if (res.error) {
+      setErrorMsg(res.error);
+      setTimeout(() => setErrorMsg(null), 4000);
     }
+    setUpdating(false);
   }
 
   async function handleToggleActive() {
     if (isCurrentUser) return;
     setUpdating(true);
     setIsOpen(false);
-    await toggleUserActive(userId, !active);
+    setErrorMsg(null);
+    const res = await toggleUserActive(userId, !active);
+    if (res && res.error) {
+      setErrorMsg(res.error);
+      setTimeout(() => setErrorMsg(null), 4000);
+    }
     setUpdating(false);
   }
 
-  async function confirmDelete() {
+  async function handleDelete() {
+    if (isCurrentUser) return;
     setUpdating(true);
-    setShowConfirmDelete(false);
-    await deleteUser(userId);
+    setErrorMsg(null);
+    const res = await softDeleteUser(userId);
+    if (res && res.error) {
+      setErrorMsg(res.error);
+      setTimeout(() => setErrorMsg(null), 4000);
+      setConfirmDelete(false);
+    } else {
+      setConfirmDelete(false);
+      onDeleted?.(userId);
+      router.refresh();
+    }
     setUpdating(false);
   }
 
@@ -81,34 +99,61 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
         </span>
       </button>
 
+      {errorMsg && (
+        <div className="absolute top-full right-0 mt-2 w-64 rounded-lg bg-red-600 text-white text-xs font-medium px-4 py-3 shadow-xl z-50">
+          {errorMsg}
+        </div>
+      )}
+
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-xl bg-mosque ring-1 ring-black ring-opacity-5 overflow-hidden z-50 origin-top-right">
+        <div className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl bg-mosque ring-1 ring-black ring-opacity-5 overflow-hidden z-50 origin-top-right">
+          <div className="px-4 py-3 text-[10px] uppercase tracking-wider text-white/50 border-b border-white/10">
+            {isAdmin ? t("administrator_role") : ""} {isAgent ? t("agent_role") : ""}
+            {!isAdmin && !isAgent ? t("user_role") : ""}
+          </div>
           <div className="py-1" role="menu">
+            {/* Admin toggle */}
             <button
-              onClick={() => handleRoleChange('admin')}
-              disabled={currentRole === 'admin'}
+              onClick={() => toggleRole('admin')}
+              disabled={isCurrentUser && isAdmin}
               className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
-                currentRole === 'admin' 
-                  ? 'text-white/30 cursor-not-allowed' 
+                isCurrentUser && isAdmin
+                  ? 'text-white/30 cursor-not-allowed'
+                  : isAdmin
+                    ? 'text-white hover:bg-white/10 hover:text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span className={`material-icons text-sm mr-3 ${isAdmin ? 'text-white' : 'text-white/50'}`}>shield</span>
+              <span className="flex-1 text-left">
+                {isCurrentUser && isAdmin ? t("cannot_remove_own_admin") : isAdmin ? t("already_admin") : t("promote_to_admin")}
+              </span>
+              <span className={`material-icons text-base ${isAdmin ? 'text-white' : 'text-white/30'}`}>
+                {isAdmin ? 'check_box' : 'check_box_outline_blank'}
+              </span>
+            </button>
+
+            {/* Agent toggle */}
+            <button
+              onClick={() => toggleRole('agent')}
+              className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
+                isAgent
+                  ? 'text-white hover:bg-white/10 hover:text-white'
                   : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <span className={`material-icons text-sm mr-3 ${currentRole === 'admin' ? 'text-white/20' : 'text-white/50'}`}>shield</span>
-              {currentRole === 'admin' ? t("already_admin") : t("promote_to_admin")}
+              <span className={`material-icons text-sm mr-3 ${isAgent ? 'text-white' : 'text-white/50'}`}>badge</span>
+              <span className="flex-1 text-left">
+                {isAgent ? t("already_agent") : t("promote_to_agent")}
+              </span>
+              <span className={`material-icons text-base ${isAgent ? 'text-white' : 'text-white/30'}`}>
+                {isAgent ? 'check_box' : 'check_box_outline_blank'}
+              </span>
             </button>
-            <button
-              onClick={() => handleRoleChange('user')}
-              disabled={currentRole === 'user'}
-              className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
-                currentRole === 'user'
-                  ? 'text-white/30 cursor-not-allowed' 
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <span className={`material-icons text-sm mr-3 ${currentRole === 'user' ? 'text-white/20' : 'text-white/50'}`}>person</span>
-              {currentRole === 'user' ? t("already_user") : t("demote_to_user")}
-            </button>
+
             <div className="border-t border-white/10 my-1"></div>
+
+            {/* Suspend/Reactivate */}
             <button
               onClick={handleToggleActive}
               disabled={isCurrentUser || updating}
@@ -125,82 +170,46 @@ export default function RoleDropdown({ userId, currentRole, currentUserId, activ
               </span>
               {isCurrentUser ? t("cannot_suspend_self") : active ? t("suspend_user") : t("reactivate_user")}
             </button>
+
             <div className="border-t border-white/10 my-1"></div>
-            <button
-              onClick={() => { setIsOpen(false); setShowConfirmDelete(true); }}
-              disabled={isCurrentUser || updating}
-              className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
-                isCurrentUser
-                  ? 'text-red-200/40 cursor-not-allowed'
-                  : 'text-red-200 hover:bg-red-500/20 hover:text-red-100'
-              }`}
-            >
-              <span className={`material-icons text-sm mr-3 ${isCurrentUser ? 'text-red-300/40' : 'text-red-300'}`}>delete_forever</span>
-              {isCurrentUser ? t("cannot_delete_self") : t("delete_user")}
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Confirm Delete Modal */}
-      {showConfirmDelete && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                <span className="material-icons text-red-600">delete_forever</span>
+            {/* Delete (soft delete) */}
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                disabled={isCurrentUser || updating}
+                className={`group flex items-center w-full px-4 py-3 text-xs transition-colors ${
+                  isCurrentUser
+                    ? 'text-red-200/40 cursor-not-allowed'
+                    : 'text-red-200 hover:bg-red-500/20 hover:text-red-100'
+                }`}
+              >
+                <span className={`material-icons text-sm mr-3 ${isCurrentUser ? 'text-red-300/40' : 'text-red-300'}`}>
+                  person_off
+                </span>
+                {isCurrentUser ? t("cannot_delete_self") : t("delete_user")}
+              </button>
+            ) : (
+              <div className="px-4 py-3 space-y-2">
+                <p className="text-[11px] text-white/80 leading-snug">{t("confirm_delete_text")}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDelete}
+                    disabled={updating}
+                    className="flex-1 py-1.5 rounded bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {updating ? t("deleting") : t("yes_delete")}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={updating}
+                    className="px-3 py-1.5 rounded bg-white/10 text-white text-xs hover:bg-white/20 transition-colors disabled:opacity-50"
+                  >
+                    {t("cancel")}
+                  </button>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-nordic-dark">{t("confirm_delete_title")}</h3>
-            </div>
-            <p className="text-gray-600 text-sm mb-6">
-              {t("confirm_delete_text")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirmDelete(false)}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-nordic-dark hover:bg-gray-50 transition-colors"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
-                disabled={updating}
-              >
-                {updating ? t("deleting") : t("yes_delete")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirm Demote Modal */}
-      {showConfirmDemote && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-                <span className="material-icons text-orange-600">warning</span>
-              </div>
-              <h3 className="text-lg font-bold text-nordic-dark">{t("confirm_action")}</h3>
-            </div>
-            <p className="text-gray-600 text-sm mb-6">
-              {t("confirm_demote_text")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setShowConfirmDemote(false); setPendingRole(null); }}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-nordic-dark hover:bg-gray-50 transition-colors"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                onClick={confirmDemote}
-                className="flex-1 px-4 py-2.5 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors"
-              >
-                {t("yes_demote")}
-              </button>
-            </div>
+            )}
           </div>
         </div>
       )}

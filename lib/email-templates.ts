@@ -1,6 +1,6 @@
 const LOGO_URL = "https://res.cloudinary.com/matu2982/image/upload/v1783977128/logo_yf70lh.png";
 
-export function replyTemplate(replyText: string, leadName: string): string {
+export function replyTemplate(replyText: string, leadName: string, agentName?: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -60,7 +60,7 @@ export function replyTemplate(replyText: string, leadName: string): string {
 
                   <p style="color:#6b7a78;font-size:12px;line-height:1.5;margin:0;">
                     Saludos,<br>
-                    <strong style="color:#006655;">El equipo de Luxe Estate</strong>
+                    <strong style="color:#006655;">${agentName ? agentName : "El equipo de Luxe Estate"}</strong>
                   </p>
                 </td>
               </tr>

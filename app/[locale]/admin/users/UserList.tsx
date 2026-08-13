@@ -11,7 +11,7 @@ interface UserWithRole {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: string;
+  roles: string[];
   active: boolean;
   created_at: string;
 }
@@ -30,6 +30,9 @@ export default function UserList({
   const t = useTranslations("Admin");
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
   const [userPages, setUserPages] = useState<Map<string, string>>(new Map());
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
+  const visibleUsers = users.filter((u) => !deletedIds.has(u.id));
 
   const fetchPresence = useCallback(async () => {
     const supabase = createClient();
@@ -88,7 +91,7 @@ export default function UserList({
         <div className="col-span-2 text-right">{t("actions")}</div>
       </div>
 
-      {users.map((user) => {
+      {visibleUsers.map((user) => {
         const isOnline = onlineUserIds.has(user.id);
         
         return (
@@ -131,11 +134,23 @@ export default function UserList({
             </div>
 
             <div className="col-span-12 md:col-span-3 w-full flex items-center justify-between md:justify-start gap-4">
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
-                user.role === 'admin' ? 'bg-nordic-dark text-white' : 'bg-mosque/10 text-mosque'
-              }`}>
-                {user.role === 'admin' ? t("administrator_role") : t("user_role")}
-              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {user.roles.includes('admin') && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-nordic-dark text-white">
+                    {t("administrator_role")}
+                  </span>
+                )}
+                {user.roles.includes('agent') && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-mosque text-white">
+                    {t("agent_role")}
+                  </span>
+                )}
+                {user.roles.length === 0 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-mosque/10 text-mosque">
+                    {t("user_role")}
+                  </span>
+                )}
+              </div>
               <div className={`flex items-center text-xs ${user.active ? 'text-nordic-dark/60' : 'text-red-500'}`}>
                 <span className={`material-icons text-[14px] mr-1 ${user.active ? 'text-mosque' : 'text-red-500'}`}>
                   {user.active ? 'check_circle' : 'cancel'}
@@ -159,10 +174,11 @@ export default function UserList({
 
               <RoleDropdown 
                 userId={user.id} 
-                currentRole={user.role} 
+                roles={user.roles} 
                 currentUserId={currentUserId}
                 active={user.active}
                 isFirst={false} 
+                onDeleted={(id) => setDeletedIds((prev) => { const next = new Set(prev); next.add(id); return next; })}
               />
           </div>
         );

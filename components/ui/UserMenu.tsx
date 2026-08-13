@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
@@ -12,13 +12,16 @@ interface UserMenuProps {
   fullName?: string | null;
   email?: string | null;
   logoutText?: string;
+  canAccessAdmin?: boolean;
   isAdmin?: boolean;
   inAdminArea?: boolean;
+  role?: "admin" | "agent" | "user";
 }
 
-export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", isAdmin, inAdminArea }: UserMenuProps) {
-  const supabase = createClient();
+export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", canAccessAdmin, isAdmin, inAdminArea, role }: UserMenuProps) {
+  const supabase = useMemo(() => createClient(), []);
   const t = useTranslations("Settings");
+  const ta = useTranslations("Admin");
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: favoritesCount } = useFavoritesContext();
@@ -72,9 +75,23 @@ export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", is
             {email && (
               <p className="text-xs text-nordic-dark/50 truncate mt-0.5">{email}</p>
             )}
+            {role && (
+              <span className={`mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                role === "admin"
+                  ? "bg-mosque/10 text-mosque"
+                  : role === "agent"
+                    ? "bg-hint-of-green/60 text-nordic-dark"
+                    : "bg-gray-100 text-gray-500"
+              }`}>
+                <span className="material-icons text-[11px]">
+                  {role === "admin" ? "admin_panel_settings" : role === "agent" ? "support_agent" : "person"}
+                </span>
+                {role === "admin" ? ta("administrator_role") : role === "agent" ? ta("agent_role") : ta("user_role")}
+              </span>
+            )}
           </div>
 
-          {isAdmin && !inAdminArea && (
+          {canAccessAdmin && !inAdminArea && (
             <Link
               href="/admin/properties"
               onClick={() => setIsOpen(false)}
@@ -84,7 +101,7 @@ export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", is
               Administración
             </Link>
           )}
-          {isAdmin && inAdminArea && (
+          {canAccessAdmin && inAdminArea && (
             <Link
               href="/"
               onClick={() => setIsOpen(false)}

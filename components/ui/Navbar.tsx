@@ -5,7 +5,6 @@ import { createServerClient } from "@/lib/supabase/server";
 import { NavbarAuth } from "./NavbarAuth";
 import { NavLinks } from "./NavLinks";
 import { MobileMenu } from "./MobileMenu";
-import { AdminNotificationBadge } from "./AdminNotificationBadge";
 
 export const Navbar = async () => {
   const t = await getTranslations("Navigation");
@@ -13,13 +12,16 @@ export const Navbar = async () => {
   const { data: { user } } = await supabase.auth.getUser();
 
   let isAdmin = false;
+  let canAccessAdmin = false;
   if (user) {
     const { data: userRole } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .single();
-    isAdmin = userRole?.role === 'admin';
+    const roles: string[] = userRole?.role ?? [];
+    isAdmin = roles.includes('admin');
+    canAccessAdmin = roles.includes('admin') || roles.includes('agent');
   }
 
   const avatarUrl = user?.user_metadata?.avatar_url;
@@ -54,7 +56,6 @@ export const Navbar = async () => {
           {/* Right: Controls */}
           <div className="flex items-center space-x-3 md:space-x-6">
             <div className="hidden md:flex items-center gap-3">
-              <AdminNotificationBadge isAdmin={isAdmin} />
               <LanguageSelector />
             </div>
             <div className="hidden md:block">
@@ -64,6 +65,7 @@ export const Navbar = async () => {
                 fullName={fullName}
                 loginText={t("login") || "Login"}
                 isAdmin={isAdmin}
+                canAccessAdmin={canAccessAdmin}
               />
             </div>
           </div>

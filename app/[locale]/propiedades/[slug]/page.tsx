@@ -103,6 +103,18 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
     sort_order: 0,
   };
 
+  // Fetch the assigned agent's profile if the property has one
+  const supabase = createPublicClient();
+  let agent: { full_name: string | null; avatar_url: string | null; phone: string | null } | null = null;
+  if (property.agentId) {
+    const { data: agentProfile } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url, phone")
+      .eq("user_id", property.agentId)
+      .maybeSingle();
+    if (agentProfile) agent = agentProfile;
+  }
+
   const isSold = property.type === "SOLD";
   const isRented = property.type === "RENTED";
   const isUnavailable = isSold || isRented;
@@ -186,33 +198,68 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
 
               <div className="h-px bg-slate-100 my-6"></div>
 
-              {/* Agent Section (Hardcoded for now) */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="relative w-14 h-14 flex-shrink-0">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4TxUmdQRb2VMjuaNxLEwLorv_dgHzoET2_wL5toSvew6nhtziaR3DX-U69DBN7J74yO6oKokpw8tqEFutJf13MeXghCy7FwZuAxnoJel6FYcKeCRUVinpZtrNnkZvXd-MY5_2MAtRD7JP5BieHixfCaeAPW04jm-y-nvF3HIrwcZ_HRDk_MrNP5WiPV3u9zNrEgM-SQoWGh4xLVSV444aZAbVl03mjjsW5WBpIeodCyqJxprTDp6Q157D06VxcdUSCf-l9UKQT-w"
-                    alt="Sarah Jenkins"
-                    fill
-                    sizes="56px"
-                    className="rounded-full object-cover border-2 border-white shadow-sm"
-                  />
+              {/* Agent Section — dynamic from assigned agent */}
+              {agent ? (
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative w-14 h-14 flex-shrink-0">
+                    {agent.avatar_url ? (
+                      <Image
+                        src={agent.avatar_url}
+                        alt={agent.full_name || "Agente"}
+                        fill
+                        sizes="56px"
+                        className="rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-mosque/10 flex items-center justify-center">
+                        <span className="material-icons text-nordic-dark/60">person</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-nordic">{agent.full_name || "Agente"}</h3>
+                    <div className="flex items-center gap-1 text-xs text-mosque font-medium">
+                      <span className="material-icons text-[14px]">star</span>
+                      <span>{t("top_rated_agent")}</span>
+                    </div>
+                  </div>
+                  {agent.phone && (
+                    <div className="ml-auto flex gap-2">
+                      <a
+                        href={`https://wa.me/${agent.phone.replace(/[^+\d]/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp"
+                        className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors"
+                      >
+                        <span className="material-icons text-sm">chat</span>
+                      </a>
+                      <a
+                        href={`tel:${agent.phone.replace(/[^+\d]/g, "")}`}
+                        aria-label="Llamar"
+                        className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors"
+                      >
+                        <span className="material-icons text-sm">call</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-semibold text-nordic">Sarah Jenkins</h3>
-                  <div className="flex items-center gap-1 text-xs text-mosque font-medium">
-                    <span className="material-icons text-[14px]">star</span>
-                    <span>{t("top_rated_agent")}</span>
+              ) : (
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative w-14 h-14 flex-shrink-0">
+                    <div className="w-14 h-14 rounded-full bg-mosque/10 flex items-center justify-center">
+                      <span className="material-icons text-nordic-dark/60">business</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-nordic">Luxe Estate</h3>
+                    <div className="flex items-center gap-1 text-xs text-mosque font-medium">
+                      <span className="material-icons text-[14px]">star</span>
+                      <span>{t("top_rated_agent")}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="ml-auto flex gap-2">
-                  <button className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors">
-                    <span className="material-icons text-sm">chat</span>
-                  </button>
-                  <button className="p-2 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors">
-                    <span className="material-icons text-sm">call</span>
-                  </button>
-                </div>
-              </div>
+              )}
 
               <PropertyContactSection
                 isUnavailable={isUnavailable}

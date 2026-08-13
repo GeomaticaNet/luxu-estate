@@ -16,6 +16,42 @@ export async function upsertProperty(formData: FormData) {
   const active = formData.get('active') === 'true';
   const address = formData.get('address') as string || '';
 
+  // Determine agent assignment:
+  // - Admin can set an explicit agent from the form
+  // - Agents creating properties are auto-assigned to themselves
+  const { data: { user } } = await supabase.auth.getUser();
+  let agentId: string | null = null;
+
+  if (user) {
+    const { data: userRole } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    const roles: string[] = userRole?.role ?? [];
+    const isAdmin = roles.includes('admin');
+    const isAgent = roles.includes('agent');
+    const explicitAgent = formData.get('agent_id') as string;
+
+    if (isAdmin && explicitAgent) {
+      agentId = explicitAgent;
+    } else if (!isAdmin && isAgent) {
+      agentId = user.id;
+    } else if (isAdmin && !isUpdating) {
+      // Admins creating a property default to themselves
+      agentId = user.id;
+    } else if (isAdmin && isUpdating && !explicitAgent) {
+      // Keep existing agent on admin edit if none selected
+      const { data: current } = await supabase
+        .from('properties')
+        .select('agent_id')
+        .eq('id', propertyId)
+        .single();
+      agentId = current?.agent_id ?? null;
+    }
+  }
+
   const propertyData = {
     slug: (formData.get('slug') as string) || title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + (propertyId ? '' : '-' + Date.now().toString(36)),
     title: title,
@@ -39,6 +75,7 @@ export async function upsertProperty(formData: FormData) {
     city: formData.get('city') as string || null,
     state: formData.get('state') as string || null,
     country: formData.get('country') as string || null,
+    ...(agentId ? { agent_id: agentId } : {}),
   };
 
   let savedPropertyId = propertyId;

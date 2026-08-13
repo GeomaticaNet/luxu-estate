@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import UserList from "./UserList";
 import { Link } from "@/i18n/routing";
 
@@ -8,7 +9,7 @@ interface UserWithRole {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: string;
+  roles: string[];
   active: boolean;
   created_at: string;
 }
@@ -28,6 +29,17 @@ export default async function AdminUsersPage({
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   const currentUserId = currentUser?.id || null;
 
+  // Admin-only guard: agents can enter the admin area but not manage users
+  const { data: userRoleRow } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', currentUserId)
+    .single();
+  const viewerRoles: string[] = userRoleRow?.role ?? [];
+  if (!viewerRoles.includes('admin')) {
+    redirect(`/${locale}/admin/messages`);
+  }
+
   const { data: users, error } = await supabase
     .rpc('get_admin_users');
 
@@ -46,7 +58,7 @@ export default async function AdminUsersPage({
     email: u.email || 'N/A',
     full_name: u.full_name || null,
     avatar_url: u.avatar_url || null,
-    role: u.role,
+    roles: Array.isArray(u.roles) ? u.roles : [u.roles].filter(Boolean),
     active: u.active ?? true,
     created_at: u.created_at,
   })) || [];
@@ -55,10 +67,15 @@ export default async function AdminUsersPage({
   const activeTab = tab || 'all';
   const search = (searchQuery || '').toLowerCase();
   const filteredUsers = formattedUsers.filter(user => {
+    const isAdmin = user.roles.includes('admin');
+    const isAgent = user.roles.includes('agent');
+    const isPlainUser = user.roles.length === 0;
+
     // Tab filter
     const matchesTab = activeTab === 'all' || 
-      (activeTab === 'users' && user.role === 'user') ||
-      (activeTab === 'admins' && user.role === 'admin');
+      (activeTab === 'users' && isPlainUser) ||
+      (activeTab === 'agents' && isAgent) ||
+      (activeTab === 'admins' && isAdmin);
     
     // Search filter
     const matchesSearch = !search || 
@@ -71,6 +88,7 @@ export default async function AdminUsersPage({
   const tabs = [
     { id: 'all', labelKey: 'tab_all_users' },
     { id: 'users', labelKey: 'tab_users' },
+    { id: 'agents', labelKey: 'tab_agents' },
     { id: 'admins', labelKey: 'tab_admins' },
   ];
 
