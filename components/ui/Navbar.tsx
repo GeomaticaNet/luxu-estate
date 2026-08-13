@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { LanguageSelector } from "./LanguageSelector";
+import { ThemeToggle } from "./ThemeToggle";
 import { createServerClient } from "@/lib/supabase/server";
 import { NavbarAuth } from "./NavbarAuth";
 import { NavLinks } from "./NavLinks";
@@ -28,7 +29,7 @@ export const Navbar = async () => {
   const fullName = user?.user_metadata?.full_name;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-black/5">
+    <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-black/5 dark:bg-background-dark/70 dark:border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Left: Logo + Mobile hamburger */}
@@ -41,10 +42,10 @@ export const Navbar = async () => {
               loginLabel={t("login") || "Login"}
             />
             <Link href="/" className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 rounded-lg bg-nordic-dark flex items-center justify-center">
-                <span className="material-icons text-white text-lg">apartment</span>
+              <div className="w-8 h-8 rounded-lg bg-nordic-dark dark:bg-white flex items-center justify-center">
+                <span className="material-icons text-white text-lg dark:text-nordic-dark">apartment</span>
               </div>
-              <span className="text-xl font-semibold tracking-tight text-nordic-dark">LuxeEstate</span>
+              <span className="text-xl font-semibold tracking-tight text-nordic-dark dark:text-white">LuxeEstate</span>
             </Link>
           </div>
 
@@ -54,7 +55,7 @@ export const Navbar = async () => {
           </div>
 
           {/* Right: Controls */}
-          <div className="flex items-center space-x-3 md:space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <div className="hidden md:flex items-center gap-3">
               <LanguageSelector />
             </div>
@@ -68,6 +69,7 @@ export const Navbar = async () => {
                 canAccessAdmin={canAccessAdmin}
               />
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>

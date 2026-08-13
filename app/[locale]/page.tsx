@@ -2,7 +2,8 @@ import { Hero } from "@/components/home/Hero";
 import { FeaturedCollections } from "@/components/home/FeaturedCollections";
 import { NewInMarket } from "@/components/home/NewInMarket";
 import { ScrollToHash } from "@/components/home/ScrollToHash";
-import { getProperties, getFeaturedProperties } from "@/lib/properties";
+import { PropertiesMapSection } from "@/components/home/PropertiesMapSection";
+import { getProperties, getFeaturedProperties, getMapProperties } from "@/lib/properties";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -49,8 +50,8 @@ export default async function Home(props: HomePageProps) {
   const priceMax = searchParams?.price_max ? parseInt(searchParams.price_max, 10) : undefined;
   const listingType = (searchParams?.type === "rent" ? "rent" : searchParams?.type === "all" ? "all" : "buy") as "buy" | "rent" | "all";
 
-  const [{ properties, currentPage, totalPages }, featuredProperties] =
-    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax, listingType), getFeaturedProperties()]);
+  const [{ properties, currentPage, totalPages }, featuredProperties, mapProperties] =
+    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax, listingType), getFeaturedProperties(), getMapProperties()]);
 
   const isFiltering = query !== "" || beds !== undefined || baths !== undefined || propertyType !== undefined || priceMin !== undefined || priceMax !== undefined;
 
@@ -58,6 +59,7 @@ export default async function Home(props: HomePageProps) {
     <>
       <ScrollToHash />
       <Hero />
+      <PropertiesMapSection properties={mapProperties} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {!isFiltering && (
           <FeaturedCollections properties={featuredProperties} />

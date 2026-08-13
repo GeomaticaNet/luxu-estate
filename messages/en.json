@@ -10,6 +10,36 @@
   "Common": {
     "back": "Back"
   },
+  "Map": {
+    "title": "Explore our properties",
+    "subtitle": "All properties on one map: hover each house to see the details.",
+    "show": "Show map",
+    "hide": "Hide map",
+    "view": "View",
+    "type_sale": "For sale",
+    "type_rent": "For rent",
+    "get_directions": "Get directions here",
+    "directions": "Directions",
+    "loading_route": "Finding the best route…",
+    "geolocation_error": "We couldn't get your location.",
+    "pick_origin": "Click the map to set your starting point.",
+    "route_error": "We couldn't calculate the route.",
+    "close": "Close",
+    "drag_origin_hint": "Drag the blue dot to adjust your origin.",
+    "m_depart": "Head out",
+    "m_arrive": "Arrive at destination",
+    "m_left": "Turn left",
+    "m_right": "Turn right",
+    "m_slight_left": "Slight left",
+    "m_slight_right": "Slight right",
+    "m_straight": "Continue straight",
+    "m_continue": "Continue",
+    "m_roundabout": "At the roundabout",
+    "m_merge": "Merge",
+    "m_fork": "Keep",
+    "m_uturn": "Make a U-turn",
+    "m_end": "At the end of the road"
+  },
   "LanguageSelector": {
     "es": "Spanish",
     "en": "English",
@@ -499,3 +529,4 @@
     "home_description": "Find your sanctuary. Exclusive properties for sale and rent."
   }
 }
+

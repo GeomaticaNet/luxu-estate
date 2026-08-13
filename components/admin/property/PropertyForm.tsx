@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { upsertProperty } from "@/app/[locale]/admin/properties/actions";
-import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
+import { reverseGeocode, searchAddresses, geocodeAddress } from "@/lib/geocode";
+import type { AddressSuggestion } from "@/lib/geocode";
 import { optimizeImage } from "@/lib/image-optimize";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -110,14 +111,41 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
   const geoTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const prevAddressRef = useRef(address);
   const isForwardGeocodingRef = useRef(false);
+  const initialLatRef = useRef(lat);
+  const initialLngRef = useRef(lng);
+  const addressTouchedRef = useRef(false);
+
+  // Address autocomplete (Photon forward search — returns street + house number)
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const suggestionBoxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (suggestionBoxRef.current && !suggestionBoxRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const DEFAULT_LAT = 37.4419;
   const DEFAULT_LNG = -122.143;
 
-  // Reverse geocode whenever lat/lng change from map interaction or manual input
+  // Reverse geocode whenever lat/lng change from map interaction.
+  // Guard 1: skip forward-geocoding (typing) so the typed address isn't clobbered.
+  // Guard 2: skip the initial mount so a stored address (street + number) isn't
+  // overwritten by the nomenclator, which often returns the street name only.
+  // Guard 3: never replace an address the user typed.
   useEffect(() => {
     if (isForwardGeocodingRef.current) {
       isForwardGeocodingRef.current = false;
+      return;
+    }
+    if (lat === initialLatRef.current && lng === initialLngRef.current) {
       return;
     }
     if (lat && lng && lat !== DEFAULT_LAT && lng !== DEFAULT_LNG) {
@@ -125,7 +153,9 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
       geoTimeoutRef.current = setTimeout(async () => {
         const result = await reverseGeocode(lat, lng, locale);
         if (result) {
-          setAddress(result.address);
+          if (!addressTouchedRef.current && result.address) {
+            setAddress(result.address);
+          }
           if (result.city) setCity(result.city);
           if (result.state) setState(result.state);
           if (result.country) setCountry(result.country);
@@ -135,19 +165,66 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
   }, [lat, lng, locale]);
 
   const handleAddressChange = useCallback((value: string) => {
+    addressTouchedRef.current = true;
     setAddress(value);
-    if (geoTimeoutRef.current) clearTimeout(geoTimeoutRef.current);
-    if (value.trim().length >= 5) {
-      geoTimeoutRef.current = setTimeout(async () => {
-        const result = await geocodeAddress(value);
-        if (result) {
-          isForwardGeocodingRef.current = true;
-          setLat(result.lat);
-          setLng(result.lng);
-        }
-      }, 800);
+    setActiveSuggestion(-1);
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (value.trim().length >= 4) {
+      searchTimeoutRef.current = setTimeout(async () => {
+        const results = await searchAddresses(value, locale);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      }, 400);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
-  }, []);
+  }, [locale]);
+
+  const selectSuggestion = (s: AddressSuggestion) => {
+    setAddress(s.value);
+    setCity(s.city || "");
+    setState(s.state || "");
+    setCountry(s.country || "");
+    setLat(s.lat);
+    setLng(s.lng);
+    isForwardGeocodingRef.current = true;
+    addressTouchedRef.current = true;
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+  };
+
+  const handleAddressKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestion((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestion((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const s = suggestions[activeSuggestion];
+      if (s) selectSuggestion(s);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  };
+
+  // When the admin edits the locality/province/country and leaves the field,
+  // re-geocode the full address so the map marker moves to that location.
+  const handleLocationBlur = async () => {
+    const full = [address, city, state, country].filter(Boolean).join(", ");
+    if (full.trim().length < 5) return;
+    const point = await geocodeAddress(full);
+    if (point) {
+      isForwardGeocodingRef.current = true;
+      setLat(point.lat);
+      setLng(point.lng);
+    }
+  };
 
   const handleLatChange = useCallback((value: number) => {
     setLat(value);
@@ -652,7 +729,7 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
             <h2 className="text-lg font-bold text-nordic-dark">{t("location")}</h2>
           </div>
           <div className="p-6 space-y-4">
-            <div>
+            <div className="relative" ref={suggestionBoxRef}>
               <label htmlFor="address" className="block text-sm font-medium text-nordic-dark mb-1.5 font-sf-pro">
                 {t("address_field")}
               </label>
@@ -662,9 +739,33 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
                 name="address"
                 value={address}
                 onChange={(e) => handleAddressChange(e.target.value)}
+                onKeyDown={handleAddressKeyDown}
+                onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
                 placeholder={t("street_address_placeholder")}
+                autoComplete="off"
                 className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
               />
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                  {suggestions.map((s, i) => (
+                    <li key={`${s.label}-${i}`}>
+                      <button
+                        type="button"
+                        onClick={() => selectSuggestion(s)}
+                        onMouseEnter={() => setActiveSuggestion(i)}
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                          i === activeSuggestion
+                            ? "bg-mosque/10 text-mosque"
+                            : "text-nordic-dark hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className="material-icons text-[16px] text-gray-400 shrink-0">place</span>
+                        <span className="truncate">{s.label}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
@@ -677,9 +778,9 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
                   name="city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
+                  onBlur={handleLocationBlur}
                   placeholder="Luján de Cuyo"
-                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
-                  readOnly
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
                 />
               </div>
               <div>
@@ -692,9 +793,9 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
                   name="state"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
+                  onBlur={handleLocationBlur}
                   placeholder="Mendoza"
-                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
-                  readOnly
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
                 />
               </div>
               <div>
@@ -707,9 +808,9 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
                   name="country"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
+                  onBlur={handleLocationBlur}
                   placeholder="Argentina"
-                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-gray-50 text-nordic-dark placeholder-gray-400 text-sm font-sf-pro cursor-not-allowed"
-                  readOnly
+                  className="w-full px-4 py-2.5 rounded-[0.375rem] border border-gray-200 bg-white text-nordic-dark placeholder-gray-400 focus:ring-1 focus:ring-mosque focus:border-mosque transition-all text-sm font-sf-pro"
                 />
               </div>
             </div>

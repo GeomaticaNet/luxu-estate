@@ -251,6 +251,34 @@ export const getFeaturedProperties = unstable_cache(
 );
 
 /**
+ * Fetches every active property that has real coordinates, for the home map.
+ */
+const _getMapProperties = async (): Promise<Property[]> => {
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*, property_images(*)")
+    .eq("active", true)
+    .not("lat", "is", null)
+    .not("lng", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[getMapProperties] Supabase error:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map(rowToProperty);
+};
+
+export const getMapProperties = unstable_cache(
+  _getMapProperties,
+  ['map-properties'],
+  { tags: ['properties'], revalidate: 300 }
+);
+
+/**
  * Fetches a single property by slug and its associated images.
  */
 const _getPropertyBySlug = async (slug: string) => {

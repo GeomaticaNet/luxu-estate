@@ -10,6 +10,36 @@
   "Common": {
     "back": "Voltar"
   },
+  "Map": {
+    "title": "Explore nossas propriedades",
+    "subtitle": "Todas as propriedades em um só mapa: passe o mouse sobre cada casinha para ver os detalhes.",
+    "show": "Mostrar mapa",
+    "hide": "Ocultar mapa",
+    "view": "Ver",
+    "type_sale": "Venda",
+    "type_rent": "Aluguel",
+    "get_directions": "Como chegar até aqui",
+    "directions": "Como chegar",
+    "loading_route": "Buscando a melhor rota…",
+    "geolocation_error": "Não foi possível obter sua localização.",
+    "pick_origin": "Clique no mapa para marcar seu ponto de partida.",
+    "route_error": "Não foi possível calcular a rota.",
+    "close": "Fechar",
+    "drag_origin_hint": "Arraste o ponto azul para ajustar sua origem.",
+    "m_depart": "Saia",
+    "m_arrive": "Chegada ao destino",
+    "m_left": "Vire à esquerda",
+    "m_right": "Vire à direita",
+    "m_slight_left": "Vire levemente à esquerda",
+    "m_slight_right": "Vire levemente à direita",
+    "m_straight": "Siga em frente",
+    "m_continue": "Continue",
+    "m_roundabout": "Na rotatória",
+    "m_merge": "Entre",
+    "m_fork": "Mantenha",
+    "m_uturn": "Faça o retorno",
+    "m_end": "No fim da rua"
+  },
   "LanguageSelector": {
     "es": "Espanhol",
     "en": "Inglês",
@@ -499,3 +529,4 @@
     "home_description": "Encontre o seu santuário. Propriedades exclusivas à venda e para alugar."
   }
 }
+

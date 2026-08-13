@@ -10,6 +10,36 @@
   "Common": {
     "back": "Volver"
   },
+  "Map": {
+    "title": "Explorá nuestras propiedades",
+    "subtitle": "Todas las propiedades en un solo mapa: pasá el mouse sobre cada casita para ver los detalles.",
+    "show": "Mostrar mapa",
+    "hide": "Ocultar mapa",
+    "view": "Ver",
+    "type_sale": "Venta",
+    "type_rent": "Alquiler",
+    "get_directions": "Cómo llegar hasta aquí",
+    "directions": "Cómo llegar",
+    "loading_route": "Buscando la mejor ruta…",
+    "geolocation_error": "No pudimos obtener tu ubicación.",
+    "pick_origin": "Hacé clic en el mapa para marcar tu punto de partida.",
+    "route_error": "No pudimos calcular la ruta.",
+    "close": "Cerrar",
+    "drag_origin_hint": "Arrastrá el punto azul para ajustar tu origen.",
+    "m_depart": "Salí",
+    "m_arrive": "Llegada a destino",
+    "m_left": "Girá a la izquierda",
+    "m_right": "Girá a la derecha",
+    "m_slight_left": "Girá levemente a la izquierda",
+    "m_slight_right": "Girá levemente a la derecha",
+    "m_straight": "Seguí derecho",
+    "m_continue": "Continuá",
+    "m_roundabout": "En la rotonda",
+    "m_merge": "Incorporáte",
+    "m_fork": "Mantené",
+    "m_uturn": "Hacé un giro en U",
+    "m_end": "Al final de la calle"
+  },
   "LanguageSelector": {
     "es": "Español",
     "en": "Inglés",
@@ -499,3 +529,4 @@
     "home_description": "Encuentra tu santuario. Propiedades exclusivas en venta y alquiler."
   }
 }
+

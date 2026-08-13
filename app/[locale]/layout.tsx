@@ -82,15 +82,20 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="h-full antialiased">
+    <html lang={locale} suppressHydrationWarning className="h-full antialiased">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('luxe_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}`,
+          }}
+        />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background-light text-nordic-dark font-display selection:bg-mosque selection:text-white">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground font-display selection:bg-mosque selection:text-white">
         <NextIntlClientProvider messages={messages}>
           <GlobalPresence />
           <LocaleDebug />

@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, LayerGroup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-// No need for React hooks in this component
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 // Green marker icon matching the mosque color palette
 const greenIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 41" width="25" height="41"><path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="#006655" stroke="#fff" stroke-width="2"/><circle cx="12.5" cy="12.5" r="5.5" fill="#fff"/></svg>';
@@ -25,7 +25,7 @@ interface Props {
 
 const PropertyMapComponent = ({ address, lat, lng }: Props) => {
 
-
+  const isDark = useDarkMode();
   const position: [number, number] = [lat, lng];
 
   return (
@@ -44,10 +44,23 @@ const PropertyMapComponent = ({ address, lat, lng }: Props) => {
         >
         <LayersControl position="bottomleft">
           <LayersControl.BaseLayer checked name="Street">
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            {isDark ? (
+              <>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.esri.com">Esri</a>'
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                />
+              </>
+            ) : (
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            )}
           </LayersControl.BaseLayer>
           <LayersControl.BaseLayer name="Satellite">
             <LayerGroup>

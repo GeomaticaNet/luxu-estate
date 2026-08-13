@@ -158,6 +158,8 @@ export async function upsertProperty(formData: FormData) {
   }
 
   revalidatePath("/[locale]/admin/properties", "page");
+  revalidatePath("/[locale]/propiedades/[slug]", "page");
+  revalidatePath("/");
   revalidateTag('properties', 'max');
   revalidateTag('featured-properties', 'max');
 

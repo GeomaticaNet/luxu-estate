@@ -12,6 +12,7 @@ export default getRequestConfig(async ({requestLocale}) => {
 
   return {
     locale,
+    // Load the messages for the resolved locale (hot-reloaded in dev).
     messages: (await import(`../messages/${locale}.json`)).default
   };
 });
