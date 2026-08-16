@@ -13,12 +13,12 @@ export default async function AdminPropertiesPage({
 }) {
   const t = await getTranslations("Admin");
   const publicClient = createPublicClient();
-  const adminClient = createAdminClient();
 
   // Resolve admin status + agent list (for the "Assign to" feature).
   // The agent list is fetched with the service-role client so that agents also
   // see every agent's name in the "Assigned to" column (RLS alone would return
-  // only the agent's own row).
+  // only the agent's own row). If the service-role key is missing (e.g. not set
+  // in production), we degrade gracefully instead of crashing the page.
   const serverSupabase = await createServerClient();
   const { data: { user } } = await serverSupabase.auth.getUser();
   const { data: userRole } = await serverSupabase
@@ -29,18 +29,25 @@ export default async function AdminPropertiesPage({
   const roles: string[] = userRole?.role ?? [];
   const isAdmin = roles.includes('admin');
 
-  const { data: agentRoleRows } = await adminClient
-    .from('user_roles')
-    .select('user_id')
-    .contains('role', ['agent']);
+  let agents: { user_id: string; full_name: string | null; avatar_url: string | null }[] = [];
+  try {
+    const adminClient = createAdminClient();
+    const { data: agentRoleRows } = await adminClient
+      .from('user_roles')
+      .select('user_id')
+      .contains('role', ['agent']);
 
-  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
-  const { data: agents } = agentIds.length > 0
-    ? await adminClient
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', agentIds)
-    : { data: [] };
+    const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+    const { data: agentList } = agentIds.length > 0
+      ? await adminClient
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', agentIds)
+      : { data: [] };
+    agents = agentList || [];
+  } catch (err) {
+    console.error("Error loading agents (missing SUPABASE_SERVICE_ROLE_KEY?):", err);
+  }
 
   const { page: pageParam, property_type: typeFilter } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam || "1", 10));
