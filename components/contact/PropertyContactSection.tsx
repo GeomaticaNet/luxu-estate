@@ -15,7 +15,22 @@ export function PropertyContactSection({ isUnavailable, isSold, propertyId, prop
   const t = useTranslations("PropertyDetails");
   const [showContact, setShowContact] = useState(false);
   const [showVisit, setShowVisit] = useState(false);
-  const [showNotify, setShowNotify] = useState(false);
+  const [notifyMsg, setNotifyMsg] = useState<string | null>(null);
+
+  const handleNotify = async () => {
+    if (!window.confirm(t("notify_confirm"))) return;
+
+    let granted = false;
+    try {
+      if (typeof window !== "undefined" && "Notification" in window) {
+        granted = (await Notification.requestPermission()) === "granted";
+      }
+    } catch {
+      /* ignore */
+    }
+
+    setNotifyMsg(granted ? t("notify_enabled") : t("notify_blocked"));
+  };
 
   return (
     <>
@@ -23,14 +38,17 @@ export function PropertyContactSection({ isUnavailable, isSold, propertyId, prop
         {isUnavailable ? (
           <>
             <button
-              onClick={() => setShowNotify(true)}
+              onClick={handleNotify}
               className="w-full bg-mosque hover:bg-primary-hover text-white py-4 px-6 rounded-lg font-medium transition-all shadow-lg shadow-mosque/20 flex items-center justify-center gap-2 group"
             >
               <span className="material-icons text-xl group-hover:scale-110 transition-transform">
                 notifications
               </span>
-              Notify me of similar properties
+              {t("notify_similar")}
             </button>
+            {notifyMsg && (
+              <p className="text-sm text-center text-mosque">{notifyMsg}</p>
+            )}
             <button
               onClick={() => setShowContact(true)}
               className="w-full bg-transparent border border-nordic/10 hover:border-mosque text-nordic/80 hover:text-mosque py-4 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
@@ -73,14 +91,6 @@ export function PropertyContactSection({ isUnavailable, isSold, propertyId, prop
         isOpen={showVisit}
         onClose={() => setShowVisit(false)}
         leadType="visit"
-        propertyId={propertyId}
-        propertyTitle={propertyTitle}
-      />
-
-      <ContactModal
-        isOpen={showNotify}
-        onClose={() => setShowNotify(false)}
-        leadType="contact"
         propertyId={propertyId}
         propertyTitle={propertyTitle}
       />

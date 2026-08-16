@@ -76,11 +76,11 @@ export function PropertiesMapSection({ properties }: { properties: Property[] })
       {hydrated && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className={`overflow-hidden transition-[height,opacity] duration-500 ease-in-out ${
+            className={`rounded-2xl border border-black/5 shadow-[0_14px_40px_-8px_rgba(25,50,47,0.35),0_4px_12px_-4px_rgba(25,50,47,0.25)] overflow-hidden transition-[height,opacity] duration-500 ease-in-out ${
               collapsed ? "h-0 opacity-0" : "h-[380px] md:h-[500px] opacity-100"
             }`}
           >
-            <div className="relative z-0 w-full h-[380px] md:h-[500px] rounded-2xl overflow-hidden border border-black/5 shadow-[0_14px_40px_-8px_rgba(25,50,47,0.35),0_4px_12px_-4px_rgba(25,50,47,0.25)]">
+            <div className="relative z-0 w-full h-full">
               <PropertiesMapLeaflet properties={properties} />
             </div>
           </div>

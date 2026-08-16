@@ -167,10 +167,10 @@ export default async function PropertyDetailsPage({ params }: PageProps) {
             {isSold ? 'domain_disabled' : 'handshake'}
           </span>
           <p className="font-bold text-lg">
-            {isSold ? 'This property has been sold' : 'This property has been rented'}
+            {isSold ? t("sold_banner") : t("rented_banner")}
           </p>
           <p className="text-sm mt-1 opacity-80">
-            Contact us to find similar properties
+            {t("contact_similar")}
           </p>
         </div>
       )}

@@ -9,6 +9,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { FavoritesProvider } from "@/hooks/FavoritesContext";
+import Script from "next/script";
 import type { Metadata } from "next";
 import "../globals.css";
 
@@ -84,11 +85,6 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning className="h-full antialiased">
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('luxe_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}`,
-          }}
-        />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -96,6 +92,13 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground font-display selection:bg-mosque selection:text-white">
+        <Script
+          id="luxe-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('luxe_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}`,
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <GlobalPresence />
           <LocaleDebug />
