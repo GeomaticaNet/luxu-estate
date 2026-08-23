@@ -17,7 +17,7 @@ export const FeaturedPropertyCard = ({ property }: Props) => {
   const t = useTranslations("PropertyCard");
   const images = property.images && property.images.length > 0 ? property.images : [property.imageUrl];
   return (
-    <Link href={`/propiedades/${property.slug}`} className="block group relative rounded-xl overflow-hidden shadow-soft bg-white cursor-pointer transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+    <Link href={`/propiedades/${property.slug}`} className="block group relative rounded-lg overflow-hidden shadow-soft bg-white cursor-pointer transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
       <div className="aspect-[4/3] w-full overflow-hidden relative">
         {images.length > 1 ? (
           <PropertyImageCarousel
