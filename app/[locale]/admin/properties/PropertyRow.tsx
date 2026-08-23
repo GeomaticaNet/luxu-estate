@@ -206,7 +206,7 @@ export function PropertyRow({ property, mainImage, isLast, isAdmin = false, curr
       } ${canManage ? 'hover:bg-background-light' : 'opacity-60 grayscale'}`}
     >
       {/* Property Details */}
-      <div className="col-span-12 md:col-span-4 flex gap-4 items-center">
+      <div className="col-span-12 md:col-span-4 flex gap-4 items-center min-w-0">
         <div className="relative h-20 w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
           {mainImage && (
             <>
@@ -223,7 +223,7 @@ export function PropertyRow({ property, mainImage, isLast, isAdmin = false, curr
             </>
           )}
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h3 className={`text-lg font-bold text-nordic-dark transition-colors flex items-center gap-2 ${canManage ? 'cursor-pointer group-hover:text-mosque' : ''}`} onClick={canManage ? () => router.push(`/admin/properties/${property.id}`) : undefined}>
             {property.title}
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${typeColors[property.property_type]?.bg || "bg-gray-100"} ${typeColors[property.property_type]?.text || "text-gray-700"}`}>{property.property_type}</span>
