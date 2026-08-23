@@ -36,6 +36,7 @@ export default function LoginPage() {
       provider,
       options: {
         redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+        queryParams: { prompt: "select_account" },
       },
     });
   };
