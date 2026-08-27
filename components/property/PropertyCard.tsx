@@ -40,7 +40,7 @@ export const PropertyCard = ({ property, className = "" }: Props) => {
   const images = property.images && property.images.length > 0 ? property.images : [property.imageUrl];
   return (
     <Link href={`/propiedades/${property.slug}`} className={`block h-full ${className}`}>
-      <article className="bg-white rounded-lg overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">
+      <article className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-card hover:shadow-xl transition-all duration-500 group cursor-pointer h-full flex flex-col hover:-translate-y-1">
         <div className="relative aspect-[4/3] overflow-hidden">
           {images.length > 1 ? (
             <PropertyImageCarousel
