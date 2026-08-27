@@ -6,7 +6,7 @@ export function Skeleton({ className = "" }: { className?: string }) {
 
 export function PropertyCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-card">
+    <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-card">
       <Skeleton className="aspect-[4/3] rounded-none" />
       <div className="p-4 space-y-3">
         <Skeleton className="h-5 w-24" />
@@ -24,7 +24,7 @@ export function PropertyCardSkeleton() {
 
 export function FeaturedCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-soft">
+    <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-soft">
       <Skeleton className="aspect-[4/3] rounded-none" />
       <div className="p-6 space-y-3">
         <Skeleton className="h-6 w-3/4" />
