@@ -12,6 +12,7 @@ interface Props {
   isInactive?: boolean;
   sizes?: string;
   className?: string;
+  compact?: boolean;
 }
 
 export const PropertyImageCarousel = ({
@@ -20,6 +21,7 @@ export const PropertyImageCarousel = ({
   isInactive = false,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
   className = "",
+  compact = false,
 }: Props) => {
   const t = useTranslations("PropertyCard");
   const [current, setCurrent] = useState(0);
@@ -74,9 +76,12 @@ export const PropertyImageCarousel = ({
         type="button"
         onClick={goPrev}
         aria-label={t("prev_image")}
-        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm text-nordic-dark shadow-md hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100"
+        className={`absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full backdrop-blur-sm shadow-md transition-all duration-200 active:scale-95 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100 ${
+          compact ? "" : "w-9 h-9 bg-white/85 text-nordic-dark hover:bg-white hover:scale-105"
+        }`}
+        style={compact ? { width: 26, height: 26, background: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 2px 6px rgba(0,0,0,0.1)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" } : undefined}
       >
-        <span className="material-icons text-xl leading-none">chevron_left</span>
+        <span className={`material-icons leading-none ${compact ? "" : "text-xl"}`} style={compact ? { fontSize: 15 } : undefined}>chevron_left</span>
       </button>
 
       {/* Right arrow */}
@@ -84,9 +89,12 @@ export const PropertyImageCarousel = ({
         type="button"
         onClick={goNext}
         aria-label={t("next_image")}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm text-nordic-dark shadow-md hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100"
+        className={`absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full backdrop-blur-sm shadow-md transition-all duration-200 active:scale-95 z-20 opacity-0 md:group-hover:opacity-100 max-md:opacity-100 ${
+          compact ? "" : "w-9 h-9 bg-white/85 text-nordic-dark hover:bg-white hover:scale-105"
+        }`}
+        style={compact ? { width: 26, height: 26, background: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 2px 6px rgba(0,0,0,0.1)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" } : undefined}
       >
-        <span className="material-icons text-xl leading-none">chevron_right</span>
+        <span className={`material-icons leading-none ${compact ? "" : "text-xl"}`} style={compact ? { fontSize: 15 } : undefined}>chevron_right</span>
       </button>
 
       {/* Dots */}

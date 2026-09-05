@@ -204,9 +204,7 @@ export default function PropertiesMapMapbox({ properties }: Props) {
     ? properties.filter((p) => p.id === destination.id)
     : properties;
 
-  const mapStyle = isDark
-    ? "mapbox://styles/mapbox/satellite-streets-v12"
-    : "mapbox://styles/mapbox/streets-v12";
+  const mapStyle = "mapbox://styles/mapbox/satellite-streets-v12";
 
   return (
     <div className="relative h-full w-full">
@@ -305,7 +303,7 @@ export default function PropertiesMapMapbox({ properties }: Props) {
                         ? p.images
                         : [p.imageUrl];
                     return images.length > 1 ? (
-                      <PropertyImageCarousel images={images} alt={p.imageAlt} />
+                      <PropertyImageCarousel images={images} alt={p.imageAlt} compact />
                     ) : (
                       <img
                         src={p.imageUrl}
