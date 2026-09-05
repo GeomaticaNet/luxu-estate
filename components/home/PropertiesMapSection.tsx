@@ -5,8 +5,8 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import type { Property } from "@/interfaces/property";
 
-// Leaflet only runs in the browser — load it lazily on the client.
-const PropertiesMapLeaflet = dynamic(() => import("./PropertiesMapLeaflet"), {
+// Mapbox solo funciona en el navegador — carga diferida en cliente.
+const PropertiesMapMapbox = dynamic(() => import("./PropertiesMapMapbox"), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full flex items-center justify-center bg-slate-100 animate-pulse">
@@ -81,7 +81,7 @@ export function PropertiesMapSection({ properties }: { properties: Property[] })
             }`}
           >
             <div className="relative z-0 w-full h-full">
-              <PropertiesMapLeaflet properties={properties} />
+              <PropertiesMapMapbox properties={properties} />
             </div>
           </div>
         </div>

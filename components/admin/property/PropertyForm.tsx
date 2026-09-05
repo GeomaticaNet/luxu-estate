@@ -12,7 +12,7 @@ import { optimizeImage } from "@/lib/image-optimize";
 import { useLocale, useTranslations } from "next-intl";
 
 const InteractiveMap = dynamic(
-  () => import("@/components/property/InteractiveLeafletMap"),
+  () => import("@/components/property/InteractiveMapboxMap"),
   { ssr: false, loading: () => <div className="w-full h-48 bg-gray-100 rounded-[0.5rem] animate-pulse" /> }
 );
 
@@ -851,7 +851,7 @@ export default function PropertyForm({ initialData, isAdmin = false, agents = []
                 lat={lat}
                 lng={lng}
                 address={address}
-                scrollWheelZoom={true}
+                scrollZoom={true}
                 onChange={(newLat, newLng) => {
                   setLat(newLat);
                   setLng(newLng);

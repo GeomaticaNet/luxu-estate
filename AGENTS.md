@@ -100,7 +100,7 @@ components/
 
 ## ⚡ Rendimiento
 
-- **[Lazy Loading]** Mapas (Leaflet) cargados diferidamente
+- **[Lazy Loading]** Mapas (Mapbox GL) cargados diferidamente
 - **[Skeletons]** Usar skeletons, no spinners, para evitar layout shift
 - **[Server > Client]** Server Components por defecto
 
