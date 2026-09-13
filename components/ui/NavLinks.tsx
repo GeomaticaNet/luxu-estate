@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { usePathname } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { ContactModal } from "@/components/contact/ContactModal";
+import dynamic from "next/dynamic";
+
+const ContactModal = dynamic(() => import("@/components/contact/ContactModal").then(mod => ({ default: mod.ContactModal })), { ssr: false });
 import { isAuthenticated, buildContactNext } from "@/lib/contact-gate";
 
 export function NavLinks() {

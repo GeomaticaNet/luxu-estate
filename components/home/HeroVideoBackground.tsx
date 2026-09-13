@@ -55,7 +55,7 @@ export const HeroVideoBackground = ({ videos }: Props) => {
         muted
         loop={false}
         playsInline
-        preload="auto"
+        preload="none"
         onEnded={handleEnded0}
       />
       <video
@@ -64,7 +64,7 @@ export const HeroVideoBackground = ({ videos }: Props) => {
         muted
         loop={false}
         playsInline
-        preload="auto"
+        preload="none"
         onEnded={handleEnded1}
       />
     </div>

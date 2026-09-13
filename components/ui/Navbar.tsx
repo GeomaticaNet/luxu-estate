@@ -8,8 +8,11 @@ import { NavLinks } from "./NavLinks";
 import { MobileMenu } from "./MobileMenu";
 
 export const Navbar = async () => {
-  const t = await getTranslations("Navigation");
-  const supabase = await createServerClient();
+  const [t, supabase] = await Promise.all([
+    getTranslations("Navigation"),
+    createServerClient(),
+  ]);
+
   const { data: { user } } = await supabase.auth.getUser();
 
   let isAdmin = false;

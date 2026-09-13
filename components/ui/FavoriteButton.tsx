@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useFavoritesContext } from "@/hooks/FavoritesContext";
 
 interface Props {
@@ -10,7 +11,13 @@ interface Props {
 
 export const FavoriteButton = ({ slug, className = "", iconSize = "text-lg" }: Props) => {
   const { isFavorite, toggleFavorite } = useFavoritesContext();
-  const active = isFavorite(slug);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const active = mounted && isFavorite(slug);
 
   return (
     <button

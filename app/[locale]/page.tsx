@@ -1,9 +1,8 @@
 import { Hero } from "@/components/home/Hero";
-import { FeaturedCollections } from "@/components/home/FeaturedCollections";
-import { NewInMarket } from "@/components/home/NewInMarket";
 import { ScrollToHash } from "@/components/home/ScrollToHash";
-import { PropertiesMapSection } from "@/components/home/PropertiesMapSection";
-import { getProperties, getFeaturedProperties, getMapProperties } from "@/lib/properties";
+import { MapSection } from "@/components/home/MapSection";
+import { FeaturedSection } from "@/components/home/FeaturedSection";
+import { NewInMarketSection } from "@/components/home/NewInMarketSection";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -39,39 +38,16 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 
 export default async function Home(props: HomePageProps) {
   const searchParams = await props.searchParams;
-  const { locale } = await props.params;
-  const page = parseInt(searchParams?.page ?? "1", 10);
-  const query = searchParams?.q ?? "";
-  const beds = searchParams?.beds ? parseInt(searchParams.beds, 10) : undefined;
-  const baths = searchParams?.baths ? parseInt(searchParams.baths, 10) : undefined;
-  const propertyType = searchParams?.propertyType;
-
-  const priceMin = searchParams?.price_min ? parseInt(searchParams.price_min, 10) : undefined;
-  const priceMax = searchParams?.price_max ? parseInt(searchParams.price_max, 10) : undefined;
-  const listingType = (searchParams?.type === "rent" ? "rent" : searchParams?.type === "all" ? "all" : "buy") as "buy" | "rent" | "all";
-
-  const [{ properties, currentPage, totalPages }, featuredProperties, mapProperties] =
-    await Promise.all([getProperties(page, query, beds, baths, propertyType, priceMin, priceMax, listingType), getFeaturedProperties(), getMapProperties()]);
-
-  const isFiltering = query !== "" || beds !== undefined || baths !== undefined || propertyType !== undefined || priceMin !== undefined || priceMax !== undefined;
 
   return (
     <>
       <ScrollToHash />
       <Hero />
-      <PropertiesMapSection properties={mapProperties} />
+      <MapSection />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {!isFiltering && (
-          <FeaturedCollections properties={featuredProperties} />
-        )}
+        <FeaturedSection searchParams={searchParams} />
       </main>
-      <NewInMarket
-        properties={properties}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        searchParams={searchParams}
-        listingType={listingType}
-      />
+      <NewInMarketSection searchParams={searchParams} />
     </>
   );
 }

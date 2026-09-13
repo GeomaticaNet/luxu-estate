@@ -24,7 +24,7 @@
   --color-hint-of-green: #D9ECC8;
   --color-clear-day: #EEF6F6;
 
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif;
+  --font-display: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
 
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;

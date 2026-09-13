@@ -43,6 +43,11 @@ export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText, isAdmi
       });
     };
 
+    // Fetch roles on mount if user exists (server already passed initial user)
+    if (initialUser) {
+      refreshRoles(initialUser);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (cancelled) return;
       const nextUser = session?.user ?? null;
@@ -55,20 +60,11 @@ export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText, isAdmi
       }
     });
 
-    // Initial role fetch so admin/agent menu shows without a F5.
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (cancelled) return;
-      if (user) {
-        setUser(user);
-        refreshRoles(user);
-      }
-    });
-
     return () => {
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [isAdmin, canAccessAdmin, supabase]);
+  }, [initialUser, isAdmin, canAccessAdmin, supabase]);
 
   if (!user) {
     return (

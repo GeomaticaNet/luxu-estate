@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Link, usePathname } from "@/i18n/routing";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LanguageSelector } from "./LanguageSelector";
-import { ContactModal } from "@/components/contact/ContactModal";
+import dynamic from "next/dynamic";
+
+const ContactModal = dynamic(() => import("@/components/contact/ContactModal").then(mod => ({ default: mod.ContactModal })), { ssr: false });
 import { isAuthenticated, buildContactNext } from "@/lib/contact-gate";
 
 interface MobileMenuProps {
