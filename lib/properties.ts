@@ -252,13 +252,14 @@ export const getFeaturedProperties = unstable_cache(
 
 /**
  * Fetches every active property that has real coordinates, for the home map.
+ * Selects only the fields needed by the map to minimize payload.
  */
 const _getMapProperties = async (): Promise<Property[]> => {
   const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("properties")
-    .select("*, property_images(*)")
+    .select("id, slug, title, price, price_label, type, active, bedrooms, bathrooms, garages, area, lat, lng, location, address, city, state, country, agent_id, property_images(id, property_id, url, is_main, sort_order)")
     .eq("active", true)
     .not("lat", "is", null)
     .not("lng", "is", null)

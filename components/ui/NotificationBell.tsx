@@ -1,26 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function NotificationBell() {
   const [count, setCount] = useState(0);
-  const pathname = usePathname();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    if (!pathname) return;
-
-    const supabase = createClient();
+    let cancelled = false;
 
     async function fetchCount() {
+      if (cancelled) return;
       const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
       if (!user) {
         setCount(0);
         return;
       }
       const res = await fetch("/api/leads/unread");
+      if (cancelled) return;
       if (res.ok) {
         const data = await res.json();
         setCount(data.count || 0);
@@ -29,8 +29,6 @@ export function NotificationBell() {
 
     fetchCount();
 
-    // Live updates: new agent message arrives (INSERT) or the user reads
-    // replies in /messages (UPDATE is_read) — both refresh the badge.
     const channel = supabase
       .channel("user-messages-badge")
       .on(
@@ -46,9 +44,10 @@ export function NotificationBell() {
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [pathname]);
+  }, [supabase]);
 
   return (
     <Link

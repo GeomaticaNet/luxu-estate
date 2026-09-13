@@ -52,25 +52,18 @@ export default function GlobalPresence() {
       if (checkRef.current) { clearInterval(checkRef.current); checkRef.current = null; }
     };
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (cancelled || !user) return;
-
-      sendHeartbeat(pathnameRef.current);
-
-      intervalRef.current = setInterval(() => {
-        sendHeartbeat(pathnameRef.current);
-      }, HEARTBEAT_INTERVAL);
-
-      checkRef.current = setInterval(() => {
-        checkIfSuspended();
-      }, CHECK_SUSPENSION_INTERVAL);
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (cancelled) return;
+      clearTimers();
+
       if (session?.user) {
         sendHeartbeat(pathnameRef.current);
-      } else {
-        clearTimers();
+        intervalRef.current = setInterval(() => {
+          sendHeartbeat(pathnameRef.current);
+        }, HEARTBEAT_INTERVAL);
+        checkRef.current = setInterval(() => {
+          checkIfSuspended();
+        }, CHECK_SUSPENSION_INTERVAL);
       }
     });
 
