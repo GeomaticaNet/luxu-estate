@@ -19,12 +19,18 @@ export default async function AdminLayout({
     redirect(`/${locale}/login`);
   }
 
-  // Verify admin or agent role
-  const { data: userRole, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single();
+  const [{ data: userRole }, { data: profile }] = await Promise.all([
+    supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single(),
+    supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+  ]);
 
   const roles: string[] = userRole?.role ?? [];
   if (!userRole || (!roles.includes('admin') && !roles.includes('agent'))) {
@@ -34,12 +40,6 @@ export default async function AdminLayout({
   const isAdmin = roles.includes('admin');
   const canAccessAdmin = roles.includes('admin') || roles.includes('agent');
 
-  // Real display name (email was being used as the name in the dropdown)
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('user_id', user.id)
-    .maybeSingle();
   const userFullName = user.user_metadata?.full_name || profile?.full_name || null;
 
   return (

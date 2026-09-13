@@ -6,22 +6,29 @@ export default async function AdminMessagesPage() {
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Run independent queries in parallel
+  const [
+    { data: { user } },
+    { data: leads, error },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("contact_leads")
+      .select("*")
+      .order("created_at", { ascending: false }),
+  ]);
 
-  const { data: userRole } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user?.id)
-    .single();
+  const { data: userRole } = user
+    ? await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+    : { data: null };
 
   const roles: string[] = userRole?.role ?? [];
   const isAdmin = roles.includes('admin');
   const currentUserId = user?.id || null;
-
-  const { data: leads, error } = await supabase
-    .from("contact_leads")
-    .select("*")
-    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error loading leads:", error);

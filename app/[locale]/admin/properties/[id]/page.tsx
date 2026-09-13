@@ -7,38 +7,44 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
   const t = await getTranslations("Admin");
   const { id } = await params;
   const supabase = createPublicClient();
+  const serverSupabase = await createServerClient();
   
-  const { data: property, error } = await supabase
-    .from('properties')
-    .select('*, property_images(*)')
-    .eq('id', id)
-    .single();
+  // Run independent queries in parallel
+  const [
+    { data: property, error },
+    { data: { user } },
+    { data: agentRoleRows },
+  ] = await Promise.all([
+    supabase
+      .from('properties')
+      .select('*, property_images(*)')
+      .eq('id', id)
+      .single(),
+    serverSupabase.auth.getUser(),
+    serverSupabase
+      .from('user_roles')
+      .select('user_id')
+      .contains('role', ['agent']),
+  ]);
+
+  const { data: userRole } = user
+    ? await serverSupabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+    : { data: null };
 
   if (error || !property) {
     return <div className="p-8 text-red-500">{t("property_not_found")}</div>;
   }
 
-  // Sort images
   if (property.property_images) {
     property.property_images.sort((a: any, b: any) => a.sort_order - b.sort_order);
   }
 
-  // Resolve admin/agent context and agent list
-  const serverSupabase = await createServerClient();
-  const { data: { user } } = await serverSupabase.auth.getUser();
-  const { data: userRole } = await serverSupabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user?.id)
-    .single();
   const roles: string[] = userRole?.role ?? [];
   const isAdmin = roles.includes('admin');
-
-  const { data: agentRoleRows } = await serverSupabase
-    .from('user_roles')
-    .select('user_id')
-    .contains('role', ['agent']);
-
   const agentIds = (agentRoleRows || []).map((r) => r.user_id);
 
   const { data: agents } = agentIds.length > 0

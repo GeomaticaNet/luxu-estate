@@ -7,22 +7,28 @@ export default async function NewPropertyPage() {
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Run independent queries in parallel
+  const [
+    { data: { user } },
+    { data: agentRoleRows },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from('user_roles')
+      .select('user_id')
+      .contains('role', ['agent']),
+  ]);
 
-  const { data: userRole } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user?.id)
-    .single();
+  const { data: userRole } = user
+    ? await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+    : { data: null };
 
   const roles: string[] = userRole?.role ?? [];
   const isAdmin = roles.includes('admin');
-
-  const { data: agentRoleRows } = await supabase
-    .from('user_roles')
-    .select('user_id')
-    .contains('role', ['agent']);
-
   const agentIds = (agentRoleRows || []).map((r) => r.user_id);
 
   const { data: agents } = agentIds.length > 0
