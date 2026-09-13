@@ -3,7 +3,7 @@ import { Navbar } from "@/components/ui/Navbar";
 import { FooterWrapper } from "@/components/ui/FooterWrapper";
 import { WhatsAppWrapper } from "@/components/ui/WhatsAppWrapper";
 import { LocaleDebug } from "@/components/ui/LocaleDebug";
-import GlobalPresence from "@/components/ui/GlobalPresence";
+import GlobalPresenceWrapper from "@/components/ui/GlobalPresenceWrapper";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -88,6 +88,8 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning className="h-full antialiased">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
@@ -100,7 +102,7 @@ export default async function RootLayout({
           }}
         />
         <NextIntlClientProvider messages={messages}>
-          <GlobalPresence />
+          <GlobalPresenceWrapper />
           <LocaleDebug />
           <FavoritesProvider>
             <NavbarWrapper>

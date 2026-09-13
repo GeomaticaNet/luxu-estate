@@ -3,9 +3,11 @@
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { UserMenu } from "./UserMenu";
-import { NotificationBell } from "./NotificationBell";
+import dynamic from "next/dynamic";
 import { Link } from "@/i18n/routing";
+
+const UserMenu = dynamic(() => import("./UserMenu").then(mod => ({ default: mod.UserMenu })), { ssr: false });
+const NotificationBell = dynamic(() => import("./NotificationBell").then(mod => ({ default: mod.NotificationBell })), { ssr: false });
 
 interface NavbarAuthProps {
   initialUser: User | null;

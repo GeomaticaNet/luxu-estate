@@ -4,8 +4,10 @@ import { useState, useRef, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { SearchFiltersModal } from "./SearchFiltersModal";
+import dynamic from "next/dynamic";
 import { HeroVideoBackground } from "./HeroVideoBackground";
+
+const SearchFiltersModal = dynamic(() => import("./SearchFiltersModal").then(mod => ({ default: mod.SearchFiltersModal })), { ssr: false });
 
 const HERO_VIDEOS = ["/videos/1.mp4", "/videos/2.mp4", "/videos/4.mp4"];
 
