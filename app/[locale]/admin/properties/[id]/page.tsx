@@ -2,17 +2,18 @@ import { getTranslations } from "next-intl/server";
 import PropertyForm from "@/components/admin/property/PropertyForm";
 import { Link } from "@/i18n/routing";
 import { createPublicClient, createServerClient } from "@/lib/supabase/server";
+import { getAdminAuth } from "@/lib/admin-auth";
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations("Admin");
   const { id } = await params;
   const supabase = createPublicClient();
   const serverSupabase = await createServerClient();
-  
-  // Run independent queries in parallel
+
+  const auth = await getAdminAuth();
+
   const [
     { data: property, error },
-    { data: { user } },
     { data: agentRoleRows },
   ] = await Promise.all([
     supabase
@@ -20,20 +21,11 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
       .select('*, property_images(*)')
       .eq('id', id)
       .single(),
-    serverSupabase.auth.getUser(),
     serverSupabase
       .from('user_roles')
       .select('user_id')
       .contains('role', ['agent']),
   ]);
-
-  const { data: userRole } = user
-    ? await serverSupabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
-    : { data: null };
 
   if (error || !property) {
     return <div className="p-8 text-red-500">{t("property_not_found")}</div>;
@@ -43,9 +35,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     property.property_images.sort((a: any, b: any) => a.sort_order - b.sort_order);
   }
 
-  const roles: string[] = userRole?.role ?? [];
-  const isAdmin = roles.includes('admin');
-  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+  const agentIds = (agentRoleRows || []).map((r: any) => r.user_id);
 
   const { data: agents } = agentIds.length > 0
     ? await serverSupabase
@@ -74,7 +64,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         </div>
       </header>
 
-      <PropertyForm initialData={property} isAdmin={isAdmin} agents={agents || []} currentUserId={user?.id || null} />
+      <PropertyForm initialData={property} isAdmin={auth.isAdmin} agents={agents || []} currentUserId={auth.user?.id || null} />
     </main>
   );
 }

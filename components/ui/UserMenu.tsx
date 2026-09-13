@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useFavoritesContext } from "@/hooks/FavoritesContext";
+import { signOutAction } from "@/app/actions/auth";
 
 interface UserMenuProps {
   avatarUrl?: string | null;
@@ -23,6 +24,7 @@ export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", ca
   const t = useTranslations("Settings");
   const ta = useTranslations("Admin");
   const [isOpen, setIsOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { count: favoritesCount } = useFavoritesContext();
 
@@ -37,7 +39,12 @@ export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", ca
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    setLoggingOut(true);
+    try {
+      await signOutAction();
+    } catch {
+      // redirect() throws — expected
+    }
     window.location.href = "/";
   };
 
@@ -138,10 +145,15 @@ export function UserMenu({ avatarUrl, fullName, email, logoutText = "Logout", ca
               setIsOpen(false);
               handleLogout();
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors"
+            disabled={loggingOut}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-nordic-dark hover:bg-mosque/10 transition-colors disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-sm text-gray-400">logout</span>
-            Salir
+            {loggingOut ? (
+              <span className="material-symbols-outlined text-sm text-gray-400 animate-spin">progress_activity</span>
+            ) : (
+              <span className="material-symbols-outlined text-sm text-gray-400">logout</span>
+            )}
+            {loggingOut ? "Cerrando sesión..." : "Salir"}
           </button>
         </div>
       )}

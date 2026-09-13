@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { createPublicClient, createServerClient, createAdminClient } from "@/lib/supabase/server";
+import { createPublicClient, createAdminClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
 import { PropertyList, type Property } from "./PropertyList";
 import { PropertyTypeFilter } from "./PropertyTypeFilter";
+import { getAdminAuth } from "@/lib/admin-auth";
 
 const PAGE_SIZE = 10;
 
@@ -13,31 +14,23 @@ export default async function AdminPropertiesPage({
 }) {
   const t = await getTranslations("Admin");
   const publicClient = createPublicClient();
-  const serverSupabase = await createServerClient();
+
+  // Auth from shared utility (cached by layout)
+  const auth = await getAdminAuth();
+  const user = auth.user;
+  const isAdmin = auth.isAdmin;
+  const isAgent = !isAdmin && !!user;
 
   const { page: pageParam, property_type: typeFilter } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam || "1", 10));
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  // Step 1: Auth + role (fast, needed for all subsequent queries)
-  const { data: { user } } = await serverSupabase.auth.getUser();
-  const { data: userRole } = await serverSupabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user?.id)
-    .single();
-
-  const roles: string[] = userRole?.role ?? [];
-  const isAdmin = roles.includes('admin');
-  const isAgent = !isAdmin && !!user;
-
-  // Step 2: All data queries in parallel
+  // All data queries in parallel (no more auth queries!)
   const [
     countResult,
     dataResult,
     agentsResult,
-    { data: mainImages },
     { data: allStats },
   ] = await Promise.all([
     // Total count
@@ -68,7 +61,7 @@ export default async function AdminPropertiesPage({
           .from('user_roles')
           .select('user_id')
           .contains('role', ['agent']);
-        const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+        const agentIds = (agentRoleRows || []).map((r: any) => r.user_id);
         if (agentIds.length === 0) return { data: [] };
         return adminClient
           .from('profiles')
@@ -78,8 +71,6 @@ export default async function AdminPropertiesPage({
         return { data: [] };
       }
     })(),
-    // Main images (will use after we know property IDs)
-    { data: [] as any[] }, // placeholder, fetched after properties load
     // Stats: single query for all type counts
     publicClient.from('properties').select('type, active, agent_id'),
   ]);

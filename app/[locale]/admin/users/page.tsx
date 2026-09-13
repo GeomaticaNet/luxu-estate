@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import UserList from "./UserList";
 import { Link } from "@/i18n/routing";
+import { getAdminAuth } from "@/lib/admin-auth";
 
 interface UserWithRole {
   id: string;
@@ -24,21 +25,14 @@ export default async function AdminUsersPage({
   const { locale } = await params;
   const { tab, search: searchQuery } = await searchParams;
   const t = await getTranslations("Admin");
-  const supabase = await createServerClient();
 
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
-  const currentUserId = currentUser?.id || null;
+  const auth = await getAdminAuth();
 
-  // Admin-only guard: agents can enter the admin area but not manage users
-  const { data: userRoleRow } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', currentUserId)
-    .single();
-  const viewerRoles: string[] = userRoleRow?.role ?? [];
-  if (!viewerRoles.includes('admin')) {
+  if (!auth.isAdmin) {
     redirect(`/${locale}/admin/messages`);
   }
+
+  const supabase = await createServerClient();
 
   const { data: users, error } = await supabase
     .rpc('get_admin_users');
@@ -72,16 +66,16 @@ export default async function AdminUsersPage({
     const isPlainUser = user.roles.length === 0;
 
     // Tab filter
-    const matchesTab = activeTab === 'all' || 
+    const matchesTab = activeTab === 'all' ||
       (activeTab === 'users' && isPlainUser) ||
       (activeTab === 'agents' && isAgent) ||
       (activeTab === 'admins' && isAdmin);
-    
+
     // Search filter
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       user.full_name?.toLowerCase().includes(search) ||
       user.email.toLowerCase().includes(search);
-    
+
     return matchesTab && matchesSearch;
   });
 
@@ -106,7 +100,7 @@ export default async function AdminUsersPage({
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span className="material-icons text-nordic-dark/40 group-focus-within:text-mosque text-xl">search</span>
             </div>
-            <input 
+            <input
               name="search"
               defaultValue={searchQuery || ''}
               className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-white text-nordic-dark shadow-soft placeholder-nordic-dark/30 focus:ring-2 focus:ring-mosque focus:bg-white transition-all text-sm"
@@ -138,7 +132,7 @@ export default async function AdminUsersPage({
         ))}
       </div>
 
-      <UserList users={filteredUsers} totalUsers={formattedUsers.length} currentUserId={currentUserId} locale={locale} />
+      <UserList users={filteredUsers} totalUsers={formattedUsers.length} currentUserId={auth.user?.id ?? null} locale={locale} />
 
       <div className="mt-8 border-t border-gray-100 py-6 flex items-center justify-between">
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">

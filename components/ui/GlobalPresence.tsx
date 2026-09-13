@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
+import { signOutAction } from "@/app/actions/auth";
 
 const HEARTBEAT_INTERVAL = 30000;
 const CHECK_SUSPENSION_INTERVAL = 30000;
@@ -37,10 +38,12 @@ export default function GlobalPresence() {
 
     if (data && data.active === false) {
       setShowSuspendedToast(true);
-      await supabase.auth.signOut();
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
+      try {
+        await signOutAction();
+      } catch {
+        // redirect() throws — expected
+      }
+      window.location.href = "/";
     }
   }, [supabase]);
 

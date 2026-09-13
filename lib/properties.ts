@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { Property, FeaturedProperty, PropertyImage } from "@/interfaces/property";
 import { createPublicClient } from "@/lib/supabase/server";
 
@@ -306,8 +307,10 @@ const _getPropertyBySlug = async (slug: string) => {
   };
 };
 
-export const getPropertyBySlug = unstable_cache(
-  _getPropertyBySlug,
-  ['property-by-slug'],
-  { tags: ['properties'], revalidate: 60 }
+export const getPropertyBySlug = cache(
+  unstable_cache(
+    _getPropertyBySlug,
+    ['property-by-slug'],
+    { tags: ['properties'], revalidate: 60 }
+  )
 );

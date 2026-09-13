@@ -45,10 +45,8 @@ export function NavbarAuth({ initialUser, avatarUrl, fullName, loginText, isAdmi
       });
     };
 
-    // Fetch roles on mount if user exists (server already passed initial user)
-    if (initialUser) {
-      refreshRoles(initialUser);
-    }
+    // Roles are already initialized from server props (isAdmin, canAccessAdmin).
+    // Only re-fetch on actual auth state changes (login/logout).
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (cancelled) return;

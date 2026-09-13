@@ -28,43 +28,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale || 'es'}/admin/properties`, request.url));
   }
 
-  // Check if route is admin
-  const isAdminRoute = pathname.includes('/admin');
-
-  if (isAdminRoute) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set({
-                name,
-                value,
-                ...options,
-              })
-            );
-          },
-        },
-      }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // Role check moved to admin layout (more reliable in Server Component)
-  }
+  // Auth check for admin routes is handled by admin/layout.tsx (no duplicate getUser() here).
 
   // For non-admin routes, refresh session
-  if (!isAdminRoute) {
+  if (!pathname.includes('/admin')) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

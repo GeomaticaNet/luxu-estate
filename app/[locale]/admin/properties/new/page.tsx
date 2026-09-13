@@ -2,34 +2,20 @@ import { getTranslations } from "next-intl/server";
 import PropertyForm from "@/components/admin/property/PropertyForm";
 import { Link } from "@/i18n/routing";
 import { createServerClient } from "@/lib/supabase/server";
+import { getAdminAuth } from "@/lib/admin-auth";
 
 export default async function NewPropertyPage() {
   const t = await getTranslations("Admin");
   const supabase = await createServerClient();
 
-  // Run independent queries in parallel
-  const [
-    { data: { user } },
-    { data: agentRoleRows },
-  ] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase
-      .from('user_roles')
-      .select('user_id')
-      .contains('role', ['agent']),
-  ]);
+  const auth = await getAdminAuth();
 
-  const { data: userRole } = user
-    ? await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
-    : { data: null };
+  const { data: agentRoleRows } = await supabase
+    .from('user_roles')
+    .select('user_id')
+    .contains('role', ['agent']);
 
-  const roles: string[] = userRole?.role ?? [];
-  const isAdmin = roles.includes('admin');
-  const agentIds = (agentRoleRows || []).map((r) => r.user_id);
+  const agentIds = (agentRoleRows || []).map((r: any) => r.user_id);
 
   const { data: agents } = agentIds.length > 0
     ? await supabase
@@ -58,7 +44,7 @@ export default async function NewPropertyPage() {
         </div>
       </header>
 
-      <PropertyForm isAdmin={isAdmin} agents={agents || []} currentUserId={user?.id || null} />
+      <PropertyForm isAdmin={auth.isAdmin} agents={agents || []} currentUserId={auth.user?.id || null} />
     </main>
   );
 }

@@ -1,34 +1,17 @@
 import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { LeadsList } from "./LeadsList";
+import { getAdminAuth } from "@/lib/admin-auth";
 
 export default async function AdminMessagesPage() {
   const t = await getTranslations("Admin");
+  const auth = await getAdminAuth();
   const supabase = await createServerClient();
 
-  // Run independent queries in parallel
-  const [
-    { data: { user } },
-    { data: leads, error },
-  ] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase
-      .from("contact_leads")
-      .select("*")
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const { data: userRole } = user
-    ? await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
-    : { data: null };
-
-  const roles: string[] = userRole?.role ?? [];
-  const isAdmin = roles.includes('admin');
-  const currentUserId = user?.id || null;
+  const { data: leads, error } = await supabase
+    .from("contact_leads")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error loading leads:", error);
@@ -56,8 +39,6 @@ export default async function AdminMessagesPage() {
     }
   }
 
-  const newCount = leads?.filter((l) => l.status === "new").length || 0;
-
   return (
     <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -71,7 +52,7 @@ export default async function AdminMessagesPage() {
         </div>
       </div>
 
-      <LeadsList leads={leads || []} isAdmin={isAdmin} currentUserId={currentUserId} agentNames={agentNames} />
+      <LeadsList leads={leads || []} isAdmin={auth.isAdmin} currentUserId={auth.user?.id ?? null} agentNames={agentNames} />
     </main>
   );
 }
